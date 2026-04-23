@@ -164,6 +164,15 @@ with tab2:
     if st.button("Predict Size", use_container_width=True):
         with st.spinner("Calculating predicted size..."):
             mu, sigma, ci = predict_forward(biology, week)
+
+
+# ... (your existing code for tab2) ...
+
+# ============================================================
+# FOOTER DISCLAIMER (after both tabs)
+# ============================================================
+st.markdown("---")
+st.caption("⚠️ Disclaimer: For research & education only – not medical advice. Always consult your doctor.")
         
         col_a, col_b = st.columns(2)
         col_a.metric("📏 Predicted mean size", f"{mu:.2f} mm")
