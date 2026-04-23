@@ -4,3 +4,4 @@ scipy
 matplotlib
 plotly
 pandas
+qrcode
