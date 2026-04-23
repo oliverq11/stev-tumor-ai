@@ -165,8 +165,6 @@ with tab2:
         with st.spinner("Calculating predicted size..."):
             mu, sigma, ci = predict_forward(biology, week)
 
-
-
         
         col_a, col_b = st.columns(2)
         col_a.metric("📏 Predicted mean size", f"{mu:.2f} mm")
@@ -181,3 +179,8 @@ with tab2:
                           xaxis_title='Tumor size (mm)',
                           yaxis_title='Probability density')
         st.plotly_chart(fig, use_container_width=True)
+        # ============================================================
+# FOOTER DISCLAIMER (after both tabs)
+# ============================================================
+st.markdown("---")
+st.caption("⚠️ Disclaimer: For research & education only – not medical advice. Always consult your doctor.")
