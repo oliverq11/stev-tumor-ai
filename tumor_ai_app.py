@@ -118,7 +118,7 @@ with st.sidebar:
     """)
     st.markdown("---")
     st.markdown("**STEV model** – Lynch Syndrome Colorectal Tumors")
-    st.markdown("*Horatio Quinones / Sherry Johnson*")
+    st.markdown("*Horatio Quinones / Sherry Johnson / et al*")
 
 # ============================================================
 # MAIN APP WITH TABS
