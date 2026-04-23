@@ -14,7 +14,7 @@ from io import BytesIO
 st.set_page_config(page_title="STEV: Stochastic Tumor Response AI", layout="wide", page_icon="🧬")
 
 # Custom CSS for styling
-st.title("🧬 STEV: Stochastic Tumor Evolution and Immunological ResponseE")
+st.title("🧬 STEV: Stochastic Tumor Evolution and      Immunological Response")
 st.markdown('<div class="subtitle">Lynch Syndrome Colorectal Tumors</div>', unsafe_allow_html=True)
 st.markdown('<div class="author">Horatio Quinones / Sherry Johnson / et-al</div>', unsafe_allow_html=True)
 st.markdown("""
