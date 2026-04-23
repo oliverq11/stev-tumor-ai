@@ -177,18 +177,11 @@ with tab2:
                           yaxis_title='Probability density')
         st.plotly_chart(fig, use_container_width=True)
 
-
-
-        # ============================================================
-# FOOTER DISCLAIMER (after both tabs)
-# ============================================================
-# st.markdown("---")
-# st.caption("⚠️ Disclaimer: For research & education only – not medical advice. Always consult your doctor.")
-
 # ============================================================
 # DISCLAIMER (shown only after prediction)
 # ============================================================
 if st.session_state.disclaimer_shown:
     st.markdown("---")
     st.caption("⚠️ Disclaimer: For research & education only – not medical advice. Always consult your doctor.")
+
 
