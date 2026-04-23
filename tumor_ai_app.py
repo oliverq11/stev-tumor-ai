@@ -15,21 +15,18 @@ st.set_page_config(page_title="STEV: Stochastic Tumor Response AI", layout="wide
 
 # Custom CSS for styling
 st.markdown("""
-<style>
-    .stApp { background-color: #f5f7fb; }
-    h1 { color: #1e466e; font-family: 'Segoe UI', sans-serif; }
-    .subtitle { color: #2c6e9e; font-size: 1.2rem; margin-bottom: 1rem; }
-    .author { color: #6c757d; font-size: 0.9rem; margin-bottom: 2rem; }
-    .stButton button {
-        background-color: #1e466e; color: white; font-weight: bold;
-        border-radius: 8px; padding: 0.5rem 1rem; width: 100%;
-        transition: 0.2s;
-    }
-    .stButton button:hover { background-color: #0f2e4a; transform: scale(1.02); }
-    .streamlit-expanderHeader { background-color: #e9ecef; border-radius: 8px; }
-    [data-testid="stMetricValue"] { font-size: 2rem; font-weight: bold; color: #1e466e; }
-</style>
-""", unsafe_allow_html=True)
+
+### 🔍 What this app does
+
+This tool uses a **stochastic model** (STEV) built on real clinical data from Lynch syndrome colorectal cancer patients treated with dostarlimab. It helps answer two questions:
+
+1. **Given a tumor size at a specific week, what is the most likely underlying biology?**  
+   (e.g., POLE, MLH1, MSH2, MSI-H, MSH6)
+
+2. **Given a known biology, what range of tumor sizes is expected at a given week?**
+
+Predictions are based on published clinical data and include 95% credible intervals to reflect uncertainty.
+""")
 
 # ============================================================
 # HEADER
