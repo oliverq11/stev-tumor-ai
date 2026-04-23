@@ -14,6 +14,10 @@ from io import BytesIO
 st.set_page_config(page_title="STEV: Stochastic Tumor Response AI", layout="wide", page_icon="🧬")
 
 # Custom CSS for styling
+# Initialize session state for disclaimer
+if 'disclaimer_shown' not in st.session_state:
+    st.session_state.disclaimer_shown = False
+
 st.title("🧬 STEV: Stochastic Tumor Evolution and      Immunological Response")
 st.markdown('<div class="subtitle">Lynch Syndrome Colorectal Tumors</div>', unsafe_allow_html=True)
 st.markdown('<div class="author">Horatio Quinones / Sherry Johnson / et-al</div>', unsafe_allow_html=True)
@@ -128,6 +132,9 @@ with tab1:
         size = st.slider("📏 Tumor size (mm)", min_value=0.0, max_value=30.0, value=1.4, step=0.1)
     
     if st.button("Predict Biology", use_container_width=True):
+
+       st.session_state.disclaimer_shown = True
+       
         with st.spinner("Computing probabilities..."):
             probs = predict_inverse(size, week)
         most_likely = max(probs, key=probs.get)
@@ -155,6 +162,9 @@ with tab2:
         biology = st.selectbox("🧬 Biology", names, index=1)
     
     if st.button("Predict Size", use_container_width=True):
+
+        st.session_state.disclaimer_shown = True
+       
         with st.spinner("Calculating predicted size..."):
             mu, sigma, ci = predict_forward(biology, week)
 
@@ -175,5 +185,13 @@ with tab2:
         # ============================================================
 # FOOTER DISCLAIMER (after both tabs)
 # ============================================================
-st.markdown("---")
-st.caption("⚠️ Disclaimer: For research & education only – not medical advice. Always consult your doctor.")
+# st.markdown("---")
+# st.caption("⚠️ Disclaimer: For research & education only – not medical advice. Always consult your doctor.")
+
+# ============================================================
+# DISCLAIMER (shown only after prediction)
+# ============================================================
+if st.session_state.disclaimer_shown:
+    st.markdown("---")
+    st.caption("⚠️ Disclaimer: For research & education only – not medical advice. Always consult your doctor.")
+
