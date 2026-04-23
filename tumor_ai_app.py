@@ -36,7 +36,7 @@ st.markdown("""
 # ============================================================
 st.title("🧬 STEV: Stochastic Tumor Response to Immunotherapy")
 st.markdown('<div class="subtitle">Lynch Syndrome Colorectal Tumors</div>', unsafe_allow_html=True)
-st.markdown('<div class="author">Horatio Quinones / Sherry Johnson</div>', unsafe_allow_html=True)
+st.markdown('<div class="author">Horatio Quinones / Sherry Johnson / et-al</div>', unsafe_allow_html=True)
 st.markdown("---")
 
 # ============================================================
