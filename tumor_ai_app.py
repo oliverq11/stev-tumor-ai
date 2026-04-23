@@ -144,17 +144,7 @@ with tab1:
     with col2:
         size = st.slider("📏 Tumor size (mm)", min_value=0.0, max_value=30.0, value=1.4, step=0.1)
 
-    # Store previous input values and reset disclaimer if changed
-    if 'prev_week_inv' not in st.session_state:
-        st.session_state.prev_week_inv = week
-        st.session_state.prev_size_inv = size
-    if week != st.session_state.prev_week_inv or size != st.session_state.prev_size_inv:
-        st.session_state.disclaimer_shown = False
-        st.session_state.prev_week_inv = week
-        st.session_state.prev_size_inv = size
-
     if st.button("Predict Biology", use_container_width=True):
-        st.session_state.disclaimer_shown = True
         with st.spinner("Computing probabilities..."):
             probs = predict_inverse(size, week)
         most_likely = max(probs, key=probs.get)
@@ -173,6 +163,10 @@ with tab1:
         with st.expander("📋 Detailed probabilities"):
             st.dataframe(df.style.format({'Probability': '{:.3f}'}))
 
+        # DISCLAIMER APPEARS ONLY HERE, AFTER PREDICTION
+        st.markdown("---")
+        st.caption("⚠️ Disclaimer: For research & education only – not medical advice. Always consult your doctor.")
+
 # ---------- TAB 2: FORWARD PREDICTION ----------
 with tab2:
     col1, col2 = st.columns(2)
@@ -181,17 +175,7 @@ with tab2:
     with col2:
         biology = st.selectbox("🧬 Biology", names, index=1)
 
-    # Store previous input values and reset disclaimer if changed
-    if 'prev_week_fwd' not in st.session_state:
-        st.session_state.prev_week_fwd = week
-        st.session_state.prev_bio_fwd = biology
-    if week != st.session_state.prev_week_fwd or biology != st.session_state.prev_bio_fwd:
-        st.session_state.disclaimer_shown = False
-        st.session_state.prev_week_fwd = week
-        st.session_state.prev_bio_fwd = biology
-
     if st.button("Predict Size", use_container_width=True):
-        st.session_state.disclaimer_shown = True
         with st.spinner("Calculating predicted size..."):
             mu, sigma, ci = predict_forward(biology, week)
 
@@ -209,9 +193,8 @@ with tab2:
                           yaxis_title='Probability density')
         st.plotly_chart(fig, use_container_width=True)
 
-# ============================================================
-# DISCLAIMER (shown only after prediction)
-# ============================================================
-if st.session_state.disclaimer_shown:
-    st.markdown("---")
-    st.caption("⚠️ Disclaimer: For research & education only – not medical advice. Always consult your doctor.")
+        # DISCLAIMER APPEARS ONLY HERE, AFTER PREDICTION
+        st.markdown("---")
+        st.caption("⚠️ Disclaimer: For research & education only – not medical advice. Always consult your doctor.")
+
+
