@@ -128,28 +128,27 @@ with tab1:
     with col1:
         week = st.selectbox("📅 Week", weeks, index=8)
     with col2:
-        # SLIDER (dial) for tumor size
         size = st.slider("📏 Tumor size (mm)", min_value=0.0, max_value=30.0, value=1.4, step=0.1)
     
-if st.button("Predict Biology", use_container_width=True):
-    st.session_state.disclaimer_shown = True
-    with st.spinner("Computing probabilities..."):
-        probs = predict_inverse(size, week)
-    most_likely = max(probs, key=probs.get)
-    
-    col_a, col_b = st.columns(2)
-    col_a.metric("🧬 Most likely biology", most_likely)
-    col_b.metric("📊 Probability", f"{probs[most_likely]:.1%}")
-    
-    df = pd.DataFrame(list(probs.items()), columns=['Biology', 'Probability'])
-    fig = px.bar(df, x='Biology', y='Probability', color='Biology',
-                 color_discrete_sequence=px.colors.qualitative.Set2,
-                 title=f'Week {week}, size = {size} mm')
-    fig.update_layout(yaxis_title='Posterior probability', xaxis_title='Biology')
-    st.plotly_chart(fig, use_container_width=True)
-    
-    with st.expander("📋 Detailed probabilities"):
-        st.dataframe(df.style.format({'Probability': '{:.3f}'}))
+    if st.button("Predict Biology", use_container_width=True):
+        st.session_state.disclaimer_shown = True
+        with st.spinner("Computing probabilities..."):
+            probs = predict_inverse(size, week)
+        most_likely = max(probs, key=probs.get)
+        
+        col_a, col_b = st.columns(2)
+        col_a.metric("🧬 Most likely biology", most_likely)
+        col_b.metric("📊 Probability", f"{probs[most_likely]:.1%}")
+        
+        df = pd.DataFrame(list(probs.items()), columns=['Biology', 'Probability'])
+        fig = px.bar(df, x='Biology', y='Probability', color='Biology',
+                     color_discrete_sequence=px.colors.qualitative.Set2,
+                     title=f'Week {week}, size = {size} mm')
+        fig.update_layout(yaxis_title='Posterior probability', xaxis_title='Biology')
+        st.plotly_chart(fig, use_container_width=True)
+        
+        with st.expander("📋 Detailed probabilities"):
+            st.dataframe(df.style.format({'Probability': '{:.3f}'}))
 
 # ---------- TAB 2: FORWARD PREDICTION ----------
 with tab2:
@@ -159,24 +158,24 @@ with tab2:
     with col2:
         biology = st.selectbox("🧬 Biology", names, index=1)
     
-if st.button("Predict Size", use_container_width=True):
-    st.session_state.disclaimer_shown = True
-    with st.spinner("Calculating predicted size..."):
-        mu, sigma, ci = predict_forward(biology, week)
-    
-    col_a, col_b = st.columns(2)
-    col_a.metric("📏 Predicted mean size", f"{mu:.2f} mm")
-    col_b.metric("📊 95% credible interval", f"[{ci[0]:.2f}, {ci[1]:.2f}] mm")
-    
-    x_vals = np.linspace(max(0, mu - 4*sigma), mu + 4*sigma, 200)
-    y_vals = norm.pdf(x_vals, mu, sigma)
-    fig = go.Figure()
-    fig.add_trace(go.Scatter(x=x_vals, y=y_vals, fill='tozeroy', line_color='#1e466e', name='Density'))
-    fig.add_vline(x=mu, line_dash="dash", line_color="red", annotation_text=f"Mean = {mu:.2f} mm")
-    fig.update_layout(title=f'{biology} at week {week}',
-                      xaxis_title='Tumor size (mm)',
-                      yaxis_title='Probability density')
-    st.plotly_chart(fig, use_container_width=True)
+    if st.button("Predict Size", use_container_width=True):
+        st.session_state.disclaimer_shown = True
+        with st.spinner("Calculating predicted size..."):
+            mu, sigma, ci = predict_forward(biology, week)
+        
+        col_a, col_b = st.columns(2)
+        col_a.metric("📏 Predicted mean size", f"{mu:.2f} mm")
+        col_b.metric("📊 95% credible interval", f"[{ci[0]:.2f}, {ci[1]:.2f}] mm")
+        
+        x_vals = np.linspace(max(0, mu - 4*sigma), mu + 4*sigma, 200)
+        y_vals = norm.pdf(x_vals, mu, sigma)
+        fig = go.Figure()
+        fig.add_trace(go.Scatter(x=x_vals, y=y_vals, fill='tozeroy', line_color='#1e466e', name='Density'))
+        fig.add_vline(x=mu, line_dash="dash", line_color="red", annotation_text=f"Mean = {mu:.2f} mm")
+        fig.update_layout(title=f'{biology} at week {week}',
+                          xaxis_title='Tumor size (mm)',
+                          yaxis_title='Probability density')
+        st.plotly_chart(fig, use_container_width=True)
 
         # ============================================================
 # FOOTER DISCLAIMER (after both tabs)
