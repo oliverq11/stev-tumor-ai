@@ -129,6 +129,17 @@ with tab1:
         week = st.selectbox("📅 Week", weeks, index=8)
     with col2:
         size = st.slider("📏 Tumor size (mm)", min_value=0.0, max_value=30.0, value=1.4, step=0.1)
+
+# Store previous input values
+if 'prev_week_inv' not in st.session_state:
+    st.session_state.prev_week_inv = week
+    st.session_state.prev_size_inv = size
+
+# If inputs changed, reset disclaimer flag
+if week != st.session_state.prev_week_inv or size != st.session_state.prev_size_inv:
+    st.session_state.disclaimer_shown = False
+    st.session_state.prev_week_inv = week
+    st.session_state.prev_size_inv = size
     
     if st.button("Predict Biology", use_container_width=True):
         st.session_state.disclaimer_shown = True
@@ -157,6 +168,15 @@ with tab2:
         week = st.selectbox("📅 Week", weeks, index=8, key="forward_week")
     with col2:
         biology = st.selectbox("🧬 Biology", names, index=1)
+
+if 'prev_week_fwd' not in st.session_state:
+    st.session_state.prev_week_fwd = week
+    st.session_state.prev_bio_fwd = biology
+
+if week != st.session_state.prev_week_fwd or biology != st.session_state.prev_bio_fwd:
+    st.session_state.disclaimer_shown = False
+    st.session_state.prev_week_fwd = week
+    st.session_state.prev_bio_fwd = biology
     
     if st.button("Predict Size", use_container_width=True):
         st.session_state.disclaimer_shown = True
