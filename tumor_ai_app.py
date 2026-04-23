@@ -16,25 +16,6 @@ st.set_page_config(page_title="STEV: Stochastic Tumor Response AI", layout="wide
 # Custom CSS for styling
 st.markdown("""
 
-### 🔍 What this app does
-
-This tool uses a **stochastic model** (STEV) built on real clinical data from Lynch syndrome colorectal cancer patients treated with dostarlimab. It helps answer two questions:
-
-1. **Given a tumor size at a specific week, what is the most likely underlying biology?**  
-   (e.g., POLE, MLH1, MSH2, MSI-H, MSH6)
-
-2. **Given a known biology, what range of tumor sizes is expected at a given week?**
-
-Predictions are based on published clinical data and include 95% credible intervals to reflect uncertainty.
-""")
-
-# ============================================================
-# HEADER
-# ============================================================
-st.title("🧬 STEV: Stochastic Tumor Evolution and Response to Immunotherapy")
-st.markdown('<div class="subtitle">Lynch Syndrome Colorectal Tumors</div>', unsafe_allow_html=True)
-st.markdown('<div class="author">Horatio Quinones / Sherry Johnson / et-al</div>', unsafe_allow_html=True)
-st.markdown("---")
 
 st.markdown("""
 ### 🔍 What this app does
