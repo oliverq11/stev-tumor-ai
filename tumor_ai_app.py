@@ -2,34 +2,43 @@ import streamlit as st
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy.stats import norm
+import plotly.express as px
+import plotly.graph_objects as go
+import pandas as pd
 
-st.set_page_config(page_title="STEV Tumor Response AI", layout="wide")
+# ============================================================
+# PAGE CONFIGURATION
+# ============================================================
+st.set_page_config(page_title="STEV Tumor Response AI", layout="wide", page_icon="🧬")
 
-# Custom CSS
+# Custom CSS for styling
 st.markdown("""
-    <style>
-    .author {
-        font-size: 14px;
-        color: #666;
-        margin-top: -20px;
-        margin-bottom: 5px;
+<style>
+    .stApp { background-color: #f5f7fb; }
+    h1 { color: #1e466e; font-family: 'Segoe UI', sans-serif; }
+    .subtitle { color: #2c6e9e; font-size: 1.2rem; margin-bottom: 1rem; }
+    .author { color: #6c757d; font-size: 0.9rem; margin-bottom: 2rem; }
+    .stButton button {
+        background-color: #1e466e; color: white; font-weight: bold;
+        border-radius: 8px; padding: 0.5rem 1rem; width: 100%;
+        transition: 0.2s;
     }
-    .subtitle {
-        font-size: 16px;
-        font-weight: normal;
-        margin-top: -10px;
-        margin-bottom: 20px;
-    }
-    </style>
+    .stButton button:hover { background-color: #0f2e4a; transform: scale(1.02); }
+    .streamlit-expanderHeader { background-color: #e9ecef; border-radius: 8px; }
+    [data-testid="stMetricValue"] { font-size: 2rem; font-weight: bold; color: #1e466e; }
+</style>
 """, unsafe_allow_html=True)
 
+# ============================================================
+# HEADER
+# ============================================================
 st.title("🧬 STEV: Stochastic Tumor Response to Immunotherapy")
 st.markdown('<div class="subtitle">Lynch Syndrome Colorectal Tumors</div>', unsafe_allow_html=True)
 st.markdown('<div class="author">Horatio Quinones / Sherry Johnson</div>', unsafe_allow_html=True)
 st.markdown("---")
 
 # ============================================================
-# 1. PARAMETERS
+# PARAMETERS (STEV + subgroup means)
 # ============================================================
 weeks = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 24]
 
@@ -69,7 +78,7 @@ def normal_pdf(x, mu, sigma):
     return np.exp(-0.5 * ((x - mu)/sigma)**2) / (sigma * np.sqrt(2*np.pi))
 
 # ============================================================
-# 2. INVERSE PREDICTION
+# PREDICTION FUNCTIONS
 # ============================================================
 def predict_inverse(size, week):
     sigma = sigma_env[week]
@@ -83,9 +92,6 @@ def predict_inverse(size, week):
         return {name: 0.2 for name in names}
     return {name: unnorm[name]/total for name in names}
 
-# ============================================================
-# 3. FORWARD PREDICTION
-# ============================================================
 def predict_forward(biology, week):
     mu = means[week][biology]
     sigma = sigma_env[week]
@@ -93,48 +99,74 @@ def predict_forward(biology, week):
     return mu, sigma, ci_95
 
 # ============================================================
-# 4. UI
+# SIDEBAR (Info + QR code placeholder)
 # ============================================================
-mode = st.radio("Select prediction mode", ["Inverse: Size → Biology", "Forward: Biology → Size"])
+with st.sidebar:
+    st.image("https://via.placeholder.com/150?text=QR+Code", width=150, caption="Scan to open on phone")
+    st.markdown("### ℹ️ How to use")
+    st.markdown("""
+    - **🔍 Size → Biology:** Enter tumor size → get most likely biology.
+    - **🔮 Biology → Size:** Select biology → get predicted size range.
+    """)
+    st.markdown("---")
+    st.markdown("**STEV model** – Lynch Syndrome Colorectal Tumors")
+    st.markdown("*Horatio Quinones / Sherry Johnson*")
 
-if mode == "Inverse: Size → Biology":
+# ============================================================
+# MAIN APP WITH TABS
+# ============================================================
+tab1, tab2 = st.tabs(["🔍 Size → Biology", "🔮 Biology → Size"])
+
+# ---------- TAB 1: INVERSE PREDICTION ----------
+with tab1:
     col1, col2 = st.columns(2)
     with col1:
-        week = st.selectbox("Week", weeks, index=8)
+        week = st.selectbox("📅 Week", weeks, index=8)
     with col2:
-        size = st.number_input("Tumor size (mm)", min_value=0.0, max_value=50.0, value=1.4, step=0.1)
+        # REPLACED number_input WITH slider
+        size = st.slider("📏 Tumor size (mm)", min_value=0.0, max_value=30.0, value=1.4, step=0.1)
     
-    if st.button("Predict Biology"):
-        probs = predict_inverse(size, week)
+    if st.button("Predict Biology", use_container_width=True):
+        with st.spinner("Computing probabilities..."):
+            probs = predict_inverse(size, week)
         most_likely = max(probs, key=probs.get)
-        st.metric("Most likely biology", most_likely)
         
-        fig, ax = plt.subplots()
-        ax.bar(names, [probs[n] for n in names], color='skyblue')
-        ax.set_ylabel('Posterior probability')
-        ax.set_title(f'Week {week}, size = {size} mm')
-        st.pyplot(fig)
+        col_a, col_b = st.columns(2)
+        col_a.metric("🧬 Most likely biology", most_likely)
+        col_b.metric("📊 Probability", f"{probs[most_likely]:.1%}")
+        
+        df = pd.DataFrame(list(probs.items()), columns=['Biology', 'Probability'])
+        fig = px.bar(df, x='Biology', y='Probability', color='Biology',
+                     color_discrete_sequence=px.colors.qualitative.Set2,
+                     title=f'Week {week}, size = {size} mm')
+        fig.update_layout(yaxis_title='Posterior probability', xaxis_title='Biology')
+        st.plotly_chart(fig, use_container_width=True)
+        
+        with st.expander("📋 Detailed probabilities"):
+            st.dataframe(df.style.format({'Probability': '{:.3f}'}))
 
-else:
+# ---------- TAB 2: FORWARD PREDICTION ----------
+with tab2:
     col1, col2 = st.columns(2)
     with col1:
-        week = st.selectbox("Week", weeks, index=8)
+        week = st.selectbox("📅 Week", weeks, index=8, key="forward_week")
     with col2:
-        biology = st.selectbox("Biology", names, index=1)
+        biology = st.selectbox("🧬 Biology", names, index=1)
     
-    if st.button("Predict Size"):
-        mu, sigma, ci = predict_forward(biology, week)
-        st.metric("Predicted mean size", f"{mu:.2f} mm")
-        st.write(f"**95% credible interval:** [{ci[0]:.2f}, {ci[1]:.2f}] mm")
+    if st.button("Predict Size", use_container_width=True):
+        with st.spinner("Calculating predicted size..."):
+            mu, sigma, ci = predict_forward(biology, week)
         
-        x = np.linspace(max(0, mu - 4*sigma), mu + 4*sigma, 200)
-        y = norm.pdf(x, mu, sigma)
-        fig, ax = plt.subplots()
-        ax.plot(x, y, color='blue')
-        ax.fill_between(x, y, where=(x>=ci[0]) & (x<=ci[1]), color='blue', alpha=0.3)
-        ax.axvline(mu, color='red', linestyle='--', label=f'Mean = {mu:.2f} mm')
-        ax.set_xlabel('Tumor size (mm)')
-        ax.set_ylabel('Density')
-        ax.set_title(f'{biology} at week {week}')
-        ax.legend()
-        st.pyplot(fig)
+        col_a, col_b = st.columns(2)
+        col_a.metric("📏 Predicted mean size", f"{mu:.2f} mm")
+        col_b.metric("📊 95% credible interval", f"[{ci[0]:.2f}, {ci[1]:.2f}] mm")
+        
+        x_vals = np.linspace(max(0, mu - 4*sigma), mu + 4*sigma, 200)
+        y_vals = norm.pdf(x_vals, mu, sigma)
+        fig = go.Figure()
+        fig.add_trace(go.Scatter(x=x_vals, y=y_vals, fill='tozeroy', line_color='#1e466e', name='Density'))
+        fig.add_vline(x=mu, line_dash="dash", line_color="red", annotation_text=f"Mean = {mu:.2f} mm")
+        fig.update_layout(title=f'{biology} at week {week}',
+                          xaxis_title='Tumor size (mm)',
+                          yaxis_title='Probability density')
+        st.plotly_chart(fig, use_container_width=True)
