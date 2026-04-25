@@ -53,7 +53,6 @@ st.markdown("""
         color: white !important;
         transform: scale(1.02) !important;
     }
-    /* Ensure any inner spans or divs inside button are also white */
     .stButton button *,
     .stButton button span,
     .stButton button div {
@@ -64,7 +63,6 @@ st.markdown("""
     [data-testid="stMetricValue"] { font-size: 2rem; font-weight: bold; color: #1e466e; }
     [data-testid="stMetricLabel"] { color: #212529; }
 
-    /* === DARK MODE OVERRIDE === */
     @media (prefers-color-scheme: dark) {
         .stApp, .main, .stAppViewContainer, .css-18e3th9, .css-1d391kg {
             background-color: #0a0a0a !important;
@@ -84,7 +82,6 @@ st.markdown("""
             color: #ffffff !important;
         }
         
-        /* DARK MODE BUTTONS: slightly lighter blue but STILL WHITE TEXT */
         .stButton button,
         .stButton button:link,
         .stButton button:visited,
@@ -156,7 +153,6 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-# Initialize session state for disclaimer
 if 'disclaimer_shown' not in st.session_state:
     st.session_state.disclaimer_shown = False
 
@@ -183,8 +179,10 @@ with st.expander("📈 View Tumor Growth up to 30mm, 60mm and Immunotherapy Resp
     col1, col2 = st.columns(2)
     with col1:
         st.image("30mm.png", caption="Start size = 30 mm", use_container_width=True)
+        st.caption("**Plot 1: 30mm growth curve** – Expected tumor size over time starting from a 30mm detectable tumor. The shaded band shows the 90% credible interval.")
     with col2:
         st.image("60mm.png", caption="Start size = 60 mm", use_container_width=True)
+        st.caption("**Plot 2: 60mm growth curve** – Same as above but starting from a larger 60mm tumor. Useful for comparing how initial size affects growth trajectory.")
     st.markdown("""
     **Interpretation:**  
     - Solid lines show expected tumor size over time.  
@@ -195,11 +193,17 @@ with st.expander("📈 View Tumor Growth up to 30mm, 60mm and Immunotherapy Resp
 # EXPANDER 2: TWO-HIT DYNAMICS (Conditional and Unconditional)
 # ============================================================
 with st.expander("🕰️ Two‑Hit Dynamics: Latency, Age at Detection & Risk", expanded=False):
+    st.markdown("### Complete stochastic model output")
+    st.caption("**Plots 3 & 4: Latency and second hit age** – These show the waiting time from a second MMR hit to clinical detection, and the age distribution at which that second hit occurs in Lynch syndrome patients.")
+    
     col1, col2 = st.columns(2)
     with col1:
         st.image("Conditional.png", caption="Conditional probability (given second hit)", use_container_width=True)
+        st.caption("**Plot 5: Conditional probability** – Given that a second hit has occurred, this curve shows the probability that the tumor has been detected by a given age. Useful for understanding screening urgency.")
     with col2:
         st.image("Unconditional.png", caption="Unconditional probability (general population)", use_container_width=True)
+        st.caption("**Plot 6: Unconditional probability** – Overall probability that a Lynch syndrome patient will have a detected tumor by a given age (accounts for those who never get a second hit).")
+    
     st.caption("Distributions derived from STEV stochastic model with Lynch syndrome epidemiology.")
 
 # ============================================================
@@ -225,7 +229,6 @@ env_factor = 0.30
 sigma_env = {w: sigma_STEV[w] * np.sqrt(env_factor) for w in weeks}
 names = ['POLE', 'MLH1', 'MSH2', 'MSIH', 'MSH6']
 
-# Subgroup means
 S0 = 23.0
 HR = {'POLE': 1.159, 'MLH1': 1.127, 'MSH2': 1.117, 'MSIH': 1.099, 'MSH6': 1.091}
 means = {}
@@ -261,7 +264,7 @@ def predict_forward(biology, week):
     return mu, sigma, ci_95
 
 # ============================================================
-# SIDEBAR (with real QR code)
+# SIDEBAR
 # ============================================================
 with st.sidebar:
     app_url = "https://stev-tumor-ai-skrobcqyqyyz4sjpvqdqmh.streamlit.app/"
@@ -277,18 +280,17 @@ with st.sidebar:
     st.markdown("""
     - **🔍 Size → Biology:** Enter tumor size → get most likely biology.
     - **🔮 Biology → Size:** Select biology → get predicted size range.
-    - **📈 Growth-Immunotherapy:** Click the expanders above to see trajectories.
+    - **📈 Growth-Immunotherapy:** Click the expanders above to see trajectories and risk curves.
     """)
     st.markdown("---")
     st.markdown("**STEV model** – Lynch Syndrome Colorectal Tumors")
     st.markdown("*Horatio Quinones / Sherry Johnson / et al*")
 
 # ============================================================
-# MAIN APP WITH TWO TABS (Size→Biology and Biology→Size)
+# MAIN APP WITH TWO TABS
 # ============================================================
 tab1, tab2 = st.tabs(["🔍 Size → Biology", "🔮 Biology → Size"])
 
-# ---------- TAB 1: INVERSE PREDICTION ----------
 with tab1:
     col_left, col_right = st.columns(2)
     with col_left:
@@ -318,7 +320,6 @@ with tab1:
         st.markdown("---")
         st.caption("⚠️ Disclaimer: For research & education only – not medical advice. Always consult your doctor.")
 
-# ---------- TAB 2: FORWARD PREDICTION ----------
 with tab2:
     col_left, col_right = st.columns(2)
     with col_left:
