@@ -177,6 +177,22 @@ Predictions are based on published clinical data and include 95% credible interv
 """)
 
 # ============================================================
+# GROWTH CURVES (placed ABOVE the two tabs)
+# ============================================================
+with st.expander("📈 View Growth Curves (30mm & 60mm starting sizes)", expanded=False):
+    col1, col2 = st.columns(2)
+    with col1:
+        st.image("30mm.png", caption="Start size = 30 mm", use_container_width=True)
+    with col2:
+        st.image("60mm.png", caption="Start size = 60 mm", use_container_width=True)
+    st.markdown("""
+    **Interpretation:**  
+    - Solid lines show expected tumor size over time.  
+    - Shaded bands represent 90% credible intervals.  
+    - The lower plateau indicates the cure threshold.
+    """)
+
+# ============================================================
 # PARAMETERS (STEV + subgroup means)
 # ============================================================
 weeks = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 24]
@@ -251,16 +267,16 @@ with st.sidebar:
     st.markdown("""
     - **🔍 Size → Biology:** Enter tumor size → get most likely biology.
     - **🔮 Biology → Size:** Select biology → get predicted size range.
-    - **📈 Growth Curves:** View predicted growth trajectories for 30 mm and 60 mm starting sizes.
+    - **📈 Growth Curves:** Click the expander above to see trajectories.
     """)
     st.markdown("---")
     st.markdown("**STEV model** – Lynch Syndrome Colorectal Tumors")
     st.markdown("*Horatio Quinones / Sherry Johnson / et al*")
 
 # ============================================================
-# MAIN APP WITH THREE TABS
+# MAIN APP WITH TWO TABS (Size→Biology and Biology→Size)
 # ============================================================
-tab1, tab2, tab3 = st.tabs(["🔍 Size → Biology", "🔮 Biology → Size", "📈 Growth Curves (30mm & 60mm)"])
+tab1, tab2 = st.tabs(["🔍 Size → Biology", "🔮 Biology → Size"])
 
 # ---------- TAB 1: INVERSE PREDICTION ----------
 with tab1:
@@ -320,18 +336,3 @@ with tab2:
 
         st.markdown("---")
         st.caption("⚠️ Disclaimer: For research & education only – not medical advice. Always consult your doctor.")
-
-# ---------- TAB 3: GROWTH CURVES (30mm & 60mm) ----------
-with tab3:
-    st.markdown("### Stochastic tumor growth curves")
-    col1, col2 = st.columns(2)
-    with col1:
-        st.image("30mm.png", caption="Start size = 30 mm", use_container_width=True)
-    with col2:
-        st.image("60mm.png", caption="Start size = 60 mm", use_container_width=True)
-    st.markdown("""
-    **Interpretation:**  
-    - Solid lines show expected tumor size over time.  
-    - Shaded bands represent 90% credible intervals.  
-    - The lower plateau indicates the cure threshold.
-    """)
