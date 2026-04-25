@@ -14,7 +14,7 @@ from io import BytesIO
 st.set_page_config(page_title="STEV: Stochastic Tumor Response AI", layout="wide", page_icon="🧬")
 
 # ============================================================
-# CUSTOM CSS WITH ROBUST DARK MODE SUPPORT
+# CUSTOM CSS WITH FIXED BUTTONS (LIGHT + DARK MODE)
 # ============================================================
 st.markdown("""
 <style>
@@ -26,24 +26,36 @@ st.markdown("""
     h1 { color: #1e466e; font-family: 'Segoe UI', sans-serif; }
     .subtitle { color: #2c6e9e; font-size: 1.2rem; margin-bottom: 1rem; }
     .author { color: #6c757d; font-size: 0.9rem; margin-bottom: 2rem; }
+    
+    /* BUTTONS - LIGHT MODE (WHITE TEXT, NAVY BACKGROUND) */
     .stButton button {
-        background-color: #1e466e; color: white; font-weight: bold;
-        border-radius: 8px; padding: 0.5rem 1rem; width: 100%;
-        transition: 0.2s;
+        background-color: #1e466e !important;
+        color: white !important;
+        font-weight: bold !important;
+        border-radius: 8px !important;
+        padding: 0.5rem 1rem !important;
+        width: 100% !important;
+        transition: 0.2s !important;
+        border: none !important;
     }
-    .stButton button:hover { background-color: #0f2e4a; transform: scale(1.02); }
+    .stButton button:hover {
+        background-color: #0f2e4a !important;
+        transform: scale(1.02) !important;
+        color: white !important;
+    }
+    
     .streamlit-expanderHeader { background-color: #e9ecef; border-radius: 8px; color: #212529; }
     [data-testid="stMetricValue"] { font-size: 2rem; font-weight: bold; color: #1e466e; }
     [data-testid="stMetricLabel"] { color: #212529; }
 
-    /* === DARK MODE OVERRIDE - FORCES EVERYTHING VISIBLE === */
+    /* === DARK MODE OVERRIDE === */
     @media (prefers-color-scheme: dark) {
         /* Main background */
         .stApp, .main, .stAppViewContainer, .css-18e3th9, .css-1d391kg {
             background-color: #0a0a0a !important;
         }
         
-        /* All text elements - catch-all */
+        /* All text elements white */
         body, p, div, span, label, .stMarkdown, .stText, .stSelectbox label, 
         .stSlider label, .stMultiSelect label, .stTextInput label, 
         .stNumberInput label, .stDateInput label, .stTimeInput label,
@@ -52,7 +64,6 @@ st.markdown("""
             color: #ffffff !important;
         }
         
-        /* Specific overrides for titles */
         h1, .subtitle, .author {
             color: #ffffff !important;
         }
@@ -62,13 +73,14 @@ st.markdown("""
             color: #ffffff !important;
         }
         
-        /* Buttons */
+        /* BUTTONS - DARK MODE (LIGHTER BLUE, WHITE TEXT) */
         .stButton button {
             background-color: #2c6e9e !important;
             color: white !important;
         }
         .stButton button:hover {
             background-color: #1e466e !important;
+            color: white !important;
         }
         
         /* Expander */
@@ -95,7 +107,7 @@ st.markdown("""
             color: white !important;
         }
         
-        /* Plotly charts - force title and axis text white */
+        /* Plotly charts */
         .plotly-graph-div .gtitle, .plotly-graph-div .xtitle, .plotly-graph-div .ytitle,
         .plotly-graph-div .legendtext, .plotly-graph-div .hovertext text,
         .plotly-graph-div .annotation-text, .plotly-graph-div .axis text,
@@ -266,14 +278,12 @@ with tab1:
         fig = px.bar(df, x='Biology', y='Probability', color='Biology',
                      color_discrete_sequence=px.colors.qualitative.Set2,
                      title=f'Week {week}, size = {size} mm')
-        fig.update_layout(yaxis_title='Posterior probability', xaxis_title='Biology',
-                          font=dict(color='white') if st.get_option("theme.base") == 'dark' else {})
+        fig.update_layout(yaxis_title='Posterior probability', xaxis_title='Biology')
         st.plotly_chart(fig, use_container_width=True)
 
         with st.expander("📋 Detailed probabilities"):
             st.dataframe(df.style.format({'Probability': '{:.3f}'}))
 
-        # DISCLAIMER
         st.markdown("---")
         st.caption("⚠️ Disclaimer: For research & education only – not medical advice. Always consult your doctor.")
 
@@ -300,10 +310,8 @@ with tab2:
         fig.add_vline(x=mu, line_dash="dash", line_color="red", annotation_text=f"Mean = {mu:.2f} mm")
         fig.update_layout(title=f'{biology} at week {week}',
                           xaxis_title='Tumor size (mm)',
-                          yaxis_title='Probability density',
-                          font=dict(color='white') if st.get_option("theme.base") == 'dark' else {})
+                          yaxis_title='Probability density')
         st.plotly_chart(fig, use_container_width=True)
 
-        # DISCLAIMER
         st.markdown("---")
         st.caption("⚠️ Disclaimer: For research & education only – not medical advice. Always consult your doctor.")
