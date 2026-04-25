@@ -266,7 +266,7 @@ with st.sidebar:
     st.markdown("""
     - **🔍 Size → Biology:** Enter tumor size → get most likely biology.
     - **🔮 Biology → Size:** Select biology → get predicted size range.
-    - **📈 Growth/Cure Curves:** Click the expander above to see trajectories.
+    - **📈 Growth-Immunotherapy:** Click the expander above to see trajectories.
     """)
     st.markdown("---")
     st.markdown("**STEV model** – Lynch Syndrome Colorectal Tumors")
