@@ -7,7 +7,7 @@ import plotly.graph_objects as go
 import pandas as pd
 import qrcode
 from io import BytesIO
-# HQS
+
 # ============================================================
 # PAGE CONFIGURATION
 # ============================================================
@@ -177,7 +177,7 @@ Predictions are based on published clinical data and include 95% credible interv
 """)
 
 # ============================================================
-# GROWTH CURVES (placed ABOVE the two tabs)
+# EXPANDER 1: GROWTH CURVES (30mm and 60mm)
 # ============================================================
 with st.expander("📈 View Tumor Growth up to 30mm, 60mm and Immunotherapy Response", expanded=False):
     col1, col2 = st.columns(2)
@@ -191,14 +191,15 @@ with st.expander("📈 View Tumor Growth up to 30mm, 60mm and Immunotherapy Resp
     - Shaded bands represent 90% credible intervals.  
     """)
 
+# ============================================================
+# EXPANDER 2: TWO-HIT DYNAMICS (Conditional and Unconditional)
+# ============================================================
 with st.expander("🕰️ Two‑Hit Dynamics: Latency, Age at Detection & Risk", expanded=False):
-    st.markdown("### Complete stochastic model output")
-
+    col1, col2 = st.columns(2)
     with col1:
         st.image("Conditional.png", caption="Conditional probability (given second hit)", use_container_width=True)
     with col2:
         st.image("Unconditional.png", caption="Unconditional probability (general population)", use_container_width=True)
-    
     st.caption("Distributions derived from STEV stochastic model with Lynch syndrome epidemiology.")
 
 # ============================================================
@@ -276,7 +277,7 @@ with st.sidebar:
     st.markdown("""
     - **🔍 Size → Biology:** Enter tumor size → get most likely biology.
     - **🔮 Biology → Size:** Select biology → get predicted size range.
-    - **📈 Growth-Immunotherapy:** Click the expander above to see trajectories.
+    - **📈 Growth-Immunotherapy:** Click the expanders above to see trajectories.
     """)
     st.markdown("---")
     st.markdown("**STEV model** – Lynch Syndrome Colorectal Tumors")
@@ -289,10 +290,10 @@ tab1, tab2 = st.tabs(["🔍 Size → Biology", "🔮 Biology → Size"])
 
 # ---------- TAB 1: INVERSE PREDICTION ----------
 with tab1:
-    col1, col2 = st.columns(2)
-    with col1:
+    col_left, col_right = st.columns(2)
+    with col_left:
         week = st.selectbox("📅 Week", weeks, index=8)
-    with col2:
+    with col_right:
         size = st.slider("📏 Tumor size (mm)", min_value=0.0, max_value=30.0, value=1.4, step=0.1)
 
     if st.button("Predict Biology", use_container_width=True):
@@ -319,10 +320,10 @@ with tab1:
 
 # ---------- TAB 2: FORWARD PREDICTION ----------
 with tab2:
-    col1, col2 = st.columns(2)
-    with col1:
+    col_left, col_right = st.columns(2)
+    with col_left:
         week = st.selectbox("📅 Week", weeks, index=8, key="forward_week")
-    with col2:
+    with col_right:
         biology = st.selectbox("🧬 Biology", names, index=1)
 
     if st.button("Predict Size", use_container_width=True):
