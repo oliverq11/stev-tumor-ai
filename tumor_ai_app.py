@@ -189,7 +189,6 @@ with st.expander("📈 View Tumor Growth up to 30mm,60mm and Immunotherapy Respo
     **Interpretation:**  
     - Solid lines show expected tumor size over time.  
     - Shaded bands represent 90% credible intervals.  
-    - The lower plateau indicates the cure threshold.
     """)
 
 # ============================================================
