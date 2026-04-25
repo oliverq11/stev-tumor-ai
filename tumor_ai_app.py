@@ -13,9 +13,12 @@ from io import BytesIO
 # ============================================================
 st.set_page_config(page_title="STEV: Stochastic Tumor Response AI", layout="wide", page_icon="🧬")
 
-# Custom CSS for styling
+# ============================================================
+# CUSTOM CSS WITH DARK MODE SUPPORT
+# ============================================================
 st.markdown("""
 <style>
+    /* Light mode (default) */
     .stApp { background-color: #f5f7fb; }
     h1 { color: #1e466e; font-family: 'Segoe UI', sans-serif; }
     .subtitle { color: #2c6e9e; font-size: 1.2rem; margin-bottom: 1rem; }
@@ -28,6 +31,57 @@ st.markdown("""
     .stButton button:hover { background-color: #0f2e4a; transform: scale(1.02); }
     .streamlit-expanderHeader { background-color: #e9ecef; border-radius: 8px; }
     [data-testid="stMetricValue"] { font-size: 2rem; font-weight: bold; color: #1e466e; }
+    /* Ensure all text inherits properly in light mode */
+    body, .stMarkdown, .stText, .stSelectbox, .stSlider, .stDataFrame {
+        color: #212529;
+    }
+
+    /* === DARK MODE OVERRIDE === */
+    /* Activates automatically when phone/computer system dark mode is ON */
+    @media (prefers-color-scheme: dark) {
+        .stApp {
+            background-color: #0a0a0a !important;
+        }
+        h1, h2, h3, .subtitle, .author, .stMarkdown, .stText, .stSelectbox label, .stSlider label {
+            color: #f0f0f0 !important;
+        }
+        .stButton button {
+            background-color: #2c6e9e !important;
+            color: white !important;
+        }
+        .stButton button:hover {
+            background-color: #1e466e !important;
+        }
+        .streamlit-expanderHeader {
+            background-color: #1e1e1e !important;
+            color: #f0f0f0 !important;
+        }
+        [data-testid="stMetricValue"] {
+            color: #79c2ff !important;
+        }
+        [data-testid="stMetricLabel"] {
+            color: #dddddd !important;
+        }
+        .stDataFrame, .stDataFrame div, .dataframe {
+            background-color: #1e1e1e !important;
+            color: #f0f0f0 !important;
+        }
+        /* Force Plotly chart background and text */
+        .plotly-graph-div .main-svg {
+            background-color: #0a0a0a !important;
+        }
+        .plotly-graph-div .gtitle, .plotly-graph-div .xtitle, .plotly-graph-div .ytitle,
+        .plotly-graph-div .legendtext, .plotly-graph-div .hovertext text {
+            fill: #f0f0f0 !important;
+            color: #f0f0f0 !important;
+        }
+        .plotly-graph-div .axis line, .plotly-graph-div .axis path {
+            stroke: #888888 !important;
+        }
+        .plotly-graph-div .axis tick text {
+            fill: #cccccc !important;
+        }
+    }
 </style>
 """, unsafe_allow_html=True)
 
@@ -158,6 +212,7 @@ with tab1:
                      color_discrete_sequence=px.colors.qualitative.Set2,
                      title=f'Week {week}, size = {size} mm')
         fig.update_layout(yaxis_title='Posterior probability', xaxis_title='Biology')
+        # Optional: force dark template if needed – but CSS should handle it
         st.plotly_chart(fig, use_container_width=True)
 
         with st.expander("📋 Detailed probabilities"):
@@ -196,5 +251,3 @@ with tab2:
         # DISCLAIMER APPEARS ONLY HERE, AFTER PREDICTION
         st.markdown("---")
         st.caption("⚠️ Disclaimer: For research & education only – not medical advice. Always consult your doctor.")
-
-
