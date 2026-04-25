@@ -179,7 +179,7 @@ Predictions are based on published clinical data and include 95% credible interv
 # ============================================================
 # GROWTH CURVES (placed ABOVE the two tabs)
 # ============================================================
-with st.expander("📈 View Growth Curves (30mm & 60mm starting sizes)", expanded=False):
+with st.expander("📈 View Tumor Growth/Immunotherapy Evolutions ( up to 30mm & 60mm sizes)", expanded=False):
     col1, col2 = st.columns(2)
     with col1:
         st.image("30mm.png", caption="Start size = 30 mm", use_container_width=True)
