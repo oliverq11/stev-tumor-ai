@@ -191,6 +191,19 @@ with st.expander("📈 View Tumor Growth up to 30mm, 60mm and Immunotherapy Resp
     - Shaded bands represent 90% credible intervals.  
     """)
 
+with st.expander("🕰️ Two‑Hit Dynamics: Latency, Age at Detection & Risk", expanded=False):
+    st.markdown("### Complete stochastic model output")
+    st.image("two_hit_full.png", caption="Latency, age of second hit, age at detection, and probability curves", use_container_width=True)
+    
+    st.markdown("### Conditional & unconditional probability of detection")
+    col1, col2 = st.columns(2)
+    with col1:
+        st.image("conditional.png", caption="Conditional probability (given second hit)", use_container_width=True)
+    with col2:
+        st.image("unconditional.png", caption="Unconditional probability (general population)", use_container_width=True)
+    
+    st.caption("Distributions derived from STEV stochastic model with Lynch syndrome epidemiology.")
+
 # ============================================================
 # PARAMETERS (STEV + subgroup means)
 # ============================================================
