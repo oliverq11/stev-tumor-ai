@@ -195,12 +195,12 @@ with st.expander("🕰️ Two‑Hit Dynamics: Latency, Age at Detection & Risk",
     st.markdown("### Complete stochastic model output")
     st.image("two_hit_full.png", caption="Latency, age of second hit, age at detection, and probability curves", use_container_width=True)
     
-    st.markdown("### Conditional & unconditional probability of detection")
+    st.markdown("### Conditional & Unconditional probability of detection")
     col1, col2 = st.columns(2)
     with col1:
-        st.image("conditional.png", caption="Conditional probability (given second hit)", use_container_width=True)
+        st.image("Conditional.png", caption="Conditional probability (given second hit)", use_container_width=True)
     with col2:
-        st.image("unconditional.png", caption="Unconditional probability (general population)", use_container_width=True)
+        st.image("Unconditional.png", caption="Unconditional probability (general population)", use_container_width=True)
     
     st.caption("Distributions derived from STEV stochastic model with Lynch syndrome epidemiology.")
 
