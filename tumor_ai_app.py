@@ -14,12 +14,15 @@ from io import BytesIO
 st.set_page_config(page_title="STEV: Stochastic Tumor Response AI", layout="wide", page_icon="🧬")
 
 # ============================================================
-# CUSTOM CSS WITH DARK MODE SUPPORT
+# CUSTOM CSS WITH ROBUST DARK MODE SUPPORT
 # ============================================================
 st.markdown("""
 <style>
     /* Light mode (default) */
     .stApp { background-color: #f5f7fb; }
+    h1, h2, h3, .stMarkdown, p, div, span, label {
+        color: #212529;
+    }
     h1 { color: #1e466e; font-family: 'Segoe UI', sans-serif; }
     .subtitle { color: #2c6e9e; font-size: 1.2rem; margin-bottom: 1rem; }
     .author { color: #6c757d; font-size: 0.9rem; margin-bottom: 2rem; }
@@ -29,22 +32,37 @@ st.markdown("""
         transition: 0.2s;
     }
     .stButton button:hover { background-color: #0f2e4a; transform: scale(1.02); }
-    .streamlit-expanderHeader { background-color: #e9ecef; border-radius: 8px; }
+    .streamlit-expanderHeader { background-color: #e9ecef; border-radius: 8px; color: #212529; }
     [data-testid="stMetricValue"] { font-size: 2rem; font-weight: bold; color: #1e466e; }
-    /* Ensure all text inherits properly in light mode */
-    body, .stMarkdown, .stText, .stSelectbox, .stSlider, .stDataFrame {
-        color: #212529;
-    }
+    [data-testid="stMetricLabel"] { color: #212529; }
 
-    /* === DARK MODE OVERRIDE === */
-    /* Activates automatically when phone/computer system dark mode is ON */
+    /* === DARK MODE OVERRIDE - FORCES EVERYTHING VISIBLE === */
     @media (prefers-color-scheme: dark) {
-        .stApp {
+        /* Main background */
+        .stApp, .main, .stAppViewContainer, .css-18e3th9, .css-1d391kg {
             background-color: #0a0a0a !important;
         }
-        h1, h2, h3, .subtitle, .author, .stMarkdown, .stText, .stSelectbox label, .stSlider label {
-            color: #f0f0f0 !important;
+        
+        /* All text elements - catch-all */
+        body, p, div, span, label, .stMarkdown, .stText, .stSelectbox label, 
+        .stSlider label, .stMultiSelect label, .stTextInput label, 
+        .stNumberInput label, .stDateInput label, .stTimeInput label,
+        .stTextArea label, .stRadio label, .stCheckbox label,
+        h1, h2, h3, h4, h5, h6, .subtitle, .author, .caption {
+            color: #ffffff !important;
         }
+        
+        /* Specific overrides for titles */
+        h1, .subtitle, .author {
+            color: #ffffff !important;
+        }
+        
+        /* Sidebar text */
+        .css-1lcbmhc, .css-1adrfps, .sidebar .stMarkdown, .sidebar p, .sidebar div {
+            color: #ffffff !important;
+        }
+        
+        /* Buttons */
         .stButton button {
             background-color: #2c6e9e !important;
             color: white !important;
@@ -52,34 +70,71 @@ st.markdown("""
         .stButton button:hover {
             background-color: #1e466e !important;
         }
+        
+        /* Expander */
         .streamlit-expanderHeader {
             background-color: #1e1e1e !important;
-            color: #f0f0f0 !important;
+            color: white !important;
         }
+        .streamlit-expanderContent {
+            background-color: #0a0a0a !important;
+            color: white !important;
+        }
+        
+        /* Metrics */
         [data-testid="stMetricValue"] {
             color: #79c2ff !important;
         }
         [data-testid="stMetricLabel"] {
             color: #dddddd !important;
         }
-        .stDataFrame, .stDataFrame div, .dataframe {
+        
+        /* Dataframe */
+        .stDataFrame, .stDataFrame div, .dataframe, .dataframe td, .dataframe th {
             background-color: #1e1e1e !important;
-            color: #f0f0f0 !important;
+            color: white !important;
         }
-        /* Force Plotly chart background and text */
+        
+        /* Plotly charts - force title and axis text white */
+        .plotly-graph-div .gtitle, .plotly-graph-div .xtitle, .plotly-graph-div .ytitle,
+        .plotly-graph-div .legendtext, .plotly-graph-div .hovertext text,
+        .plotly-graph-div .annotation-text, .plotly-graph-div .axis text,
+        .plotly-graph-div .legend .traces .text {
+            fill: #ffffff !important;
+            color: #ffffff !important;
+        }
         .plotly-graph-div .main-svg {
             background-color: #0a0a0a !important;
-        }
-        .plotly-graph-div .gtitle, .plotly-graph-div .xtitle, .plotly-graph-div .ytitle,
-        .plotly-graph-div .legendtext, .plotly-graph-div .hovertext text {
-            fill: #f0f0f0 !important;
-            color: #f0f0f0 !important;
         }
         .plotly-graph-div .axis line, .plotly-graph-div .axis path {
             stroke: #888888 !important;
         }
         .plotly-graph-div .axis tick text {
             fill: #cccccc !important;
+        }
+        
+        /* QR code caption */
+        .stImage caption, .stImage figcaption {
+            color: #cccccc !important;
+        }
+        
+        /* Tab labels */
+        .stTabs [data-baseweb="tab-list"] button [data-testid="stMarkdownContainer"] p {
+            color: #ffffff !important;
+        }
+        .stTabs [data-baseweb="tab-list"] button:hover {
+            background-color: #2c6e9e !important;
+        }
+        
+        /* Selectbox dropdown */
+        .stSelectbox div[data-baseweb="select"] > div {
+            background-color: #1e1e1e !important;
+            color: white !important;
+        }
+        
+        /* Slider */
+        .stSlider div[data-baseweb="slider"] div[role="slider"] {
+            background-color: #2c6e9e !important;
         }
     }
 </style>
@@ -211,14 +266,14 @@ with tab1:
         fig = px.bar(df, x='Biology', y='Probability', color='Biology',
                      color_discrete_sequence=px.colors.qualitative.Set2,
                      title=f'Week {week}, size = {size} mm')
-        fig.update_layout(yaxis_title='Posterior probability', xaxis_title='Biology')
-        # Optional: force dark template if needed – but CSS should handle it
+        fig.update_layout(yaxis_title='Posterior probability', xaxis_title='Biology',
+                          font=dict(color='white') if st.get_option("theme.base") == 'dark' else {})
         st.plotly_chart(fig, use_container_width=True)
 
         with st.expander("📋 Detailed probabilities"):
             st.dataframe(df.style.format({'Probability': '{:.3f}'}))
 
-        # DISCLAIMER APPEARS ONLY HERE, AFTER PREDICTION
+        # DISCLAIMER
         st.markdown("---")
         st.caption("⚠️ Disclaimer: For research & education only – not medical advice. Always consult your doctor.")
 
@@ -245,9 +300,10 @@ with tab2:
         fig.add_vline(x=mu, line_dash="dash", line_color="red", annotation_text=f"Mean = {mu:.2f} mm")
         fig.update_layout(title=f'{biology} at week {week}',
                           xaxis_title='Tumor size (mm)',
-                          yaxis_title='Probability density')
+                          yaxis_title='Probability density',
+                          font=dict(color='white') if st.get_option("theme.base") == 'dark' else {})
         st.plotly_chart(fig, use_container_width=True)
 
-        # DISCLAIMER APPEARS ONLY HERE, AFTER PREDICTION
+        # DISCLAIMER
         st.markdown("---")
         st.caption("⚠️ Disclaimer: For research & education only – not medical advice. Always consult your doctor.")
