@@ -14,11 +14,11 @@ from io import BytesIO
 st.set_page_config(page_title="STEV: Stochastic Tumor Response AI", layout="wide", page_icon="🧬")
 
 # ============================================================
-# CUSTOM CSS WITH FIXED BUTTONS (LIGHT + DARK MODE)
+# CUSTOM CSS WITH FORCED WHITE BUTTON TEXT (ALL MODES)
 # ============================================================
 st.markdown("""
 <style>
-    /* Light mode (default) */
+    /* Light mode background */
     .stApp { background-color: #f5f7fb; }
     h1, h2, h3, .stMarkdown, p, div, span, label {
         color: #212529;
@@ -27,8 +27,18 @@ st.markdown("""
     .subtitle { color: #2c6e9e; font-size: 1.2rem; margin-bottom: 1rem; }
     .author { color: #6c757d; font-size: 0.9rem; margin-bottom: 2rem; }
     
-    /* BUTTONS - LIGHT MODE (WHITE TEXT, NAVY BACKGROUND) */
-    .stButton button {
+    /* ===== BUTTONS: FORCE WHITE TEXT IN ALL SITUATIONS ===== */
+    .stButton button,
+    .stButton button:link,
+    .stButton button:visited,
+    .stButton button:active,
+    .stButton button:focus,
+    .stButton button:hover,
+    .stButton > button,
+    div[data-testid="stBaseButton-primary"] button,
+    div[data-testid="stBaseButton-secondary"] button,
+    button[kind="primary"],
+    button[kind="secondary"] {
         background-color: #1e466e !important;
         color: white !important;
         font-weight: bold !important;
@@ -40,7 +50,13 @@ st.markdown("""
     }
     .stButton button:hover {
         background-color: #0f2e4a !important;
+        color: white !important;
         transform: scale(1.02) !important;
+    }
+    /* Ensure any inner spans or divs inside button are also white */
+    .stButton button *,
+    .stButton button span,
+    .stButton button div {
         color: white !important;
     }
     
@@ -50,12 +66,10 @@ st.markdown("""
 
     /* === DARK MODE OVERRIDE === */
     @media (prefers-color-scheme: dark) {
-        /* Main background */
         .stApp, .main, .stAppViewContainer, .css-18e3th9, .css-1d391kg {
             background-color: #0a0a0a !important;
         }
         
-        /* All text elements white */
         body, p, div, span, label, .stMarkdown, .stText, .stSelectbox label, 
         .stSlider label, .stMultiSelect label, .stTextInput label, 
         .stNumberInput label, .stDateInput label, .stTimeInput label,
@@ -64,17 +78,24 @@ st.markdown("""
             color: #ffffff !important;
         }
         
-        h1, .subtitle, .author {
-            color: #ffffff !important;
-        }
+        h1, .subtitle, .author { color: #ffffff !important; }
         
-        /* Sidebar text */
         .css-1lcbmhc, .css-1adrfps, .sidebar .stMarkdown, .sidebar p, .sidebar div {
             color: #ffffff !important;
         }
         
-        /* BUTTONS - DARK MODE (LIGHTER BLUE, WHITE TEXT) */
-        .stButton button {
+        /* DARK MODE BUTTONS: slightly lighter blue but STILL WHITE TEXT */
+        .stButton button,
+        .stButton button:link,
+        .stButton button:visited,
+        .stButton button:active,
+        .stButton button:focus,
+        .stButton button:hover,
+        .stButton > button,
+        div[data-testid="stBaseButton-primary"] button,
+        div[data-testid="stBaseButton-secondary"] button,
+        button[kind="primary"],
+        button[kind="secondary"] {
             background-color: #2c6e9e !important;
             color: white !important;
         }
@@ -82,8 +103,12 @@ st.markdown("""
             background-color: #1e466e !important;
             color: white !important;
         }
+        .stButton button *,
+        .stButton button span,
+        .stButton button div {
+            color: white !important;
+        }
         
-        /* Expander */
         .streamlit-expanderHeader {
             background-color: #1e1e1e !important;
             color: white !important;
@@ -93,21 +118,14 @@ st.markdown("""
             color: white !important;
         }
         
-        /* Metrics */
-        [data-testid="stMetricValue"] {
-            color: #79c2ff !important;
-        }
-        [data-testid="stMetricLabel"] {
-            color: #dddddd !important;
-        }
+        [data-testid="stMetricValue"] { color: #79c2ff !important; }
+        [data-testid="stMetricLabel"] { color: #dddddd !important; }
         
-        /* Dataframe */
         .stDataFrame, .stDataFrame div, .dataframe, .dataframe td, .dataframe th {
             background-color: #1e1e1e !important;
             color: white !important;
         }
         
-        /* Plotly charts */
         .plotly-graph-div .gtitle, .plotly-graph-div .xtitle, .plotly-graph-div .ytitle,
         .plotly-graph-div .legendtext, .plotly-graph-div .hovertext text,
         .plotly-graph-div .annotation-text, .plotly-graph-div .axis text,
@@ -115,36 +133,22 @@ st.markdown("""
             fill: #ffffff !important;
             color: #ffffff !important;
         }
-        .plotly-graph-div .main-svg {
-            background-color: #0a0a0a !important;
-        }
-        .plotly-graph-div .axis line, .plotly-graph-div .axis path {
-            stroke: #888888 !important;
-        }
-        .plotly-graph-div .axis tick text {
-            fill: #cccccc !important;
-        }
+        .plotly-graph-div .main-svg { background-color: #0a0a0a !important; }
+        .plotly-graph-div .axis line, .plotly-graph-div .axis path { stroke: #888888 !important; }
+        .plotly-graph-div .axis tick text { fill: #cccccc !important; }
         
-        /* QR code caption */
-        .stImage caption, .stImage figcaption {
-            color: #cccccc !important;
-        }
+        .stImage caption, .stImage figcaption { color: #cccccc !important; }
         
-        /* Tab labels */
         .stTabs [data-baseweb="tab-list"] button [data-testid="stMarkdownContainer"] p {
             color: #ffffff !important;
         }
-        .stTabs [data-baseweb="tab-list"] button:hover {
-            background-color: #2c6e9e !important;
-        }
+        .stTabs [data-baseweb="tab-list"] button:hover { background-color: #2c6e9e !important; }
         
-        /* Selectbox dropdown */
         .stSelectbox div[data-baseweb="select"] > div {
             background-color: #1e1e1e !important;
             color: white !important;
         }
         
-        /* Slider */
         .stSlider div[data-baseweb="slider"] div[role="slider"] {
             background-color: #2c6e9e !important;
         }
