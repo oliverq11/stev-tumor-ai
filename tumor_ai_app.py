@@ -7,7 +7,7 @@ import plotly.graph_objects as go
 import pandas as pd
 import qrcode
 from io import BytesIO
-
+# HQS
 # ============================================================
 # PAGE CONFIGURATION
 # ============================================================
