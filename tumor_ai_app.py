@@ -214,11 +214,12 @@ with st.expander("📈 Tumor Growth & Immunotherapy Response (30mm & 60mm starti
 # ============================================================
 # EXPANDER 2: TWO-HIT DYNAMICS (6 plots)
 # ============================================================
-with st.expander("🕰️ Two‑Hit Dynamics: Incubation, Latency, Age at Detection & Risk", expanded=False):
+
+with st.expander("Two-Hit Dynamics: Incubation, Latency, Age at Detection & Risk", expanded=False):
     st.markdown("""
-    ### 📖 What is "First Hit" and "Second Hit"?
+    ### What is "First Hit" and "Second Hit"?
     
-    - **First hit (inherited mutation):** A person with Lynch syndrome is born with **one faulty copy** of an MMR gene (e.g., MLH1, MSH2) inherited from a parent. This alone does not cause cancer – it only creates a **predisposition**.
+    - **First hit (inherited mutation):** A person with Lynch syndrome is born with **one faulty copy** of an MMR gene (e.g., MLH1, MSH2) inherited from a parent. This alone does not cause cancer - it only creates a **predisposition**.
       
     - **Second hit (acquired mutation):** At some point later in life, the **second healthy copy** of that MMR gene is damaged or lost. When this happens, the cell can no longer repair DNA mistakes, leading to microsatellite instability (MSI) and eventually **tumor formation**.
     """)
@@ -227,34 +228,34 @@ with st.expander("🕰️ Two‑Hit Dynamics: Incubation, Latency, Age at Detect
     
     col1, col2 = st.columns(2)
     with col1:
-        st.image("incubation.png", caption="**Plot a:** Incubation (birth → second hit)", use_container_width=True)
-        st.caption("Age at which the second hit occurs. Most occur between ages 30–55.")
+        st.image("incubation.png", caption="Plot a: Incubation (birth to second hit)", use_container_width=True)
+        st.caption("Age at which the second hit occurs. Most occur between ages 30-55.")
     with col2:
-        st.image("latency.png", caption="**Plot b:** Latency (second hit → detectable tumor >1 mm)", use_container_width=True)
+        st.image("latency.png", caption="Plot b: Latency (second hit to detectable tumor >1 mm)", use_container_width=True)
         st.caption("Waiting time from the second hit until the tumor becomes detectable.")
     
     col1, col2 = st.columns(2)
     with col1:
-        st.image("detection_age_conditional.png", caption="**Plot c (Conditional):** Detection age distribution", use_container_width=True)
+        st.image("detection_age_conditional.png", caption="Plot c (Conditional): Detection age distribution", use_container_width=True)
         st.caption("Given that a second hit has occurred, this shows the age at clinical detection.")
     with col2:
-        st.image("probability_conditional.png", caption="**Plot d (Conditional):** Probability of detection by age", use_container_width=True)
+        st.image("probability_conditional.png", caption="Plot d (Conditional): Probability of detection by age", use_container_width=True)
         st.caption("Given a second hit, the cumulative probability that the tumor has been detected by a given age.")
     
     col1, col2 = st.columns(2)
     with col1:
-        st.image("detection_age_unconditional.png", caption="**Plot c (Unconditional):** Detection age distribution", use_container_width=True)
+        st.image("detection_age_unconditional.png", caption="Plot c (Unconditional): Detection age distribution", use_container_width=True)
         st.caption("For all Lynch patients (including those without a second hit), the age at clinical detection.")
     with col2:
-        st.image("probability_uconditional.png", caption="**Plot d (Unconditional):** Probability of detection by age", use_container_width=True)
+        st.image("probability_uconditional.png", caption="Plot d (Unconditional): Probability of detection by age", use_container_width=True)
         st.caption("Overall probability that a Lynch patient will have a detected tumor by a given age.")
     
     st.markdown("""
     ---
-    ### 🔑 Conditional vs. Unconditional
+    ### Conditional vs. Unconditional
     
-    - **Conditional (top row c & d):** *"Given that you already had the second hit, what is the probability of detection by age X?"*
-    - **Unconditional (bottom row c & d):** *"At birth, what is your overall chance of ever having a detected tumor by age X?"*
+    - **Conditional (top row c and d):** "Given that you already had the second hit, what is the probability of detection by age X?"
+    - **Unconditional (bottom row c and d):** "At birth, what is your overall chance of ever having a detected tumor by age X?"
     
     The unconditional curves are always lower because some Lynch patients never experience the second hit.
     """)
