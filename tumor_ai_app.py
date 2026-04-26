@@ -173,7 +173,7 @@ Given a tumor size at a specific week, the model returns the **most likely under
 Given a known tumor biology, the model predicts the **expected tumor size range** at any week, including 95% credible intervals.
 
 #### 3. 📈 Growth and Immunotherapy Curves (Visualization)
-Two plots showing the **complete tumor trajectory** (growth + immunotherapy shrinkage) starting from 30 mm and 60 mm, with 90% credible bands.
+Two plots showing the **complete tumor trajectory** (growth from tiny to 30 mm or 60 mm, then immunotherapy shrinkage to cure floor), with 90% credible bands.
 
 #### 4. 🕰️ Two-Hit Dynamics (Visualization)
 Six plots that illustrate the **stochastic process of tumor initiation** in Lynch syndrome:
