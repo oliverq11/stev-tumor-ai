@@ -165,22 +165,182 @@ with st.expander("🕰️ Two-Hit Dynamics", expanded=False):
 # ============================================================
 # EXPANDER 3: MATHEMATICAL FRAMEWORK
 # ============================================================
-with st.expander("📐 Mathematical Framework", expanded=False):
+
+with st.expander("📐 Mathematical Framework of the STEV Model", expanded=False):
     st.markdown(r"""
-    **Equation 1:** $Z = \ln((S-L)/(U-S))$, $L=1.0$, $U=60.0$ mm  
-    **Equation 2:** $\kappa(S) = (U-L)/((S-L)(U-S))$  
-    **Equation 3:** $Z_{t+1} = Z_t + \Delta Z_t$, $\mathbb{E}[\Delta Z_t]=r$, $\text{Var}(\Delta Z_t)=\sigma_{\text{cycle}}^2(S_t)$  
-    **Equation 4:** $\mu_Z(t) = \alpha + r \cdot t$, $r=0.0426$/week  
-    **Equation 5:** $\sigma_S(S) = \max(0.5, 0.20 \cdot S)$ mm  
-    **Equation 6:** $\sigma_{\text{cycle}}^2(S) = [\kappa(S) \cdot \sigma_S(S)]^2$  
-    **Equation 7:** strength $= \ln(1+TMB)/\ln(11) \times f_{MMR}$  
-    **Equation 8:** $t_{\text{delay}} = \max(1.5, 3.0 \times (1 - 0.30 \cdot \text{strength}/(1+\text{strength})))$  
-    **Equation 9:** $S_{\text{cure}}(t) = K_c + (L_c-K_c)/(1+e^{-k_c(t-t_{\text{delay}}-x_{0c})})$  
-    **Equation 10:** $\text{Var}[Z(t)] = t^2 \text{Var}(r) + \sum \sigma_{\text{cycle}}^2(\mu_S(i))$  
-    **Equation 11:** $\text{Var}[Z_{\text{cure}}(t)] = (t-t_{\text{delay}})^2 \text{Var}(r_{\text{decay}}) + \sum \sigma_{\text{cycle}}^2(S_{\text{cure}}(i))$  
-    **Equation 12:** $\phi_{\text{bio}} = \min(0.70, \text{strength}/(1+\text{strength}))$  
-    **Equation 13:** $Z_{\text{lo,hi}}(t) = \mu_Z(t) \pm 1.645\sqrt{\text{Var}[Z(t)]}$  
-    **Equations 14-18:** Gamma distributions, convolution, conditional/unconditional probabilities
+    ### A True Stochastic Process
+    
+    The STEV model is a **purely stochastic simulation**. At each weekly cycle, tumor growth or shrinkage is random. The mean path is only the average of many random realizations - no single patient follows the mean exactly.
+    
+    ---
+    
+    **Equation 1: Logit Transformation**
+    $$
+    Z = \ln\left(\frac{S - L}{U - S}\right)
+    $$
+    **Inverse:** $S = L + \frac{U - L}{1 + e^{-Z}}$
+    - $L = 1.0$ mm (lower bound), $U = 60.0$ mm (upper bound)
+    
+    ---
+    
+    **Equation 2: Sensitivity Coefficient**
+    $$
+    \kappa(S) = \frac{dZ}{dS} = \frac{U - L}{(S - L)(U - S)}
+    $$
+    
+    ---
+    
+    **Equation 3: Stochastic Process at Each Cycle**
+    $$
+    Z_{t+1} = Z_t + \Delta Z_t, \quad \mathbb{E}[\Delta Z_t] = r, \quad \text{Var}(\Delta Z_t) = \sigma_{\text{cycle}}^2(S_t)
+    $$
+    
+    ---
+    
+    **Equation 4: Growth Phase - Mean Path**
+    $$
+    \mu_Z(t) = \alpha + r \cdot t
+    $$
+    - $r = 0.0426$ per week, $\alpha \approx -6.44$
+    
+    ---
+    
+    **Equation 5: Per-Cycle Noise (mm space)**
+    $$
+    \sigma_{S}(S) = \max(0.5,\; 0.20 \cdot S) \text{ mm}
+    $$
+    
+    ---
+    
+    **Equation 6: Convert Noise to Logit Variance**
+    $$
+    \sigma_{\text{cycle}}^2(S) = [\kappa(S) \cdot \sigma_S(S)]^2
+    $$
+    
+    ---
+    
+    **Equation 7: Biological Modulation (TMB and MMR)**
+    $$
+    \text{strength} = \frac{\ln(1 + \text{TMB})}{\ln(11)} \times f_{\text{MMR}}
+    $$
+    - dMMR/MSI-H: $f=1.3$, MSS: $f=1.0$, POLE: $f=1.5$
+    
+    ---
+    
+    **Equation 8: Immunotherapy Delay**
+    $$
+    t_{\text{delay}} = \max\left(1.5,\; 3.0 \times \left(1 - 0.30 \cdot \frac{\text{strength}}{1 + \text{strength}}\right)\right)
+    $$
+    
+    ---
+    
+    **Equation 9: Cure Phase - 4PL Mean Path**
+    $$
+    S_{\text{cure}}(t) = K_c + \frac{L_c - K_c}{1 + e^{-k_c (t - t_{\text{delay}} - x_{0c})}}, \quad t \ge t_{\text{delay}}
+    $$
+    - $L_c$ = starting size, $K_c \approx 1.1$ mm (cure floor)
+    
+    ---
+    
+    **Equation 10: Total Variance - Growth Phase**
+    $$
+    \text{Var}[Z(t)] = t^2 \cdot \text{Var}(r) + \sum_{i=1}^{t} \sigma_{\text{cycle}}^2(\mu_S(i))
+    $$
+    
+    ---
+    
+    **Equation 11: Total Variance - Cure Phase**
+    $$
+    \text{Var}[Z_{\text{cure}}(t)] = (t - t_{\text{delay}})^2 \cdot \text{Var}(r_{\text{decay}}) + \sum_{i=1}^{t - t_{\text{delay}}} \sigma_{\text{cycle}}^2(S_{\text{cure}}(i))
+    $$
+    
+    ---
+    
+    **Equation 12: Biological Variance Fraction**
+    $$
+    \phi_{\text{bio}} = \min\left(0.70,\; \frac{\text{strength}}{1 + \text{strength}}\right)
+    $$
+    
+    ---
+    
+    **Equation 13: CLT Confidence Bands (90% Credible Intervals)**
+    $$
+    Z_{\text{lo}}(t) = \mu_Z(t) - 1.645 \cdot \sqrt{\text{Var}[Z(t)]}, \quad
+    Z_{\text{hi}}(t) = \mu_Z(t) + 1.645 \cdot \sqrt{\text{Var}[Z(t)]}
+    $$
+    $$
+    S_{\text{lo}}(t) = L + \frac{U - L}{1 + e^{-Z_{\text{lo}}(t)}}, \quad
+    S_{\text{hi}}(t) = L + \frac{U - L}{1 + e^{-Z_{\text{hi}}(t)}}
+    $$
+    
+    ---
+    
+    ### Two-Hit Dynamics: Mathematical Formulation
+    
+    ---
+    
+    **Equation 14: Incubation (Birth to Second Hit)**
+    $$
+    f_{\text{inc}}(t) = \frac{t^{k-1} e^{-t/\theta}}{\theta^k \, \Gamma(k)}, \quad t \ge 0
+    $$
+    - Gamma distribution, shape $k \approx 4-6$, scale $\theta \approx 5-8$ years
+    
+    ---
+    
+    **Equation 15: Latency (Second Hit to Detectable Tumor)**
+    $$
+    f_{\text{lat}}(t) = \frac{t^{k_{\text{lat}}-1} e^{-t/\theta_{\text{lat}}}}{\theta_{\text{lat}}^{k_{\text{lat}}} \, \Gamma(k_{\text{lat}})}, \quad t \ge 0
+    $$
+    
+    ---
+    
+    **Equation 16: Convolution (Incubation + Latency)**
+    $$
+    T_{\text{detection}} = T_{\text{inc}} + T_{\text{lat}}, \quad
+    f_{\text{det}}(t) = \int_{0}^{t} f_{\text{inc}}(\tau) \, f_{\text{lat}}(t - \tau) \, d\tau
+    $$
+    
+    ---
+    
+    **Equation 17: Conditional Probability of Detection by Age**
+    $$
+    P_{\text{cond}}(t) = \int_{0}^{t} f_{\text{det}}(\tau) \, d\tau
+    $$
+    
+    ---
+    
+    **Equation 18: Unconditional Probability of Detection by Age**
+    $$
+    P_{\text{uncond}}(t) = R_{\text{lifetime}} \cdot P_{\text{cond}}(t)
+    $$
+    - $R_{\text{lifetime}} \approx 0.70-0.80$ for MLH1/MSH2
+    
+    ---
+    
+    **Lifetime Risk by Gene**
+    - MLH1: 70-80%
+    - MSH2: 70-80%
+    - MSH6: 50-60%
+    - PMS2: 15-20%
+    
+    ---
+    
+    ### Summary of All Parameters
+    
+    | Parameter | Meaning | Value |
+    |-----------|---------|-------|
+    | $L$ | Lower bound | 1.0 mm |
+    | $U$ | Upper bound | 60.0 mm |
+    | $r$ | Growth rate | 0.0426 /week |
+    | $\sigma_{\text{floor}}$ | Minimum noise | 0.5 mm |
+    | $\sigma_{\text{rel}}$ | Relative noise | 0.20 |
+    | $t_{\text{delay}}$ | Immunotherapy delay | 1.5-3.0 weeks |
+    | $k_{\text{inc}}$ | Incubation shape | 4-6 |
+    | $\theta_{\text{inc}}$ | Incubation scale | 5-8 years |
+    | $k_{\text{lat}}$ | Latency shape | 2-4 |
+    | $\theta_{\text{lat}}$ | Latency scale | 1-3 years |
+    
+    *Model parameters calibrated to published trial data (GARNET, KEYNOTE-177) and Lynch syndrome epidemiology.*
     """)
 
 # ============================================================
