@@ -443,7 +443,7 @@ with st.sidebar:
 # ============================================================
 # MAIN APP WITH TWO TABS
 # ============================================================
-tab1, tab2 = st.tabs(["🔍 Size -> iology", "🔮 Genotype -> Size"])
+tab1, tab2 = st.tabs(["🔍 Size -> Genotype", "🔮 Genotype -> Size"])
 
 # ========== TAB 1: SIZE -> GENOTYPE ==========
 with tab1:
