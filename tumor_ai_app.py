@@ -447,12 +447,12 @@ with st.sidebar:
     
     # RESET BUTTON - SINGLE BUTTON, NO DUPLICATE
  
-       if st.button("🔄 Reset All", use_container_width=True):
-        # Reset widgets
-        st.session_state.week_tab1 = 8
-        st.session_state.size_tab1 = 1.4
-        st.session_state.week_tab2 = 8
-        st.session_state.biology_tab2 = 'MLH1'
+    if st.button("🔄 Reset All", use_container_width=True):
+    # Reset widgets
+       st.session_state.week_tab1 = 8
+       st.session_state.size_tab1 = 1.4
+       st.session_state.week_tab2 = 8
+       st.session_state.biology_tab2 = 'MLH1'
         
         # Clear prediction
         st.session_state.show_prediction = False
