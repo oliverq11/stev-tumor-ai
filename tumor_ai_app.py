@@ -14,6 +14,16 @@ import os
 # ============================================================
 st.set_page_config(page_title="STEV: Stochastic Tumor Response AI", layout="wide", page_icon="🧬")
 
+# For Reset button to close expanders
+if 'expander_growth' not in st.session_state:
+    st.session_state.expander_growth = False
+if 'expander_twohit' not in st.session_state:
+    st.session_state.expander_twohit = False
+if 'expander_math' not in st.session_state:
+    st.session_state.expander_math = False
+if 'expander_clinical' not in st.session_state:
+    st.session_state.expander_clinical = False
+
 # ============================================================
 # INITIALIZE SESSION STATE
 # ============================================================
@@ -119,7 +129,7 @@ Incubation, latency, conditional and unconditional probability plots.
 # ============================================================
 # EXPANDER 1: GROWTH CURVES
 # ============================================================
-with st.expander("📈 Tumor Growth and Immunotherapy Response", expanded=False):
+with st.expander("📈 Tumor Growth...", expanded=st.session_state.expander_growth):
     col1, col2 = st.columns(2)
     with col1:
         if os.path.exists("30mm.png"):
@@ -436,20 +446,25 @@ with st.sidebar:
     st.markdown("---")
     
     # RESET BUTTON - SINGLE BUTTON, NO DUPLICATE
-    if st.button("🔄 Reset Prediction", use_container_width=True):
-        # Only clear prediction results, NOT all session state
-        st.session_state.show_prediction = False
-        st.session_state.prediction_probs = None
-        st.rerun()
-        st.markdown("---")
+ 
     if st.button("🔄 Reset All", use_container_width=True):
-        # Clear prediction results from session state
-        if 'show_prediction' in st.session_state:
-            st.session_state.show_prediction = False
-        if 'prediction_probs' in st.session_state:
-            st.session_state.prediction_probs = None
-        st.rerun()
-    st.markdown("### ℹ️ How to use")
+    # Reset widgets
+    st.session_state.week_tab1 = 8
+    st.session_state.size_tab1 = 1.4
+    st.session_state.week_tab2 = 8
+    st.session_state.biology_tab2 = 'MLH1'
+    
+    # Clear prediction
+    st.session_state.show_prediction = False
+    st.session_state.prediction_probs = None
+    
+    # Close expanders
+    st.session_state.expander_growth = False
+    st.session_state.expander_twohit = False
+    st.session_state.expander_math = False
+    st.session_state.expander_clinical = False
+    
+    st.rerun().markdown("### ℹ️ How to use")
     st.markdown("- **Size -> Biology:** Enter size, get biology")
     st.markdown("- **Biology -> Size:** Select biology, get size range")
     st.markdown("- **Expanders:** Click to view curves, dynamics, math, and cases")
@@ -466,9 +481,9 @@ tab1, tab2 = st.tabs(["🔍 Size -> Biology", "🔮 Biology -> Size"])
 with tab1:
     col_left, col_right = st.columns(2)
     with col_left:
-        week = st.selectbox("📅 Week", weeks, index=8)
+        week = st.selectbox("📅 Week", weeks, index=8, key="week_tab1")
     with col_right:
-        size = st.slider("📏 Tumor size (mm)", 0.0, 30.0, 1.4, 0.1)
+        size = st.slider("📏 Tumor size (mm)", 0.0, 30.0, 1.4, 0.1, key="size_tab1")
 
     if st.button("Predict Biology", use_container_width=True):
         probs = predict_inverse(size, week)
@@ -503,9 +518,9 @@ with tab1:
 with tab2:
     col_left, col_right = st.columns(2)
     with col_left:
-        week = st.selectbox("📅 Week", weeks, index=8, key="forward_week")
+        week = st.selectbox("📅 Week", weeks, index=8, key="week_tab2")
     with col_right:
-        biology = st.selectbox("🧬 Biology", names, index=1)
+        biology = st.selectbox("🧬 Biology", names, index=1, key="biology_tab2")
 
     if st.button("Predict Size", use_container_width=True):
         mu, sigma, ci = predict_forward(biology, week)
