@@ -606,6 +606,10 @@ with st.sidebar:
     img.save(buf, format="PNG")
     st.image(buf.getvalue(), width=150, caption="Scan to open on phone")
     
+    # --- CLICKABLE LINK FOR PC USERS ---
+    st.markdown("**Or open directly on PC:**")
+    st.markdown(f'<a href="{app_url}" target="_blank">{app_url}</a>', unsafe_allow_html=True)
+    
     st.markdown("### ℹ️ How to use")
     st.markdown("""
     - **🔍 Size -> Biology:** Enter tumor size -> get most likely biology.
@@ -618,7 +622,6 @@ with st.sidebar:
     st.markdown("---")
     st.markdown("**STEV model** - Lynch Syndrome Colorectal Tumors")
     st.markdown("*Horatio Quinones / Sherry Johnson / et al*")
-
 # ============================================================
 # MAIN APP WITH TWO TABS
 # ============================================================
