@@ -229,7 +229,7 @@ with st.expander("📈 Tumor Growth and Immunotherapy Response (Treatment initia
     col1, col2 = st.columns([2, 1])
     with col1:
         if os.path.exists("MLH1_55TMB.png"):
-            st.image("MLH1_55TMB.png", caption="Actual MLH1 tumor response (red dot: ~20 mm to ~1.5 mm in 9 weeks) overlaid on STEV model projection.", with=350)
+            st.image("MLH1_55TMB.png", caption="Actual MLH1 tumor response (red dot: ~20 mm to ~1.5 mm in 9 weeks) overlaid on STEV model projection.", width=350)
         else:
             st.image("MLH1_55TMB.png", caption="Actual MLH1 tumor response...", width=350)
     
