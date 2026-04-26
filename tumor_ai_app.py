@@ -8,11 +8,37 @@ import pandas as pd
 import qrcode
 from io import BytesIO
 import os
-# HQS
+
 # ============================================================
 # PAGE CONFIGURATION
 # ============================================================
 st.set_page_config(page_title="STEV: Stochastic Tumor Response AI", layout="wide", page_icon="🧬")
+
+# ============================================================
+# INITIALIZE SESSION STATE
+# ============================================================
+if 'disclaimer_shown' not in st.session_state:
+    st.session_state.disclaimer_shown = False
+
+# Widget values
+if 'week' not in st.session_state:
+    st.session_state.week = 8
+if 'size' not in st.session_state:
+    st.session_state.size = 1.4
+if 'week_forward' not in st.session_state:
+    st.session_state.week_forward = 8
+if 'biology' not in st.session_state:
+    st.session_state.biology = 'MLH1'
+
+# Expander states (all closed by default)
+if 'expander_growth' not in st.session_state:
+    st.session_state.expander_growth = False
+if 'expander_twohit' not in st.session_state:
+    st.session_state.expander_twohit = False
+if 'expander_math' not in st.session_state:
+    st.session_state.expander_math = False
+if 'expander_clinical' not in st.session_state:
+    st.session_state.expander_clinical = False
 
 # ============================================================
 # CUSTOM CSS WITH FORCED WHITE BUTTON TEXT (ALL MODES)
@@ -149,9 +175,6 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-if 'disclaimer_shown' not in st.session_state:
-    st.session_state.disclaimer_shown = False
-
 st.title("🧬 STEV: Stochastic Tumor Evolution and Immunological Response")
 st.markdown('<div class="subtitle">Lynch Syndrome Colorectal Tumors</div>', unsafe_allow_html=True)
 st.markdown('<div class="author">Horatio Quinones / Sherry Johnson / et-al</div>', unsafe_allow_html=True)
@@ -197,7 +220,7 @@ All predictions and plots are based on published clinical data (GARNET, KEYNOTE-
 # ============================================================
 # EXPANDER 1: GROWTH CURVES (30mm and 60mm) + MLH1 VALIDATION
 # ============================================================
-with st.expander("📈 Tumor Growth and Immunotherapy Response (Treatment initiated at 30mm and 60mm)", expanded=False):
+with st.expander("📈 Tumor Growth and Immunotherapy Response (Treatment initiated at 30mm and 60mm)", expanded=st.session_state.expander_growth):
     st.markdown("""
     ### 📖 What these curves show
     
@@ -231,7 +254,7 @@ with st.expander("📈 Tumor Growth and Immunotherapy Response (Treatment initia
         if os.path.exists("MLH1_55TMB.png"):
             st.image("MLH1_55TMB.png", caption="Actual MLH1 tumor response (red dot: ~20 mm to ~1.5 mm in 9.3 weeks) overlaid on STEV model projection.", width=350)
         else:
-            st.image("MLH1_55TMB.png", caption="Actual MLH1 tumor response...", width=350)
+            st.info("MLH1_55TMB.png not found. Upload to see model validation.")
     
     with col2:
         st.markdown("""
@@ -248,7 +271,7 @@ with st.expander("📈 Tumor Growth and Immunotherapy Response (Treatment initia
 # ============================================================
 # EXPANDER 2: TWO-HIT DYNAMICS
 # ============================================================
-with st.expander("🕰️ Two-Hit Dynamics: Incubation, Latency, Age at Detection and Risk", expanded=False):
+with st.expander("🕰️ Two-Hit Dynamics: Incubation, Latency, Age at Detection and Risk", expanded=st.session_state.expander_twohit):
     st.markdown("""
     ### 📖 What is "First Hit" and "Second Hit"?
     
@@ -314,7 +337,7 @@ with st.expander("🕰️ Two-Hit Dynamics: Incubation, Latency, Age at Detectio
 # ============================================================
 # EXPANDER 3: MATHEMATICAL FRAMEWORK
 # ============================================================
-with st.expander("📐 Mathematical Framework of the STEV Model", expanded=False):
+with st.expander("📐 Mathematical Framework of the STEV Model", expanded=st.session_state.expander_math):
     st.markdown(r"""
     ### A True Stochastic Process
     
@@ -494,7 +517,7 @@ with st.expander("📐 Mathematical Framework of the STEV Model", expanded=False
 # ============================================================
 # EXPANDER 4: CLINICAL CASE (Benign Polyp)
 # ============================================================
-with st.expander("📋 Clinical Case: Benign Polyp Responded to Dostarlimab", expanded=False):
+with st.expander("📋 Clinical Case: Benign Polyp Responded to Dostarlimab", expanded=st.session_state.expander_clinical):
     st.markdown("""
     ### A Surprising Validation of the STEV Model
     
@@ -616,14 +639,18 @@ with st.sidebar:
     # --- RESET BUTTON ---
     st.markdown("---")
     if st.button("🔄 Reset All", use_container_width=True):
-        # Reset session state for tabs
+        # Reset widget values
         st.session_state.week = 8
         st.session_state.size = 1.4
         st.session_state.week_forward = 8
-        if 'biology' in st.session_state:
-            st.session_state.biology = 'MLH1'
-        # Clear any stored results
-        st.session_state.prediction_made = False
+        st.session_state.biology = 'MLH1'
+        
+        # Close all expanders
+        st.session_state.expander_growth = False
+        st.session_state.expander_twohit = False
+        st.session_state.expander_math = False
+        st.session_state.expander_clinical = False
+        
         st.rerun()
     
     st.markdown("### ℹ️ How to use")
@@ -638,6 +665,7 @@ with st.sidebar:
     st.markdown("---")
     st.markdown("**STEV model** - Lynch Syndrome Colorectal Tumors")
     st.markdown("*Horatio Quinones / Sherry Johnson / et al*")
+
 # ============================================================
 # MAIN APP WITH TWO TABS
 # ============================================================
@@ -646,9 +674,9 @@ tab1, tab2 = st.tabs(["🔍 Size -> Biology", "🔮 Biology -> Size"])
 with tab1:
     col_left, col_right = st.columns(2)
     with col_left:
-        week = st.selectbox("📅 Week", weeks, index=8)
+        week = st.selectbox("📅 Week", weeks, index=weeks.index(st.session_state.week), key="week")
     with col_right:
-        size = st.slider("📏 Tumor size (mm)", min_value=0.0, max_value=30.0, value=1.4, step=0.1, key="size")
+        size = st.slider("📏 Tumor size (mm)", min_value=0.0, max_value=30.0, value=st.session_state.size, step=0.1, key="size")
 
     if st.button("Predict Biology", use_container_width=True):
         with st.spinner("Computing probabilities..."):
@@ -675,27 +703,4 @@ with tab1:
 with tab2:
     col_left, col_right = st.columns(2)
     with col_left:
-        week = st.selectbox("📅 Week", weeks, index=8, key="week_forward")
-    with col_right:
-        biology = st.selectbox("🧬 Biology", names, index=1, key="biology")
-
-    if st.button("Predict Size", use_container_width=True):
-        with st.spinner("Calculating predicted size..."):
-            mu, sigma, ci = predict_forward(biology, week)
-
-        col_a, col_b = st.columns(2)
-        col_a.metric("📏 Predicted mean size", f"{mu:.2f} mm")
-        col_b.metric("📊 95% credible interval", f"[{ci[0]:.2f}, {ci[1]:.2f}] mm")
-
-        x_vals = np.linspace(max(0, mu - 4*sigma), mu + 4*sigma, 200)
-        y_vals = norm.pdf(x_vals, mu, sigma)
-        fig = go.Figure()
-        fig.add_trace(go.Scatter(x=x_vals, y=y_vals, fill='tozeroy', line_color='#1e466e', name='Density'))
-        fig.add_vline(x=mu, line_dash="dash", line_color="red", annotation_text=f"Mean = {mu:.2f} mm")
-        fig.update_layout(title=f'{biology} at week {week}',
-                          xaxis_title='Tumor size (mm)',
-                          yaxis_title='Probability density')
-        st.plotly_chart(fig, use_container_width=True)
-
-        st.markdown("---")
-        st.caption("⚠️ Disclaimer: For research and education only - not medical advice. Always consult your doctor.")
+        week
