@@ -8,7 +8,7 @@ import pandas as pd
 import qrcode
 from io import BytesIO
 import os
-# HQS
+
 # ============================================================
 # PAGE CONFIGURATION
 # ============================================================
@@ -157,7 +157,7 @@ st.markdown('<div class="subtitle">Lynch Syndrome Colorectal Tumors</div>', unsa
 st.markdown('<div class="author">Horatio Quinones / Sherry Johnson / et-al</div>', unsafe_allow_html=True)
 
 # ============================================================
-# WHAT THIS APP DOES (EXPANDED)
+# WHAT THIS APP DOES
 # ============================================================
 st.markdown("""
 ### 🔍 What this app does
@@ -195,7 +195,7 @@ All predictions and plots are based on published clinical data (GARNET, KEYNOTE-
 """)
 
 # ============================================================
-# EXPANDER 1: GROWTH CURVES (30mm and 60mm)
+# EXPANDER 1: GROWTH CURVES
 # ============================================================
 with st.expander("📈 Tumor Growth and Immunotherapy Response (Treatment initiated at 30mm and 60mm)", expanded=False):
     st.markdown("""
@@ -217,7 +217,7 @@ with st.expander("📈 Tumor Growth and Immunotherapy Response (Treatment initia
         st.caption("Tumor grows from tiny to 60 mm, then shrinks after immunotherapy. Compare the shrinkage trajectory.")
 
 # ============================================================
-# EXPANDER 2: TWO-HIT DYNAMICS (6 plots)
+# EXPANDER 2: TWO-HIT DYNAMICS
 # ============================================================
 with st.expander("🕰️ Two-Hit Dynamics: Incubation, Latency, Age at Detection and Risk", expanded=False):
     st.markdown("""
@@ -445,7 +445,7 @@ with st.expander("📐 Mathematical Framework of the STEV Model", expanded=False
     """)
 
 # ============================================================
-# EXPANDER 4: CLINICAL CASE (WITH PLOT)
+# EXPANDER 4: CLINICAL CASE (WITH SAFE FILE CHECK)
 # ============================================================
 with st.expander("📋 Clinical Case: Benign Polyp Responded to Dostarlimab", expanded=False):
     st.markdown("""
@@ -467,9 +467,14 @@ with st.expander("📋 Clinical Case: Benign Polyp Responded to Dostarlimab", ex
     - Post-removal pathology confirmed **benign** histology
     """)
     
-    # --- STEV MODEL PROJECTION PLOT ---
     st.markdown("### STEV Model Projection vs. Actual Polyp Measurements")
-    st.image("benign_polyp_STEV.png", caption="STEV model projection (blue line with 90% credible band) vs. actual benign polyp measurements (red circles). The measured dimensions fall within the predicted credible interval, validating the model's applicability to benign MMR-deficient lesions.", use_container_width=True)
+    
+    # Safe check for file existence
+    if os.path.exists("benign_polyp_STEV.png"):
+        st.image("benign_polyp_STEV.png", caption="STEV model projection (blue line with 90% credible band) vs. actual benign polyp measurements (red circles). The measured dimensions fall within the predicted credible interval, validating the model's applicability to benign MMR-deficient lesions.", use_container_width=True)
+    else:
+        st.warning("⚠️ Benign polyp projection plot not found. Please upload the file 'benign_polyp_STEV.png' to the repository to see the model validation.")
+        st.info("The plot shows: STEV model projection (blue line with 90% credible band) vs. actual benign polyp measurements (red circles). The measured dimensions fall within the predicted credible interval, validating the model's applicability to benign MMR-deficient lesions.")
     
     st.markdown("""
     **Why this matters:**
