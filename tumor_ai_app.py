@@ -505,30 +505,42 @@ with tab1:
         fig.update_layout(yaxis_title='Posterior probability', xaxis_title='Genotype')
         st.plotly_chart(fig, use_container_width=True)
         
-        # --- TMB SENSITIVITY TABLE ---
+        # --- TMB SENSITIVITY TABLE (TOP 10 COMBINATIONS) ---
         st.markdown("### 🔬 How TMB influences genotype prediction")
-        st.markdown("The table below shows what the most likely genotype would be **if TMB were different** (keeping same week and tumor size):")
+        st.markdown("The table below shows the **top 10 most likely (Genotype, TMB) combinations** for the same week and tumor size:")
         
-        tmb_values = [20, 30, 40, 55, 70, 80]
-        tmb_results = []
+        # TMB range: 10 to 95, step 5
+        tmb_values = list(range(10, 100, 5))  # 10, 15, 20, ..., 95
+        all_combinations = []
         
         for tmb in tmb_values:
-            adjusted_probs = {}
             for name in names:
                 mu_base = means[week][name]
                 tmb_factor = (55 / tmb) ** 0.25
                 mu_adjusted = max(1.1, mu_base * tmb_factor)
                 like = normal_pdf(size, mu_adjusted, sigma_env[week])
-                adjusted_probs[name] = like * priors[name]
-            total = sum(adjusted_probs.values())
-            if total > 0:
-                adjusted_probs = {k: v/total for k, v in adjusted_probs.items()}
-            most_likely_tmb = max(adjusted_probs, key=adjusted_probs.get)
-            prob_tmb = adjusted_probs[most_likely_tmb]
-            tmb_results.append({"TMB": tmb, "Most likely genotype": most_likely_tmb, "Probability": f"{prob_tmb:.1%}"})
+                prob = like * priors[name]
+                all_combinations.append({
+                    "TMB": tmb,
+                    "Genotype": name,
+                    "Probability": prob
+                })
         
-        df_tmb = pd.DataFrame(tmb_results)
+        # Normalize probabilities (sum to 1 across all combinations)
+        total_prob = sum(c["Probability"] for c in all_combinations)
+        if total_prob > 0:
+            for c in all_combinations:
+                c["Probability"] = c["Probability"] / total_prob
+        
+        # Sort by probability (descending) and take top 10
+        all_combinations.sort(key=lambda x: x["Probability"], reverse=True)
+        top_10 = all_combinations[:10]
+        
+        # Create DataFrame for display
+        df_tmb = pd.DataFrame(top_10)
+        df_tmb["Probability"] = df_tmb["Probability"].apply(lambda x: f"{x:.1%}")
         st.dataframe(df_tmb, use_container_width=True, hide_index=True)
+        
         st.caption("💡 Higher TMB favors POLE/MSI-H; lower TMB favors MSH6/MSS")
         
         st.caption("⚠️ Research & education only - not medical advice")
