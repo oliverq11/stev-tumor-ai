@@ -158,14 +158,39 @@ st.markdown('<div class="author">Horatio Quinones / Sherry Johnson / et-al</div>
 st.markdown("""
 ### 🔍 What this app does
 
-This tool uses a **stochastic model** (STEV) built on real clinical data from Lynch syndrome colorectal cancer patients treated with dostarlimab. It helps answer two questions:
+st.markdown("""
+### 🔍 What this app does
 
-1. **Given a tumor size at a specific week, what is the most likely underlying biology?**  
-   (e.g., POLE, MLH1, MSH2, MSI-H, MSH6)
+This tool uses a **stochastic model** (STEV) built on real clinical data from Lynch syndrome colorectal cancer patients treated with dostarlimab. The app is organized into four main sections:
 
-2. **Given a known biology, what range of tumor sizes is expected at a given week?**
+---
 
-Predictions are based on published clinical data and include 95% credible intervals to reflect uncertainty.
+#### 1. 🔍 Size → Biology (Prediction Tool)
+Given a tumor size at a specific week, the model returns the **most likely underlying biology** (POLE, MLH1, MSH2, MSI-H, or MSH6) with full probability distribution.
+
+#### 2. 🔮 Biology → Size (Prediction Tool)
+Given a known tumor biology, the model predicts the **expected tumor size range** at any week, including 95% credible intervals.
+
+#### 3. 📈 Growth & Immunotherapy Curves (Visualization)
+Two plots showing the **complete tumor trajectory** (growth + immunotherapy shrinkage) starting from 30 mm and 60 mm, with 90% credible bands.
+
+#### 4. 🕰️ Two‑Hit Dynamics (Visualization)
+Six plots that illustrate the **stochastic process of tumor initiation** in Lynch syndrome:
+- Incubation (birth → second hit)
+- Latency (second hit → detectable tumor)
+- Conditional and unconditional detection age distributions and probability curves
+
+---
+
+#### Additionally, the app includes:
+
+- **📐 Mathematical Framework** – Full 18‑equation formulation of the stochastic model, including logit transformation, variance decomposition, CLT confidence bands, Gamma distributions, and convolution for two‑hit dynamics.
+
+- **📋 Clinical Case** – Real‑world validation: a benign flat polyp that shrank under dostarlimab, with response slower than the model mean but within the 90% credible interval.
+
+---
+
+All predictions and plots are based on published clinical data (GARNET, KEYNOTE-177) and Lynch syndrome epidemiology. The 90% credible intervals reflect patient‑to‑patient heterogeneity and within‑patient stochasticity.
 """)
 
 # ============================================================
