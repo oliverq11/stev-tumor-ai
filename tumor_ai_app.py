@@ -9,7 +9,6 @@ import qrcode
 from io import BytesIO
 import os
 
-
 # ============================================================
 # PAGE CONFIGURATION
 # ============================================================
@@ -29,7 +28,6 @@ st.markdown("""
     .subtitle { color: #2c6e9e; font-size: 1.2rem; margin-bottom: 1rem; }
     .author { color: #6c757d; font-size: 0.9rem; margin-bottom: 2rem; }
     
-    /* ===== BUTTONS: FORCE WHITE TEXT IN ALL SITUATIONS ===== */
     .stButton button,
     .stButton button:link,
     .stButton button:visited,
@@ -79,10 +77,6 @@ st.markdown("""
         }
         
         h1, .subtitle, .author { color: #ffffff !important; }
-        
-        .css-1lcbmhc, .css-1adrfps, .sidebar .stMarkdown, .sidebar p, .sidebar div {
-            color: #ffffff !important;
-        }
         
         .stButton button,
         .stButton button:link,
@@ -181,13 +175,7 @@ with st.expander("📈 Tumor Growth & Immunotherapy Response (30mm & 60mm starti
     st.markdown("""
     ### 📖 What these curves show
     
-    Each plot traces the **complete tumor size trajectory** over time (weeks) for Lynch syndrome patients treated with dostarlimab immunotherapy:
-    
-    - **Growth phase (weeks 0–6)**: Tumor grows from a very small, barely detectable size until it reaches either **30 mm** or **60 mm**.
-    - **Immunotherapy response phase (weeks 6–24)**: Dostarlimab treatment begins. The tumor **shrinks** continuously – the curve shows tumor size decreasing week by week.
-    - **Cure plateau (week 12–24)**: Tumor size approaches a minimal residual level (approximately 1.1 mm).
-    
-    The two plots compare outcomes based on tumor size at treatment initiation (30 mm vs. 60 mm).
+    Each plot traces the **complete tumor size trajectory** over time (weeks) for Lynch syndrome patients treated with dostarlimab immunotherapy.
     """)
     
     col1, col2 = st.columns(2)
@@ -197,10 +185,6 @@ with st.expander("📈 Tumor Growth & Immunotherapy Response (30mm & 60mm starti
     with col2:
         st.image("60mm.png", caption="**Plot 2:** Start size = 60 mm", use_container_width=True)
         st.caption("Same treatment, but tumor starts larger. Compare the shrinkage trajectory.")
-    
-    st.markdown("""
-    **Key insight:** Earlier detection (30 mm) leads to faster shrinkage to the cure plateau. The shaded bands represent uncertainty in the stochastic model.
-    """)
 
 # ============================================================
 # EXPANDER 2: TWO-HIT DYNAMICS (6 plots)
@@ -212,22 +196,20 @@ with st.expander("🕰️ Two‑Hit Dynamics: Incubation, Latency, Age at Detect
     - **First hit (inherited mutation):** A person with Lynch syndrome is born with **one faulty copy** of an MMR gene (e.g., MLH1, MSH2) inherited from a parent. This alone does not cause cancer – it only creates a **predisposition**.
       
     - **Second hit (acquired mutation):** At some point later in life, the **second healthy copy** of that MMR gene is damaged or lost (due to random chance, environment, or aging). When this happens, the cell can no longer repair DNA mistakes, leading to microsatellite instability (MSI) and eventually **tumor formation**.
-      
-    - **Key insight:** The time from **birth to second hit** (Plot b) can be decades. After the second hit, the tumor must grow until it becomes detectable >1 mm (Plot a). This is why Lynch syndrome cancers typically appear in adulthood, not childhood.
     """)
     
     st.markdown("### Complete stochastic model output (6 plots)")
     
-    # Row 1: Incubation and Latency (Plots a and b)
+    # Row 1: incubation and latency
     col1, col2 = st.columns(2)
     with col1:
         st.image("incubation.png", caption="**Plot a:** Incubation (birth → second hit)", use_container_width=True)
-        st.caption("Age at which the second hit occurs. Most occur between ages 30–55. This is why Lynch cancers appear in adulthood.")
+        st.caption("Age at which the second hit occurs. Most occur between ages 30–55.")
     with col2:
         st.image("latency.png", caption="**Plot b:** Latency (second hit → detectable tumor >1 mm)", use_container_width=True)
-        st.caption("Waiting time from the second hit until the tumor becomes detectable. Shorter latency = faster tumor growth.")
+        st.caption("Waiting time from the second hit until the tumor becomes detectable.")
     
-    # Row 2: Conditional plots (Plots c and d)
+    # Row 2: detection_age_conditional and probability_conditional
     col1, col2 = st.columns(2)
     with col1:
         st.image("detection_age_conditional.png", caption="**Plot c (Conditional):** Detection age distribution", use_container_width=True)
@@ -236,26 +218,24 @@ with st.expander("🕰️ Two‑Hit Dynamics: Incubation, Latency, Age at Detect
         st.image("probability_conditional.png", caption="**Plot d (Conditional):** Probability of detection by age", use_container_width=True)
         st.caption("Given a second hit, the cumulative probability that the tumor has been detected by a given age.")
     
-    # Row 3: Unconditional plots (Plots c and d repeated)
+    # Row 3: detection_age_unconditional and probability_uconditional
     col1, col2 = st.columns(2)
     with col1:
         st.image("detection_age_unconditional.png", caption="**Plot c (Unconditional):** Detection age distribution", use_container_width=True)
         st.caption("For all Lynch patients (including those without a second hit), the age at clinical detection.")
     with col2:
-        st.image("probability_unconditional.png", caption="**Plot d (Unconditional):** Probability of detection by age", use_container_width=True)
-        st.caption("Overall probability that a Lynch patient will have a detected tumor by a given age (∼70–80% by age 70).")
+        st.image("probability_uconditional.png", caption="**Plot d (Unconditional):** Probability of detection by age", use_container_width=True)
+        st.caption("Overall probability that a Lynch patient will have a detected tumor by a given age.")
     
     st.markdown("""
     ---
     ### 🔑 Conditional vs. Unconditional
     
-    - **Conditional (Plots c & d, top row):** *"Given that you already had the second hit, what is the probability of detection by age X?"*
+    - **Conditional (top row c & d):** *"Given that you already had the second hit, what is the probability of detection by age X?"*
       
-    - **Unconditional (Plots c & d, bottom row):** *"At birth, what is your overall chance of ever having a detected tumor by age X?"*
+    - **Unconditional (bottom row c & d):** *"At birth, what is your overall chance of ever having a detected tumor by age X?"*
     
-    The unconditional curves are always lower than the conditional curves because some Lynch patients never experience the second hit and therefore never develop cancer.
-    
-    *Distributions derived from STEV stochastic model with Lynch syndrome epidemiology.*
+    The unconditional curves are always lower because some Lynch patients never experience the second hit.
     """)
 
 # ============================================================
@@ -316,7 +296,7 @@ def predict_forward(biology, week):
     return mu, sigma, ci_95
 
 # ============================================================
-# SIDEBAR
+# SIDEBAR (UPDATED WITH SEPARATE SECTIONS AND ICONS)
 # ============================================================
 with st.sidebar:
     app_url = "https://stev-tumor-ai-skrobcqyqyyz4sjpvqdqmh.streamlit.app/"
@@ -331,8 +311,12 @@ with st.sidebar:
     st.markdown("### ℹ️ How to use")
     st.markdown("""
     - **🔍 Size → Biology:** Enter tumor size → get most likely biology.
+    
     - **🔮 Biology → Size:** Select biology → get predicted size range.
-    - **📈 Growth-Immunotherapy & Two-Hit Dynamics:** Click the expanders above to see all 8 plots.
+    
+    - **📈 Growth & Immunotherapy:** Click expander to see 30mm and 60mm tumor growth/shrinkage curves.
+    
+    - **🕰️ Two‑Hit Dynamics:** Click expander to see incubation, latency, conditional & unconditional probability plots.
     """)
     st.markdown("---")
     st.markdown("**STEV model** – Lynch Syndrome Colorectal Tumors")
