@@ -137,7 +137,6 @@ with st.expander("📈 Tumor Growth and Immunotherapy Response", expanded=False)
     col1, col2 = st.columns([2, 1])
     with col1:
         if os.path.exists("MLH1_55TMB.png"):
-       #     st.image("MLH1_55TMB.png", caption="~20mm to ~1.5mm in 9.3 weeks", width=400)
             st.image("MLH1_55TMB.png", caption="STEV projection vs. actual measurements", use_container_width=True)
     with col2:
         st.markdown("**MLH1 | TMB=55.4** | Faster than population mean")
@@ -372,7 +371,7 @@ with st.expander("📋 Clinical Case: Benign Polyp", expanded=False):
     """)
     if os.path.exists("benign_polyp_STEV.png"):
         st.image("benign_polyp_STEV.png", caption="STEV projection vs. actual measurements", use_container_width=True)
-  #     st.image("benign_polyp_STEV.png", caption="~20mm to ~1.5mm in 9.3 weeks", width=400)
+
 # ============================================================
 # PARAMETERS
 # ============================================================
@@ -503,8 +502,34 @@ with tab1:
         fig = px.bar(df, x='Genotype', y='Probability', color='Genotype',
                      color_discrete_sequence=px.colors.qualitative.Set2,
                      title=f'Week {week}, size = {size} mm')
-        fig.update_layout(yaxis_title='Posterior probability', xaxis_title='genotype')
+        fig.update_layout(yaxis_title='Posterior probability', xaxis_title='Genotype')
         st.plotly_chart(fig, use_container_width=True)
+        
+        # --- TMB SENSITIVITY TABLE ---
+        st.markdown("### 🔬 How TMB influences genotype prediction")
+        st.markdown("The table below shows what the most likely genotype would be **if TMB were different** (keeping same week and tumor size):")
+        
+        tmb_values = [20, 30, 40, 55, 70, 80]
+        tmb_results = []
+        
+        for tmb in tmb_values:
+            adjusted_probs = {}
+            for name in names:
+                mu_base = means[week][name]
+                tmb_factor = (55 / tmb) ** 0.25
+                mu_adjusted = max(1.1, mu_base * tmb_factor)
+                like = normal_pdf(size, mu_adjusted, sigma_env[week])
+                adjusted_probs[name] = like * priors[name]
+            total = sum(adjusted_probs.values())
+            if total > 0:
+                adjusted_probs = {k: v/total for k, v in adjusted_probs.items()}
+            most_likely_tmb = max(adjusted_probs, key=adjusted_probs.get)
+            prob_tmb = adjusted_probs[most_likely_tmb]
+            tmb_results.append({"TMB": tmb, "Most likely genotype": most_likely_tmb, "Probability": f"{prob_tmb:.1%}"})
+        
+        df_tmb = pd.DataFrame(tmb_results)
+        st.dataframe(df_tmb, use_container_width=True, hide_index=True)
+        st.caption("💡 Higher TMB favors POLE/MSI-H; lower TMB favors MSH6/MSS")
         
         st.caption("⚠️ Research & education only - not medical advice")
 
