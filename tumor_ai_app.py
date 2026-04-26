@@ -435,14 +435,14 @@ with st.sidebar:
     
     st.markdown("---")
     
-    # RESET BUTTON - SIMPLE AND RELIABLE
-    if st.button("🔄 Reset All", key="reset_all_btn", use_container_width=True):
-        # Clear all session state to reset everything
-        for key in list(st.session_state.keys()):
-            del st.session_state[key]
+    # RESET BUTTON - SINGLE BUTTON, NO DUPLICATE
+    if st.button("🔄 Reset Prediction", use_container_width=True):
+        # Only clear prediction results, NOT all session state
+        st.session_state.show_prediction = False
+        st.session_state.prediction_probs = None
         st.rerun()
         st.markdown("---")
-    if st.button("🔄 Reset All", key="reset_all_btn", use_container_width=True):
+    if st.button("🔄 Reset All", use_container_width=True):
         # Clear prediction results from session state
         if 'show_prediction' in st.session_state:
             st.session_state.show_prediction = False
