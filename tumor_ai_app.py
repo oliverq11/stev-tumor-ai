@@ -173,19 +173,19 @@ Given a tumor size at a specific week, the model returns the **most likely under
 Given a known tumor biology, the model predicts the **expected tumor size range** at any week, including 95% credible intervals.
 
 #### 3. 📈 Growth and Immunotherapy Curves (Visualization)
-Two plots showing the **complete tumor trajectory** (growth from tiny to 30 mm or 60 mm, then immunotherapy shrinkage to cure floor), with 90% credible bands.
+Plots showing the **complete tumor trajectory** (growth from tiny to 30 mm or 60 mm, then immunotherapy shrinkage to cure floor), with 90% credible bands.
 
 #### 4. 🕰️ Two-Hit Dynamics (Visualization)
-Six plots that illustrate the **stochastic process of tumor initiation** in Lynch syndrome:
-- Incubation (birth to second hit)
-- Latency (second hit to detectable tumor)
+Plots that illustrate the **stochastic process of tumor initiation** in Lynch syndrome:
+- Incubation (first hit (at birth) to second hit)
+- Latency (second hit to detectable tumor, >1mm)
 - Conditional and unconditional detection age distributions and probability curves
 
 ---
 
 #### Additionally, the app includes:
 
-- **📐 Mathematical Framework** - Full 18-equation formulation of the stochastic model, including logit transformation, variance decomposition, CLT confidence bands, Gamma distributions, and convolution for two-hit dynamics.
+- **📐 Mathematical Framework** - Full mathematical formulation of the Stochastic Model, including logit transformation, variance decomposition, CLT confidence bands, Gamma distributions, and convolution for two-hit dynamics.
 
 - **📋 Clinical Case** - Real-world validation: a benign flat polyp that shrank under dostarlimab, with response slower than the model mean but within the 90% credible interval.
 
@@ -204,8 +204,8 @@ with st.expander("📈 Tumor Growth and Immunotherapy Response (Treatment initia
     Each plot traces the **complete tumor size trajectory** over time (weeks) for Lynch syndrome patients treated with dostarlimab immunotherapy.
     
     - **Growth phase:** Tumor grows from a very small, barely detectable size (~1.1 mm) until it reaches a threshold size.
-    - **Treatment initiation:** At the threshold (30 mm or 60 mm), immunotherapy begins.
-    - **Cure phase:** The tumor then shrinks back down toward the minimal residual size (~1.1 mm).
+    - **Treatment initiation:** At tumor sizes of 30mm and 60mm, immunotherapy begins.
+    - **Cure phase:** The tumor then shrinks back down toward the minimal residual size (<1.1mm).
     """)
     
     col1, col2 = st.columns(2)
