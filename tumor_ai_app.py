@@ -613,6 +613,19 @@ with st.sidebar:
     st.code(app_url, language="text")
     st.caption("Tap the copy icon (top-right of code box) or select and copy the text")
     
+    # --- RESET BUTTON ---
+    st.markdown("---")
+    if st.button("🔄 Reset All", use_container_width=True):
+        # Reset session state for tabs
+        st.session_state.week = 8
+        st.session_state.size = 1.4
+        st.session_state.week_forward = 8
+        if 'biology' in st.session_state:
+            st.session_state.biology = 'MLH1'
+        # Clear any stored results
+        st.session_state.prediction_made = False
+        st.rerun()
+    
     st.markdown("### ℹ️ How to use")
     st.markdown("""
     - **🔍 Size -> Biology:** Enter tumor size -> get most likely biology.
@@ -635,7 +648,7 @@ with tab1:
     with col_left:
         week = st.selectbox("📅 Week", weeks, index=8)
     with col_right:
-        size = st.slider("📏 Tumor size (mm)", min_value=0.0, max_value=30.0, value=1.4, step=0.1)
+        size = st.slider("📏 Tumor size (mm)", min_value=0.0, max_value=30.0, value=1.4, step=0.1, key="size")
 
     if st.button("Predict Biology", use_container_width=True):
         with st.spinner("Computing probabilities..."):
@@ -662,9 +675,9 @@ with tab1:
 with tab2:
     col_left, col_right = st.columns(2)
     with col_left:
-        week = st.selectbox("📅 Week", weeks, index=8, key="forward_week")
+        week = st.selectbox("📅 Week", weeks, index=8, key="week_forward")
     with col_right:
-        biology = st.selectbox("🧬 Biology", names, index=1)
+        biology = st.selectbox("🧬 Biology", names, index=1, key="biology")
 
     if st.button("Predict Size", use_container_width=True):
         with st.spinner("Calculating predicted size..."):
