@@ -152,30 +152,30 @@ st.markdown("""
 if 'disclaimer_shown' not in st.session_state:
     st.session_state.disclaimer_shown = False
 
-st.title("STEV: Stochastic Tumor Evolution and Immunological Response")
+st.title("🧬 STEV: Stochastic Tumor Evolution and Immunological Response")
 st.markdown('<div class="subtitle">Lynch Syndrome Colorectal Tumors</div>', unsafe_allow_html=True)
 st.markdown('<div class="author">Horatio Quinones / Sherry Johnson / et-al</div>', unsafe_allow_html=True)
 
 # ============================================================
-# WHAT THIS APP DOES (EXPANDED - NO SPECIAL CHARACTERS)
+# WHAT THIS APP DOES (EXPANDED - WITH ICONS, FIXED DASHES)
 # ============================================================
 st.markdown("""
-### What this app does
+### 🔍 What this app does
 
 This tool uses a **stochastic model** (STEV) built on real clinical data from Lynch syndrome colorectal cancer patients treated with dostarlimab. The app is organized into four main sections:
 
 ---
 
-#### 1. Size -> Biology (Prediction Tool)
+#### 1. 🔍 Size -> Biology (Prediction Tool)
 Given a tumor size at a specific week, the model returns the **most likely underlying biology** (POLE, MLH1, MSH2, MSI-H, or MSH6) with full probability distribution.
 
-#### 2. Biology -> Size (Prediction Tool)
+#### 2. 🔮 Biology -> Size (Prediction Tool)
 Given a known tumor biology, the model predicts the **expected tumor size range** at any week, including 95% credible intervals.
 
-#### 3. Growth and Immunotherapy Curves (Visualization)
+#### 3. 📈 Growth and Immunotherapy Curves (Visualization)
 Two plots showing the **complete tumor trajectory** (growth + immunotherapy shrinkage) starting from 30 mm and 60 mm, with 90% credible bands.
 
-#### 4. Two-Hit Dynamics (Visualization)
+#### 4. 🕰️ Two-Hit Dynamics (Visualization)
 Six plots that illustrate the **stochastic process of tumor initiation** in Lynch syndrome:
 - Incubation (birth to second hit)
 - Latency (second hit to detectable tumor)
@@ -185,9 +185,9 @@ Six plots that illustrate the **stochastic process of tumor initiation** in Lync
 
 #### Additionally, the app includes:
 
-- **Mathematical Framework** - Full 18-equation formulation of the stochastic model, including logit transformation, variance decomposition, CLT confidence bands, Gamma distributions, and convolution for two-hit dynamics.
+- **📐 Mathematical Framework** - Full 18-equation formulation of the stochastic model, including logit transformation, variance decomposition, CLT confidence bands, Gamma distributions, and convolution for two-hit dynamics.
 
-- **Clinical Case** - Real-world validation: a benign flat polyp that shrank under dostarlimab, with response slower than the model mean but within the 90% credible interval.
+- **📋 Clinical Case** - Real-world validation: a benign flat polyp that shrank under dostarlimab, with response slower than the model mean but within the 90% credible interval.
 
 ---
 
@@ -197,27 +197,27 @@ All predictions and plots are based on published clinical data (GARNET, KEYNOTE-
 # ============================================================
 # EXPANDER 1: GROWTH CURVES (30mm and 60mm)
 # ============================================================
-with st.expander("Tumor Growth and Immunotherapy Response (30mm and 60mm starting points)", expanded=False):
+with st.expander("📈 Tumor Growth and Immunotherapy Response (30mm and 60mm starting points)", expanded=False):
     st.markdown("""
-    ### What these curves show
+    ### 📖 What these curves show
     
     Each plot traces the **complete tumor size trajectory** over time (weeks) for Lynch syndrome patients treated with dostarlimab immunotherapy.
     """)
     
     col1, col2 = st.columns(2)
     with col1:
-        st.image("30mm.png", caption="Plot 1: Start size = 30 mm", use_container_width=True)
+        st.image("30mm.png", caption="**Plot 1:** Start size = 30 mm", use_container_width=True)
         st.caption("Tumor grows to 30 mm, then shrinks after immunotherapy. Shaded band = 90% credible interval.")
     with col2:
-        st.image("60mm.png", caption="Plot 2: Start size = 60 mm", use_container_width=True)
+        st.image("60mm.png", caption="**Plot 2:** Start size = 60 mm", use_container_width=True)
         st.caption("Same treatment, but tumor starts larger. Compare the shrinkage trajectory.")
 
 # ============================================================
 # EXPANDER 2: TWO-HIT DYNAMICS (6 plots)
 # ============================================================
-with st.expander("Two-Hit Dynamics: Incubation, Latency, Age at Detection and Risk", expanded=False):
+with st.expander("🕰️ Two-Hit Dynamics: Incubation, Latency, Age at Detection and Risk", expanded=False):
     st.markdown("""
-    ### What is "First Hit" and "Second Hit"?
+    ### 📖 What is "First Hit" and "Second Hit"?
     
     - **First hit (inherited mutation):** A person with Lynch syndrome is born with **one faulty copy** of an MMR gene (e.g., MLH1, MSH2) inherited from a parent. This alone does not cause cancer - it only creates a **predisposition**.
       
@@ -228,31 +228,31 @@ with st.expander("Two-Hit Dynamics: Incubation, Latency, Age at Detection and Ri
     
     col1, col2 = st.columns(2)
     with col1:
-        st.image("incubation.png", caption="Plot a: Incubation (birth to second hit)", use_container_width=True)
+        st.image("incubation.png", caption="**Plot a:** Incubation (birth to second hit)", use_container_width=True)
         st.caption("Age at which the second hit occurs. Most occur between ages 30-55.")
     with col2:
-        st.image("latency.png", caption="Plot b: Latency (second hit to detectable tumor >1 mm)", use_container_width=True)
+        st.image("latency.png", caption="**Plot b:** Latency (second hit to detectable tumor >1 mm)", use_container_width=True)
         st.caption("Waiting time from the second hit until the tumor becomes detectable.")
     
     col1, col2 = st.columns(2)
     with col1:
-        st.image("detection_age_conditional.png", caption="Plot c (Conditional): Detection age distribution", use_container_width=True)
+        st.image("detection_age_conditional.png", caption="**Plot c (Conditional):** Detection age distribution", use_container_width=True)
         st.caption("Given that a second hit has occurred, this shows the age at clinical detection.")
     with col2:
-        st.image("probability_conditional.png", caption="Plot d (Conditional): Probability of detection by age", use_container_width=True)
+        st.image("probability_conditional.png", caption="**Plot d (Conditional):** Probability of detection by age", use_container_width=True)
         st.caption("Given a second hit, the cumulative probability that the tumor has been detected by a given age.")
     
     col1, col2 = st.columns(2)
     with col1:
-        st.image("detection_age_unconditional.png", caption="Plot c (Unconditional): Detection age distribution", use_container_width=True)
+        st.image("detection_age_unconditional.png", caption="**Plot c (Unconditional):** Detection age distribution", use_container_width=True)
         st.caption("For all Lynch patients (including those without a second hit), the age at clinical detection.")
     with col2:
-        st.image("probability_uconditional.png", caption="Plot d (Unconditional): Probability of detection by age", use_container_width=True)
+        st.image("probability_uconditional.png", caption="**Plot d (Unconditional):** Probability of detection by age", use_container_width=True)
         st.caption("Overall probability that a Lynch patient will have a detected tumor by a given age.")
     
     st.markdown("""
     ---
-    ### Conditional vs. Unconditional
+    ### 🔑 Conditional vs. Unconditional
     
     - **Conditional (top row c and d):** "Given that you already had the second hit, what is the probability of detection by age X?"
     - **Unconditional (bottom row c and d):** "At birth, what is your overall chance of ever having a detected tumor by age X?"
@@ -263,7 +263,7 @@ with st.expander("Two-Hit Dynamics: Incubation, Latency, Age at Detection and Ri
 # ============================================================
 # EXPANDER 3: MATHEMATICAL FRAMEWORK
 # ============================================================
-with st.expander("Mathematical Framework of the STEV Model", expanded=False):
+with st.expander("📐 Mathematical Framework of the STEV Model", expanded=False):
     st.markdown(r"""
     ### A True Stochastic Process
     
@@ -443,7 +443,7 @@ with st.expander("Mathematical Framework of the STEV Model", expanded=False):
 # ============================================================
 # EXPANDER 4: CLINICAL CASE
 # ============================================================
-with st.expander("Clinical Case: Benign Polyp Responded to Dostarlimab", expanded=False):
+with st.expander("📋 Clinical Case: Benign Polyp Responded to Dostarlimab", expanded=False):
     st.markdown("""
     ### A Surprising Validation of the STEV Model
     
@@ -546,14 +546,14 @@ with st.sidebar:
     img.save(buf, format="PNG")
     st.image(buf.getvalue(), width=150, caption="Scan to open on phone")
     
-    st.markdown("### How to use")
+    st.markdown("### ℹ️ How to use")
     st.markdown("""
-    - **Size -> Biology:** Enter tumor size -> get most likely biology.
-    - **Biology -> Size:** Select biology -> get predicted size range.
-    - **Growth and Immunotherapy:** Click expander to see 30mm and 60mm curves.
-    - **Two-Hit Dynamics:** Click expander to see incubation, latency, conditional and unconditional plots.
-    - **Mathematical Framework:** Click expander to see the full mathematical formulation.
-    - **Clinical Case:** Click expander to see real-world validation.
+    - **🔍 Size -> Biology:** Enter tumor size -> get most likely biology.
+    - **🔮 Biology -> Size:** Select biology -> get predicted size range.
+    - **📈 Growth and Immunotherapy:** Click expander to see 30mm and 60mm curves.
+    - **🕰️ Two-Hit Dynamics:** Click expander to see incubation, latency, conditional and unconditional plots.
+    - **📐 Mathematical Framework:** Click expander to see the full mathematical formulation.
+    - **📋 Clinical Case:** Click expander to see real-world validation.
     """)
     st.markdown("---")
     st.markdown("**STEV model** - Lynch Syndrome Colorectal Tumors")
@@ -562,14 +562,14 @@ with st.sidebar:
 # ============================================================
 # MAIN APP WITH TWO TABS
 # ============================================================
-tab1, tab2 = st.tabs(["Size -> Biology", "Biology -> Size"])
+tab1, tab2 = st.tabs(["🔍 Size -> Biology", "🔮 Biology -> Size"])
 
 with tab1:
     col_left, col_right = st.columns(2)
     with col_left:
-        week = st.selectbox("Week", weeks, index=8)
+        week = st.selectbox("📅 Week", weeks, index=8)
     with col_right:
-        size = st.slider("Tumor size (mm)", min_value=0.0, max_value=30.0, value=1.4, step=0.1)
+        size = st.slider("📏 Tumor size (mm)", min_value=0.0, max_value=30.0, value=1.4, step=0.1)
 
     if st.button("Predict Biology", use_container_width=True):
         with st.spinner("Computing probabilities..."):
@@ -577,8 +577,8 @@ with tab1:
         most_likely = max(probs, key=probs.get)
 
         col_a, col_b = st.columns(2)
-        col_a.metric("Most likely biology", most_likely)
-        col_b.metric("Probability", f"{probs[most_likely]:.1%}")
+        col_a.metric("🧬 Most likely biology", most_likely)
+        col_b.metric("📊 Probability", f"{probs[most_likely]:.1%}")
 
         df = pd.DataFrame(list(probs.items()), columns=['Biology', 'Probability'])
         fig = px.bar(df, x='Biology', y='Probability', color='Biology',
@@ -587,26 +587,26 @@ with tab1:
         fig.update_layout(yaxis_title='Posterior probability', xaxis_title='Biology')
         st.plotly_chart(fig, use_container_width=True)
 
-        with st.expander("Detailed probabilities"):
+        with st.expander("📋 Detailed probabilities"):
             st.dataframe(df.style.format({'Probability': '{:.3f}'}))
 
         st.markdown("---")
-        st.caption("Disclaimer: For research and education only - not medical advice. Always consult your doctor.")
+        st.caption("⚠️ Disclaimer: For research and education only - not medical advice. Always consult your doctor.")
 
 with tab2:
     col_left, col_right = st.columns(2)
     with col_left:
-        week = st.selectbox("Week", weeks, index=8, key="forward_week")
+        week = st.selectbox("📅 Week", weeks, index=8, key="forward_week")
     with col_right:
-        biology = st.selectbox("Biology", names, index=1)
+        biology = st.selectbox("🧬 Biology", names, index=1)
 
     if st.button("Predict Size", use_container_width=True):
         with st.spinner("Calculating predicted size..."):
             mu, sigma, ci = predict_forward(biology, week)
 
         col_a, col_b = st.columns(2)
-        col_a.metric("Predicted mean size", f"{mu:.2f} mm")
-        col_b.metric("95% credible interval", f"[{ci[0]:.2f}, {ci[1]:.2f}] mm")
+        col_a.metric("📏 Predicted mean size", f"{mu:.2f} mm")
+        col_b.metric("📊 95% credible interval", f"[{ci[0]:.2f}, {ci[1]:.2f}] mm")
 
         x_vals = np.linspace(max(0, mu - 4*sigma), mu + 4*sigma, 200)
         y_vals = norm.pdf(x_vals, mu, sigma)
@@ -619,4 +619,4 @@ with tab2:
         st.plotly_chart(fig, use_container_width=True)
 
         st.markdown("---")
-        st.caption("Disclaimer: For research and education only - not medical advice. Always consult your doctor.")
+        st.caption("⚠️ Disclaimer: For research and education only - not medical advice. Always consult your doctor.")
