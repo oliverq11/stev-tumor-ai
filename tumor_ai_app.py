@@ -8,7 +8,7 @@ import pandas as pd
 import qrcode
 from io import BytesIO
 import os
-
+# HQS
 # ============================================================
 # PAGE CONFIGURATION
 # ============================================================
