@@ -15,42 +15,7 @@ import os
 st.set_page_config(page_title="STEV: Stochastic Tumor Response AI", layout="wide", page_icon="🧬")
 
 # ============================================================
-# INITIALIZE SESSION STATE
-# ============================================================
-# Widget values
-if 'week' not in st.session_state:
-    st.session_state.week = 8
-if 'size' not in st.session_state:
-    st.session_state.size = 1.4
-if 'week_forward' not in st.session_state:
-    st.session_state.week_forward = 8
-if 'biology' not in st.session_state:
-    st.session_state.biology = 'MLH1'
-
-# Expander states (all closed by default)
-if 'expander_growth' not in st.session_state:
-    st.session_state.expander_growth = False
-if 'expander_twohit' not in st.session_state:
-    st.session_state.expander_twohit = False
-if 'expander_math' not in st.session_state:
-    st.session_state.expander_math = False
-if 'expander_clinical' not in st.session_state:
-    st.session_state.expander_clinical = False
-
-# Prediction results flag
-if 'show_tab1_prediction' not in st.session_state:
-    st.session_state.show_tab1_prediction = False
-if 'tab1_probs' not in st.session_state:
-    st.session_state.tab1_probs = None
-if 'tab1_most_likely' not in st.session_state:
-    st.session_state.tab1_most_likely = None
-if 'tab1_week' not in st.session_state:
-    st.session_state.tab1_week = None
-if 'tab1_size' not in st.session_state:
-    st.session_state.tab1_size = None
-
-# ============================================================
-# CUSTOM CSS
+# CUSTOM CSS WITH FORCED WHITE BUTTON TEXT (ALL MODES)
 # ============================================================
 st.markdown("""
 <style>
@@ -63,7 +28,6 @@ st.markdown("""
     .subtitle { color: #2c6e9e; font-size: 1.2rem; margin-bottom: 1rem; }
     .author { color: #6c757d; font-size: 0.9rem; margin-bottom: 2rem; }
     
-    /* ===== BUTTONS: FORCE WHITE TEXT IN ALL MODES ===== */
     .stButton button,
     .stButton button:link,
     .stButton button:visited,
@@ -89,7 +53,6 @@ st.markdown("""
         color: white !important;
         transform: scale(1.02) !important;
     }
-    /* Ensure any inner spans or divs inside button are also white */
     .stButton button *,
     .stButton button span,
     .stButton button div {
@@ -100,7 +63,6 @@ st.markdown("""
     [data-testid="stMetricValue"] { font-size: 2rem; font-weight: bold; color: #1e466e; }
     [data-testid="stMetricLabel"] { color: #212529; }
 
-    /* === DARK MODE OVERRIDE === */
     @media (prefers-color-scheme: dark) {
         .stApp, .main, .stAppViewContainer, .css-18e3th9, .css-1d391kg {
             background-color: #0a0a0a !important;
@@ -116,7 +78,6 @@ st.markdown("""
         
         h1, .subtitle, .author { color: #ffffff !important; }
         
-        /* DARK MODE BUTTONS */
         .stButton button,
         .stButton button:link,
         .stButton button:visited,
@@ -200,111 +161,377 @@ st.markdown("""
 
 This tool uses a **stochastic model** (STEV) built on real clinical data from Lynch syndrome colorectal cancer patients treated with dostarlimab. The app is organized into four main sections:
 
-1. **🔍 Size -> Biology** - Enter tumor size -> get most likely biology
-2. **🔮 Biology -> Size** - Select biology -> get predicted size range
-3. **📈 Growth and Immunotherapy Curves** - 30mm and 60mm trajectories with 90% credible bands
-4. **🕰️ Two-Hit Dynamics** - Incubation, latency, and probability curves
+---
 
-**Plus:** Mathematical framework (18 equations) and clinical case validation.
+#### 1. 🔍 Size -> Biology (Prediction Tool)
+Given a tumor size at a specific week, the model returns the **most likely underlying biology** (POLE, MLH1, MSH2, MSI-H, or MSH6) with full probability distribution.
+
+#### 2. 🔮 Biology -> Size (Prediction Tool)
+Given a known tumor biology, the model predicts the **expected tumor size range** at any week, including 95% credible intervals.
+
+#### 3. 📈 Growth and Immunotherapy Curves (Visualization)
+Two plots showing the **complete tumor trajectory** (growth from tiny to 30 mm or 60 mm, then immunotherapy shrinkage to cure floor), with 90% credible bands. Includes real patient validation data.
+
+#### 4. 🕰️ Two-Hit Dynamics (Visualization)
+Six plots that illustrate the **stochastic process of tumor initiation** in Lynch syndrome:
+- Incubation (birth to second hit)
+- Latency (second hit to detectable tumor)
+- Conditional and unconditional detection age distributions and probability curves
+
+---
+
+#### Additionally, the app includes:
+
+- **📐 Mathematical Framework** - Full 18-equation formulation of the stochastic model, including logit transformation, variance decomposition, CLT confidence bands, Gamma distributions, and convolution for two-hit dynamics.
+
+- **📋 Clinical Case** - Real-world validation: a benign flat polyp that shrank under dostarlimab, with response slower than the model mean but within the 90% credible interval.
+
+---
+
+All predictions and plots are based on published clinical data (GARNET, KEYNOTE-177) and Lynch syndrome epidemiology. The 90% credible intervals reflect patient-to-patient heterogeneity and within-patient stochasticity.
 """)
 
 # ============================================================
-# EXPANDER 1: GROWTH CURVES
+# EXPANDER 1: GROWTH CURVES (30mm and 60mm) + MLH1 VALIDATION
 # ============================================================
-with st.expander("📈 Tumor Growth and Immunotherapy Response (Treatment initiated at 30mm and 60mm)", expanded=st.session_state.expander_growth):
+with st.expander("📈 Tumor Growth and Immunotherapy Response (Treatment initiated at 30mm and 60mm)", expanded=False):
     st.markdown("""
-    **Growth phase:** Tumor grows from tiny (~1.1 mm) to threshold size.  
-    **Treatment initiation:** At 30 mm or 60 mm, immunotherapy begins.  
-    **Cure phase:** Tumor shrinks back to minimal residual size (~1.1 mm).
+    ### 📖 What these curves show
+    
+    Each plot traces the **complete tumor size trajectory** over time (weeks) for Lynch syndrome patients treated with dostarlimab immunotherapy.
+    
+    - **Growth phase:** Tumor grows from a very small, barely detectable size (~1.1 mm) until it reaches a threshold size.
+    - **Treatment initiation:** At the threshold (30 mm or 60 mm), immunotherapy begins.
+    - **Cure phase:** The tumor then shrinks back down toward the minimal residual size (~1.1 mm).
     """)
     
     col1, col2 = st.columns(2)
     with col1:
         if os.path.exists("30mm.png"):
-            st.image("30mm.png", caption="Treatment initiated at 30 mm", use_container_width=True)
+            st.image("30mm.png", caption="**Plot 1:** Treatment initiated at 30 mm", use_container_width=True)
+            st.caption("Tumor grows from tiny to 30 mm, then shrinks after immunotherapy. Shaded band = 90% credible interval.")
+        else:
+            st.warning("30mm.png not found")
     with col2:
         if os.path.exists("60mm.png"):
-            st.image("60mm.png", caption="Treatment initiated at 60 mm", use_container_width=True)
+            st.image("60mm.png", caption="**Plot 2:** Treatment initiated at 60 mm", use_container_width=True)
+            st.caption("Tumor grows from tiny to 60 mm, then shrinks after immunotherapy. Compare the shrinkage trajectory.")
+        else:
+            st.warning("60mm.png not found")
     
+    # --- REAL PATIENT VALIDATION: MLH1 TUMOR ---
     st.markdown("---")
     st.markdown("### 📊 Real Patient Validation: MLH1 Tumor (TMB = 55.4)")
+    
     col1, col2 = st.columns([2, 1])
     with col1:
         if os.path.exists("MLH1_55TMB.png"):
-            st.image("MLH1_55TMB.png", caption="~20 mm to ~1.5 mm in 9.3 weeks", width=350)
+            st.image("MLH1_55TMB.png", caption="Actual MLH1 tumor response (red dot: ~20 mm to ~1.5 mm in 9.3 weeks) overlaid on STEV model projection.", width=350)
+        else:
+            st.info("MLH1_55TMB.png not found. Upload to see model validation.")
+    
     with col2:
-        st.markdown("**MLH1 | TMB = 55.4** | ~20 mm → ~1.5 mm in 9 weeks | Faster than population mean")
+        st.markdown("""
+        **Patient data:**
+        - Biology: **MLH1**
+        - TMB: **55.4** 
+        - Starting size: **~20 mm**
+        - After 9 weeks: **~1.5 mm**
+        - Response Speed: **Faster than population mean**
+        
+        **Key insight:** High TMB and in particular MLH1 tumor-bio drives exceptionally fast immunotherapy response.
+        """)
 
 # ============================================================
 # EXPANDER 2: TWO-HIT DYNAMICS
 # ============================================================
-with st.expander("🕰️ Two-Hit Dynamics: Incubation, Latency, Age at Detection and Risk", expanded=st.session_state.expander_twohit):
+with st.expander("🕰️ Two-Hit Dynamics: Incubation, Latency, Age at Detection and Risk", expanded=False):
     st.markdown("""
-    - **First hit:** Inherited MMR mutation (e.g., MLH1, MSH2) - predisposition only
-    - **Second hit:** Acquired mutation - leads to MSI and tumor formation
+    ### 📖 What is "First Hit" and "Second Hit"?
+    
+    - **First hit (inherited mutation):** A person with Lynch syndrome is born with **one faulty copy** of an MMR gene (e.g., MLH1, MSH2) inherited from a parent. This alone does not cause cancer - it only creates a **predisposition**.
+      
+    - **Second hit (acquired mutation):** At some point later in life, the **second healthy copy** of that MMR gene is damaged or lost. When this happens, the cell can no longer repair DNA mistakes, leading to microsatellite instability (MSI) and eventually **tumor formation**.
     """)
+    
+    st.markdown("### Complete stochastic model output (6 plots)")
     
     col1, col2 = st.columns(2)
     with col1:
         if os.path.exists("incubation.png"):
-            st.image("incubation.png", caption="Incubation (birth to second hit)", use_container_width=True)
+            st.image("incubation.png", caption="**Plot a:** Incubation (birth to second hit)", use_container_width=True)
+            st.caption("Age at which the second hit occurs. Most occur between ages 30-55.")
+        else:
+            st.warning("incubation.png not found")
     with col2:
         if os.path.exists("latency.png"):
-            st.image("latency.png", caption="Latency (second hit to detectable tumor)", use_container_width=True)
+            st.image("latency.png", caption="**Plot b:** Latency (second hit to detectable tumor >1 mm)", use_container_width=True)
+            st.caption("Waiting time from the second hit until the tumor becomes detectable.")
+        else:
+            st.warning("latency.png not found")
     
     col1, col2 = st.columns(2)
     with col1:
         if os.path.exists("detection_age_conditional.png"):
-            st.image("detection_age_conditional.png", caption="Detection age (conditional)", use_container_width=True)
+            st.image("detection_age_conditional.png", caption="**Plot c (Conditional):** Detection age distribution", use_container_width=True)
+            st.caption("Given that a second hit has occurred, this shows the age at clinical detection.")
+        else:
+            st.warning("detection_age_conditional.png not found")
     with col2:
         if os.path.exists("probability_conditional.png"):
-            st.image("probability_conditional.png", caption="Probability of detection (conditional)", use_container_width=True)
+            st.image("probability_conditional.png", caption="**Plot d (Conditional):** Probability of detection by age", use_container_width=True)
+            st.caption("Given a second hit, the cumulative probability that the tumor has been detected by a given age.")
+        else:
+            st.warning("probability_conditional.png not found")
     
     col1, col2 = st.columns(2)
     with col1:
         if os.path.exists("detection_age_unconditional.png"):
-            st.image("detection_age_unconditional.png", caption="Detection age (unconditional)", use_container_width=True)
+            st.image("detection_age_unconditional.png", caption="**Plot c (Unconditional):** Detection age distribution", use_container_width=True)
+            st.caption("For all Lynch patients (including those without a second hit), the age at clinical detection.")
+        else:
+            st.warning("detection_age_unconditional.png not found")
     with col2:
         if os.path.exists("probability_uconditional.png"):
-            st.image("probability_uconditional.png", caption="Probability of detection (unconditional)", use_container_width=True)
-
-# ============================================================
-# EXPANDER 3: MATHEMATICAL FRAMEWORK
-# ============================================================
-with st.expander("📐 Mathematical Framework of the STEV Model", expanded=st.session_state.expander_math):
-    st.markdown(r"""
-    **Equation 1: Logit Transformation** – $Z = \ln((S-L)/(U-S))$, $L=1.0$ mm, $U=60.0$ mm  
-    **Equation 2: Sensitivity Coefficient** – $\kappa(S) = (U-L)/((S-L)(U-S))$  
-    **Equation 3: Stochastic Process** – $Z_{t+1} = Z_t + \Delta Z_t$, $\mathbb{E}[\Delta Z_t] = r$, $\text{Var}(\Delta Z_t) = \sigma_{\text{cycle}}^2(S_t)$  
-    **Equation 4: Growth Mean Path** – $\mu_Z(t) = \alpha + r \cdot t$, $r=0.0426$/week  
-    **Equation 5: Per-Cycle Noise** – $\sigma_S(S) = \max(0.5,\; 0.20 \cdot S)$ mm  
-    **Equation 6: Logit Variance** – $\sigma_{\text{cycle}}^2(S) = [\kappa(S) \cdot \sigma_S(S)]^2$  
-    **Equation 7: Biological Modulation** – strength $= \ln(1+TMB)/\ln(11) \times f_{MMR}$  
-    **Equation 8: Immunotherapy Delay** – $t_{\text{delay}} = \max(1.5,\; 3.0 \times (1 - 0.30 \cdot \text{strength}/(1+\text{strength})))$  
-    **Equation 9: Cure Phase** – $S_{\text{cure}}(t) = K_c + (L_c-K_c)/(1+e^{-k_c(t-t_{\text{delay}}-x_{0c})})$  
-    **Equation 10: Growth Variance** – $\text{Var}[Z(t)] = t^2 \text{Var}(r) + \sum \sigma_{\text{cycle}}^2(\mu_S(i))$  
-    **Equation 11: Cure Variance** – $\text{Var}[Z_{\text{cure}}(t)] = (t-t_{\text{delay}})^2 \text{Var}(r_{\text{decay}}) + \sum \sigma_{\text{cycle}}^2(S_{\text{cure}}(i))$  
-    **Equation 12: Biological Variance Fraction** – $\phi_{\text{bio}} = \min(0.70,\; \text{strength}/(1+\text{strength}))$  
-    **Equation 13: CLT Confidence Bands** – $Z_{\text{lo,hi}}(t) = \mu_Z(t) \pm 1.645\sqrt{\text{Var}[Z(t)]}$  
-    **Equations 14-18: Two-Hit Dynamics** – Gamma distributions, convolution, conditional/unconditional probabilities
+            st.image("probability_uconditional.png", caption="**Plot d (Unconditional):** Probability of detection by age", use_container_width=True)
+            st.caption("Overall probability that a Lynch patient will have a detected tumor by a given age.")
+        else:
+            st.warning("probability_uconditional.png not found")
     
-    *Full details in code repository.*
-    """)
-
-# ============================================================
-# EXPANDER 4: CLINICAL CASE
-# ============================================================
-with st.expander("📋 Clinical Case: Benign Polyp Responded to Dostarlimab", expanded=st.session_state.expander_clinical):
     st.markdown("""
-    **Clinical history:** Lynch patient on dostarlimab. Flat benign polyp (~5-6 mm) in descending colon. Could not be removed during two colonoscopies (ESD failed).
+    ---
+    ### 🔑 Conditional vs. Unconditional
     
-    **Outcome:** Polyp shrank progressively (slower than MLH1 tumor mean). Third colonoscopy removed it successfully. Pathology confirmed benign.
+    - **Conditional (top row c and d):** "Given that you already had the second hit, what is the probability of detection by age X?"
+    - **Unconditional (bottom row c and d):** "At birth, what is your overall chance of ever having a detected tumor by age X?"
     
-    **Validation:** Both fast MLH1 tumor and slower benign polyp fell within model's 90% credible interval.
+    The unconditional curves are always lower because some Lynch patients never experience the second hit.
     """)
+
+# ============================================================
+# EXPANDER 3: MATHEMATICAL FRAMEWORK (FULL 18 EQUATIONS)
+# ============================================================
+with st.expander("📐 Mathematical Framework of the STEV Model", expanded=False):
+    st.markdown(r"""
+    ### A True Stochastic Process
+    
+    The STEV model is a **purely stochastic simulation**. At each weekly cycle, tumor growth or shrinkage is random. The mean path is only the average of many random realizations - no single patient follows the mean exactly.
+    
+    ---
+    
+    **Equation 1: Logit Transformation**
+    $$
+    Z = \ln\left(\frac{S - L}{U - S}\right)
+    $$
+    **Inverse:** $S = L + \frac{U - L}{1 + e^{-Z}}$
+    - $L = 1.0$ mm (lower bound), $U = 60.0$ mm (upper bound)
+    
+    ---
+    
+    **Equation 2: Sensitivity Coefficient**
+    $$
+    \kappa(S) = \frac{dZ}{dS} = \frac{U - L}{(S - L)(U - S)}
+    $$
+    
+    ---
+    
+    **Equation 3: Stochastic Process at Each Cycle**
+    $$
+    Z_{t+1} = Z_t + \Delta Z_t, \quad \mathbb{E}[\Delta Z_t] = r, \quad \text{Var}(\Delta Z_t) = \sigma_{\text{cycle}}^2(S_t)
+    $$
+    
+    ---
+    
+    **Equation 4: Growth Phase - Mean Path**
+    $$
+    \mu_Z(t) = \alpha + r \cdot t
+    $$
+    - $r = 0.0426$ per week, $\alpha \approx -6.44$
+    
+    ---
+    
+    **Equation 5: Per-Cycle Noise (mm space)**
+    $$
+    \sigma_{S}(S) = \max(0.5,\; 0.20 \cdot S) \text{ mm}
+    $$
+    
+    ---
+    
+    **Equation 6: Convert Noise to Logit Variance**
+    $$
+    \sigma_{\text{cycle}}^2(S) = [\kappa(S) \cdot \sigma_S(S)]^2
+    $$
+    
+    ---
+    
+    **Equation 7: Biological Modulation (TMB and MMR)**
+    $$
+    \text{strength} = \frac{\ln(1 + \text{TMB})}{\ln(11)} \times f_{\text{MMR}}
+    $$
+    - dMMR/MSI-H: $f=1.3$, MSS: $f=1.0$, POLE: $f=1.5$
+    
+    ---
+    
+    **Equation 8: Immunotherapy Delay**
+    $$
+    t_{\text{delay}} = \max\left(1.5,\; 3.0 \times \left(1 - 0.30 \cdot \frac{\text{strength}}{1 + \text{strength}}\right)\right)
+    $$
+    
+    ---
+    
+    **Equation 9: Cure Phase - 4PL Mean Path**
+    $$
+    S_{\text{cure}}(t) = K_c + \frac{L_c - K_c}{1 + e^{-k_c (t - t_{\text{delay}} - x_{0c})}}, \quad t \ge t_{\text{delay}}
+    $$
+    - $L_c$ = starting size, $K_c \approx 1.1$ mm (cure floor)
+    
+    ---
+    
+    **Equation 10: Total Variance - Growth Phase**
+    $$
+    \text{Var}[Z(t)] = t^2 \cdot \text{Var}(r) + \sum_{i=1}^{t} \sigma_{\text{cycle}}^2(\mu_S(i))
+    $$
+    
+    ---
+    
+    **Equation 11: Total Variance - Cure Phase**
+    $$
+    \text{Var}[Z_{\text{cure}}(t)] = (t - t_{\text{delay}})^2 \cdot \text{Var}(r_{\text{decay}}) + \sum_{i=1}^{t - t_{\text{delay}}} \sigma_{\text{cycle}}^2(S_{\text{cure}}(i))
+    $$
+    
+    ---
+    
+    **Equation 12: Biological Variance Fraction**
+    $$
+    \phi_{\text{bio}} = \min\left(0.70,\; \frac{\text{strength}}{1 + \text{strength}}\right)
+    $$
+    
+    ---
+    
+    **Equation 13: CLT Confidence Bands (90% Credible Intervals)**
+    $$
+    Z_{\text{lo}}(t) = \mu_Z(t) - 1.645 \cdot \sqrt{\text{Var}[Z(t)]}, \quad
+    Z_{\text{hi}}(t) = \mu_Z(t) + 1.645 \cdot \sqrt{\text{Var}[Z(t)]}
+    $$
+    $$
+    S_{\text{lo}}(t) = L + \frac{U - L}{1 + e^{-Z_{\text{lo}}(t)}}, \quad
+    S_{\text{hi}}(t) = L + \frac{U - L}{1 + e^{-Z_{\text{hi}}(t)}}
+    $$
+    
+    ---
+    
+    ### Two-Hit Dynamics: Mathematical Formulation
+    
+    ---
+    
+    **Equation 14: Incubation (Birth to Second Hit)**
+    $$
+    f_{\text{inc}}(t) = \frac{t^{k-1} e^{-t/\theta}}{\theta^k \, \Gamma(k)}, \quad t \ge 0
+    $$
+    - Gamma distribution, shape $k \approx 4-6$, scale $\theta \approx 5-8$ years
+    
+    ---
+    
+    **Equation 15: Latency (Second Hit to Detectable Tumor)**
+    $$
+    f_{\text{lat}}(t) = \frac{t^{k_{\text{lat}}-1} e^{-t/\theta_{\text{lat}}}}{\theta_{\text{lat}}^{k_{\text{lat}}} \, \Gamma(k_{\text{lat}})}, \quad t \ge 0
+    $$
+    
+    ---
+    
+    **Equation 16: Convolution (Incubation + Latency)**
+    $$
+    T_{\text{detection}} = T_{\text{inc}} + T_{\text{lat}}, \quad
+    f_{\text{det}}(t) = \int_{0}^{t} f_{\text{inc}}(\tau) \, f_{\text{lat}}(t - \tau) \, d\tau
+    $$
+    
+    ---
+    
+    **Equation 17: Conditional Probability of Detection by Age**
+    $$
+    P_{\text{cond}}(t) = \int_{0}^{t} f_{\text{det}}(\tau) \, d\tau
+    $$
+    
+    ---
+    
+    **Equation 18: Unconditional Probability of Detection by Age**
+    $$
+    P_{\text{uncond}}(t) = R_{\text{lifetime}} \cdot P_{\text{cond}}(t)
+    $$
+    - $R_{\text{lifetime}} \approx 0.70-0.80$ for MLH1/MSH2
+    
+    ---
+    
+    **Lifetime Risk by Gene**
+    - MLH1: 70-80%
+    - MSH2: 70-80%
+    - MSH6: 50-60%
+    - PMS2: 15-20%
+    
+    ---
+    
+    ### Summary of All Parameters
+    
+    | Parameter | Meaning | Value |
+    |-----------|---------|-------|
+    | $L$ | Lower bound | 1.0 mm |
+    | $U$ | Upper bound | 60.0 mm |
+    | $r$ | Growth rate | 0.0426 /week |
+    | $\sigma_{\text{floor}}$ | Minimum noise | 0.5 mm |
+    | $\sigma_{\text{rel}}$ | Relative noise | 0.20 |
+    | $t_{\text{delay}}$ | Immunotherapy delay | 1.5-3.0 weeks |
+    | $k_{\text{inc}}$ | Incubation shape | 4-6 |
+    | $\theta_{\text{inc}}$ | Incubation scale | 5-8 years |
+    | $k_{\text{lat}}$ | Latency shape | 2-4 |
+    | $\theta_{\text{lat}}$ | Latency scale | 1-3 years |
+    
+    *Model parameters calibrated to published trial data (GARNET, KEYNOTE-177) and Lynch syndrome epidemiology.*
+    """)
+
+# ============================================================
+# EXPANDER 4: CLINICAL CASE (Benign Polyp)
+# ============================================================
+with st.expander("📋 Clinical Case: Benign Polyp Responded to Dostarlimab", expanded=False):
+    st.markdown("""
+    ### A Surprising Validation of the STEV Model
+    
+    **Clinical history:**
+    
+    - Patient with Lynch syndrome undergoing dostarlimab immunotherapy
+    - Prior **MLH1-deficient malignant tumor** (TMB = 55.4) showed shrinkage **faster than the STEV model's population mean** (see Expander 1)
+    - A **flat, benign polyp** (approximately 5-6 mm) in the descending colon (about 30 cm from anal orifice)
+    - **Could not be removed** during two colonoscopies - the second attempted by a specialist using **Endoscopic Submucosal Dissection (ESD)**, which failed due to the polyp's flat, fibrotic morphology
+    
+    **Outcome:**
+    
+    - During dostarlimab treatment, the benign polyp **shrank progressively**
+    - Shrinkage was **slower than the STEV model's population mean** (unlike the faster-than-mean MLH1 tumor)
+    - Both trajectories - the fast MLH1 tumor and the slower benign polyp - fell **within the model's 90% credible interval**
+    - Third colonoscopy successfully removed the polyp without complications
+    - Post-removal pathology confirmed **benign** histology
+    """)
+    
+    st.markdown("### STEV Model Projection vs. Actual Polyp Measurements")
     
     if os.path.exists("benign_polyp_STEV.png"):
-        st.image("benign_polyp_STEV.png", caption="STEV projection vs. actual measurements", use_container_width=True)
+        st.image("benign_polyp_STEV.png", caption="STEV model projection (blue line with 90% credible band) vs. actual benign polyp measurements (red circles). The measured dimensions fall within the predicted credible interval, validating the model's applicability to benign MMR-deficient lesions.", use_container_width=True)
+    else:
+        st.info("📁 benign_polyp_STEV.png not found. Upload this file to see the model validation for the benign polyp.")
+    
+    st.markdown("""
+    **Why this matters:**
+    
+    1. **Model validation** - The STEV model's credible interval captured **both** an exceptionally fast malignant tumor and a slower benign polyp
+    
+    2. **Biological insight** - Response speed varies continuously:
+       - MLH1, high TMB: faster than mean
+       - Benign polyps: slower than mean
+       - Both still within the model's stochastic range
+    
+    3. **Practical guidance** - For flat, unresectable polyps where ESD fails, a trial of immunotherapy may enable subsequent removal - but response may be **slower than the model's mean**
+    
+    4. **Future directions** - This suggests possible **chemoprevention** applications of immunotherapy in Lynch syndrome
+    """)
 
 # ============================================================
 # PARAMETERS (STEV + subgroup means)
@@ -364,7 +591,7 @@ def predict_forward(biology, week):
     return mu, sigma, ci_95
 
 # ============================================================
-# SIDEBAR (WITH WORKING RESET BUTTON)
+# SIDEBAR
 # ============================================================
 with st.sidebar:
     app_url = "https://stev-tumor-ai-skrobcqyqyyz4sjpvqdqmh.streamlit.app/"
@@ -375,100 +602,74 @@ with st.sidebar:
     img = qr.make_image(fill_color="black", back_color="white")
     buf = BytesIO()
     img.save(buf, format="PNG")
-    st.image(buf.getvalue(), width=150, caption="Scan with phone camera")
+    st.image(buf.getvalue(), width=150, caption="Scan with phone camera to open")
     
-    st.markdown("**Or copy link to share:**")
+    st.markdown("**Or copy this link to share:**")
     st.code(app_url, language="text")
-    
-    st.markdown("---")
-    
-    # RESET BUTTON - THIS WORKS
-    if st.button("🔄 Reset Everything", use_container_width=True):
-        # Reset widget values
-        st.session_state.week = 8
-        st.session_state.size = 1.4
-        st.session_state.week_forward = 8
-        st.session_state.biology = 'MLH1'
-        
-        # Clear predictions
-        st.session_state.show_tab1_prediction = False
-        st.session_state.tab1_probs = None
-        st.session_state.tab1_most_likely = None
-        
-        # Close all expanders
-        st.session_state.expander_growth = False
-        st.session_state.expander_twohit = False
-        st.session_state.expander_math = False
-        st.session_state.expander_clinical = False
-        
-        st.rerun()
+    st.caption("Tap the copy icon (top-right of code box) or select and copy the text")
     
     st.markdown("### ℹ️ How to use")
-    st.markdown("- **Size -> Biology:** Enter size, get biology")
-    st.markdown("- **Biology -> Size:** Select biology, get size range")
-    st.markdown("- **Expanders above** show curves and math")
+    st.markdown("""
+    - **🔍 Size -> Biology:** Enter tumor size -> get most likely biology.
+    - **🔮 Biology -> Size:** Select biology -> get predicted size range.
+    - **📈 Growth and Immunotherapy:** Click expander to see 30mm and 60mm curves + MLH1 validation.
+    - **🕰️ Two-Hit Dynamics:** Click expander to see incubation, latency, conditional and unconditional plots.
+    - **📐 Mathematical Framework:** Click expander to see the full mathematical formulation.
+    - **📋 Clinical Case:** Click expander to see benign polyp validation.
+    """)
     st.markdown("---")
-    st.markdown("**STEV model** - Lynch Syndrome")
-    st.markdown("*Horatio Quinones / et al*")
+    st.markdown("**STEV model** - Lynch Syndrome Colorectal Tumors")
+    st.markdown("*Horatio Quinones / Sherry Johnson / et al*")
 
 # ============================================================
 # MAIN APP WITH TWO TABS
 # ============================================================
 tab1, tab2 = st.tabs(["🔍 Size -> Biology", "🔮 Biology -> Size"])
 
-# ========== TAB 1: SIZE -> BIOLOGY ==========
 with tab1:
     col_left, col_right = st.columns(2)
     with col_left:
-        week = st.selectbox("📅 Week", weeks, index=weeks.index(st.session_state.week), key="week")
+        week = st.selectbox("📅 Week", weeks, index=8)
     with col_right:
-        size = st.slider("📏 Tumor size (mm)", 0.0, 30.0, st.session_state.size, 0.1, key="size")
+        size = st.slider("📏 Tumor size (mm)", min_value=0.0, max_value=30.0, value=1.4, step=0.1)
 
     if st.button("Predict Biology", use_container_width=True):
-        probs = predict_inverse(size, week)
+        with st.spinner("Computing probabilities..."):
+            probs = predict_inverse(size, week)
         most_likely = max(probs, key=probs.get)
-        st.session_state.show_tab1_prediction = True
-        st.session_state.tab1_probs = probs
-        st.session_state.tab1_most_likely = most_likely
-        st.session_state.tab1_week = week
-        st.session_state.tab1_size = size
 
-    # Show prediction if exists
-    if st.session_state.show_tab1_prediction and st.session_state.tab1_probs:
-        probs = st.session_state.tab1_probs
-        most_likely = st.session_state.tab1_most_likely
-        week = st.session_state.tab1_week
-        size = st.session_state.tab1_size
-        
         col_a, col_b = st.columns(2)
         col_a.metric("🧬 Most likely biology", most_likely)
         col_b.metric("📊 Probability", f"{probs[most_likely]:.1%}")
-        
+
         df = pd.DataFrame(list(probs.items()), columns=['Biology', 'Probability'])
         fig = px.bar(df, x='Biology', y='Probability', color='Biology',
                      color_discrete_sequence=px.colors.qualitative.Set2,
                      title=f'Week {week}, size = {size} mm')
         fig.update_layout(yaxis_title='Posterior probability', xaxis_title='Biology')
         st.plotly_chart(fig, use_container_width=True)
-        
-        st.caption("⚠️ Research & education only - not medical advice")
 
-# ========== TAB 2: BIOLOGY -> SIZE ==========
+        with st.expander("📋 Detailed probabilities"):
+            st.dataframe(df.style.format({'Probability': '{:.3f}'}))
+
+        st.markdown("---")
+        st.caption("⚠️ Disclaimer: For research and education only - not medical advice. Always consult your doctor.")
+
 with tab2:
     col_left, col_right = st.columns(2)
     with col_left:
-        week = st.selectbox("📅 Week", weeks, index=weeks.index(st.session_state.week_forward), key="week_forward")
+        week = st.selectbox("📅 Week", weeks, index=8, key="forward_week")
     with col_right:
-        bio_index = names.index(st.session_state.biology) if st.session_state.biology in names else 1
-        biology = st.selectbox("🧬 Biology", names, index=bio_index, key="biology")
+        biology = st.selectbox("🧬 Biology", names, index=1)
 
     if st.button("Predict Size", use_container_width=True):
-        mu, sigma, ci = predict_forward(biology, week)
-        
+        with st.spinner("Calculating predicted size..."):
+            mu, sigma, ci = predict_forward(biology, week)
+
         col_a, col_b = st.columns(2)
         col_a.metric("📏 Predicted mean size", f"{mu:.2f} mm")
         col_b.metric("📊 95% credible interval", f"[{ci[0]:.2f}, {ci[1]:.2f}] mm")
-        
+
         x_vals = np.linspace(max(0, mu - 4*sigma), mu + 4*sigma, 200)
         y_vals = norm.pdf(x_vals, mu, sigma)
         fig = go.Figure()
@@ -478,5 +679,6 @@ with tab2:
                           xaxis_title='Tumor size (mm)',
                           yaxis_title='Probability density')
         st.plotly_chart(fig, use_container_width=True)
-        
-        st.caption("⚠️ Research & education only - not medical advice")
+
+        st.markdown("---")
+        st.caption("⚠️ Disclaimer: For research and education only - not medical advice. Always consult your doctor.")
