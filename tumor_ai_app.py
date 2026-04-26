@@ -150,8 +150,11 @@ with st.expander("🕰️ Two-Hit Dynamics: Tumor Incubation, Latency, Detection
 #st.markdown("""
     ### 📖 What is "First Hit" and "Second Hit"?
     
-    - **First hit (inherited mutation):** A person with Lynch syndrome is born with **one faulty copy** of an MMR gene (e.g., MLH1, MSH2) inherited from a parent. This alone does not cause cancer – it only creates a **predisposition**.
-      
+    #- **First hit (inherited mutation):** A person with Lynch syndrome is born with **one faulty copy** of an MMR gene (e.g., MLH1, MSH2) inherited from a parent. This alone does not cause cancer – it only creates a **predisposition**.
+    - **First hit (inherited mutation):** A person with Lynch syndrome is born with **one faulty copy** of an MMR gene (e.g., MLH1, MSH2) inherited from a parent. This alone does not cause cancer - it only creates a **predisposition**.
+
+
+    
     - **Second hit (acquired mutation):** At some point later in life, the **second healthy copy** of that MMR gene is damaged or lost (due to random chance, environment, or aging). When this happens, the cell can no longer repair DNA mistakes, leading to microsatellite instability (MSI) and eventually **tumor formation**.
  #   """)    
     
