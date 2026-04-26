@@ -112,8 +112,11 @@ Trajectories of the Evolution of Geometrical Dimension Changes in Time, from tin
 #### 4. 🕰️ Two-Hit Dynamics
 Incubation, latency, conditional and unconditional probability plots.
 
-#### 5.     Mathematical Formulation
+#### 5.  📐 Mathematical Formulation
 Stochastic Tumor EVolution model (STEV).
+
+#### 6.  📋 Clinical Case 
+Colon Benign Poly Response to Immunotheraoy
 
 """)
 
