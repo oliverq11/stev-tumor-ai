@@ -447,22 +447,24 @@ with st.sidebar:
     
     # RESET BUTTON - SINGLE BUTTON, NO DUPLICATE
  
-    if st.button("🔄 Reset All", use_container_width=True):
-    # Reset widgets
-    st.session_state.week_tab1 = 8
-    st.session_state.size_tab1 = 1.4
-    st.session_state.week_tab2 = 8
-    st.session_state.biology_tab2 = 'MLH1'
-    
-    # Clear prediction
-    st.session_state.show_prediction = False
-    st.session_state.prediction_probs = None
-    
-    # Close expanders
-    st.session_state.expander_growth = False
-    st.session_state.expander_twohit = False
-    st.session_state.expander_math = False
-    st.session_state.expander_clinical = False
+       if st.button("🔄 Reset All", use_container_width=True):
+        # Reset widgets
+        st.session_state.week_tab1 = 8
+        st.session_state.size_tab1 = 1.4
+        st.session_state.week_tab2 = 8
+        st.session_state.biology_tab2 = 'MLH1'
+        
+        # Clear prediction
+        st.session_state.show_prediction = False
+        st.session_state.prediction_probs = None
+        
+        # Close expanders
+        st.session_state.expander_growth = False
+        st.session_state.expander_twohit = False
+        st.session_state.expander_math = False
+        st.session_state.expander_clinical = False
+        
+        st.rerun()
     
     st.rerun().markdown("### ℹ️ How to use")
     st.markdown("- **Size -> Biology:** Enter size, get biology")
