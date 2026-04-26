@@ -15,6 +15,28 @@ import os
 st.set_page_config(page_title="STEV: Stochastic Tumor Response AI", layout="wide", page_icon="🧬")
 
 # ============================================================
+# INITIALIZE SESSION STATE FOR RESET BUTTON
+# ============================================================
+if 'expander_growth' not in st.session_state:
+    st.session_state.expander_growth = False
+if 'expander_twohit' not in st.session_state:
+    st.session_state.expander_twohit = False
+if 'expander_math' not in st.session_state:
+    st.session_state.expander_math = False
+if 'expander_clinical' not in st.session_state:
+    st.session_state.expander_clinical = False
+if 'clear_prediction' not in st.session_state:
+    st.session_state.clear_prediction = False
+if 'week_reset' not in st.session_state:
+    st.session_state.week_reset = 8
+if 'size_reset' not in st.session_state:
+    st.session_state.size_reset = 1.4
+if 'week_forward_reset' not in st.session_state:
+    st.session_state.week_forward_reset = 8
+if 'biology_reset' not in st.session_state:
+    st.session_state.biology_reset = 'MLH1'
+
+# ============================================================
 # CUSTOM CSS WITH FORCED WHITE BUTTON TEXT (ALL MODES)
 # ============================================================
 st.markdown("""
@@ -194,7 +216,7 @@ All predictions and plots are based on published clinical data (GARNET, KEYNOTE-
 # ============================================================
 # EXPANDER 1: GROWTH CURVES (30mm and 60mm) + MLH1 VALIDATION
 # ============================================================
-with st.expander("📈 Tumor Growth and Immunotherapy Response (Treatment initiated at 30mm and 60mm)", expanded=False):
+with st.expander("📈 Tumor Growth and Immunotherapy Response (Treatment initiated at 30mm and 60mm)", expanded=st.session_state.expander_growth):
     st.markdown("""
     ### 📖 What these curves show
     
@@ -245,7 +267,7 @@ with st.expander("📈 Tumor Growth and Immunotherapy Response (Treatment initia
 # ============================================================
 # EXPANDER 2: TWO-HIT DYNAMICS
 # ============================================================
-with st.expander("🕰️ Two-Hit Dynamics: Incubation, Latency, Age at Detection and Risk", expanded=False):
+with st.expander("🕰️ Two-Hit Dynamics: Incubation, Latency, Age at Detection and Risk", expanded=st.session_state.expander_twohit):
     st.markdown("""
     ### 📖 What is "First Hit" and "Second Hit"?
     
@@ -311,7 +333,7 @@ with st.expander("🕰️ Two-Hit Dynamics: Incubation, Latency, Age at Detectio
 # ============================================================
 # EXPANDER 3: MATHEMATICAL FRAMEWORK (FULL 18 EQUATIONS)
 # ============================================================
-with st.expander("📐 Mathematical Framework of the STEV Model", expanded=False):
+with st.expander("📐 Mathematical Framework of the STEV Model", expanded=st.session_state.expander_math):
     st.markdown(r"""
     ### A True Stochastic Process
     
@@ -491,7 +513,7 @@ with st.expander("📐 Mathematical Framework of the STEV Model", expanded=False
 # ============================================================
 # EXPANDER 4: CLINICAL CASE (Benign Polyp)
 # ============================================================
-with st.expander("📋 Clinical Case: Benign Polyp Responded to Dostarlimab", expanded=False):
+with st.expander("📋 Clinical Case: Benign Polyp Responded to Dostarlimab", expanded=st.session_state.expander_clinical):
     st.markdown("""
     ### A Surprising Validation of the STEV Model
     
@@ -591,7 +613,7 @@ def predict_forward(biology, week):
     return mu, sigma, ci_95
 
 # ============================================================
-# SIDEBAR
+# SIDEBAR (WITH RESET BUTTON ADDED)
 # ============================================================
 with st.sidebar:
     app_url = "https://stev-tumor-ai-skrobcqyqyyz4sjpvqdqmh.streamlit.app/"
@@ -607,6 +629,27 @@ with st.sidebar:
     st.markdown("**Or copy this link to share:**")
     st.code(app_url, language="text")
     st.caption("Tap the copy icon (top-right of code box) or select and copy the text")
+    
+    st.markdown("---")
+    
+    # RESET BUTTON
+    if st.button("🔄 Reset Everything", use_container_width=True):
+        # Reset widget values
+        st.session_state.week_reset = 8
+        st.session_state.size_reset = 1.4
+        st.session_state.week_forward_reset = 8
+        st.session_state.biology_reset = 'MLH1'
+        
+        # Clear prediction display
+        st.session_state.clear_prediction = True
+        
+        # Close all expanders
+        st.session_state.expander_growth = False
+        st.session_state.expander_twohit = False
+        st.session_state.expander_math = False
+        st.session_state.expander_clinical = False
+        
+        st.rerun()
     
     st.markdown("### ℹ️ How to use")
     st.markdown("""
@@ -626,41 +669,56 @@ with st.sidebar:
 # ============================================================
 tab1, tab2 = st.tabs(["🔍 Size -> Biology", "🔮 Biology -> Size"])
 
+# ========== TAB 1: SIZE -> BIOLOGY ==========
 with tab1:
+    # Get default values from session state (reset if clicked)
+    default_week = st.session_state.get('week_reset', 8)
+    default_size = st.session_state.get('size_reset', 1.4)
+    
     col_left, col_right = st.columns(2)
     with col_left:
-        week = st.selectbox("📅 Week", weeks, index=8)
+        week = st.selectbox("📅 Week", weeks, index=weeks.index(default_week) if default_week in weeks else 8)
     with col_right:
-        size = st.slider("📏 Tumor size (mm)", min_value=0.0, max_value=30.0, value=1.4, step=0.1)
+        size = st.slider("📏 Tumor size (mm)", min_value=0.0, max_value=30.0, value=default_size, step=0.1)
 
-    if st.button("Predict Biology", use_container_width=True):
-        with st.spinner("Computing probabilities..."):
-            probs = predict_inverse(size, week)
-        most_likely = max(probs, key=probs.get)
+    # Check if reset was clicked - if so, don't show prediction
+    if st.session_state.get('clear_prediction', False):
+        # Reset was clicked, clear the flag and don't show anything
+        st.session_state.clear_prediction = False
+    else:
+        if st.button("Predict Biology", use_container_width=True):
+            with st.spinner("Computing probabilities..."):
+                probs = predict_inverse(size, week)
+            most_likely = max(probs, key=probs.get)
 
-        col_a, col_b = st.columns(2)
-        col_a.metric("🧬 Most likely biology", most_likely)
-        col_b.metric("📊 Probability", f"{probs[most_likely]:.1%}")
+            col_a, col_b = st.columns(2)
+            col_a.metric("🧬 Most likely biology", most_likely)
+            col_b.metric("📊 Probability", f"{probs[most_likely]:.1%}")
 
-        df = pd.DataFrame(list(probs.items()), columns=['Biology', 'Probability'])
-        fig = px.bar(df, x='Biology', y='Probability', color='Biology',
-                     color_discrete_sequence=px.colors.qualitative.Set2,
-                     title=f'Week {week}, size = {size} mm')
-        fig.update_layout(yaxis_title='Posterior probability', xaxis_title='Biology')
-        st.plotly_chart(fig, use_container_width=True)
+            df = pd.DataFrame(list(probs.items()), columns=['Biology', 'Probability'])
+            fig = px.bar(df, x='Biology', y='Probability', color='Biology',
+                         color_discrete_sequence=px.colors.qualitative.Set2,
+                         title=f'Week {week}, size = {size} mm')
+            fig.update_layout(yaxis_title='Posterior probability', xaxis_title='Biology')
+            st.plotly_chart(fig, use_container_width=True)
 
-        with st.expander("📋 Detailed probabilities"):
-            st.dataframe(df.style.format({'Probability': '{:.3f}'}))
+            with st.expander("📋 Detailed probabilities"):
+                st.dataframe(df.style.format({'Probability': '{:.3f}'}))
 
-        st.markdown("---")
-        st.caption("⚠️ Disclaimer: For research and education only - not medical advice. Always consult your doctor.")
+            st.markdown("---")
+            st.caption("⚠️ Disclaimer: For research and education only - not medical advice. Always consult your doctor.")
 
+# ========== TAB 2: BIOLOGY -> SIZE ==========
 with tab2:
+    # Get default values from session state (reset if clicked)
+    default_week_forward = st.session_state.get('week_forward_reset', 8)
+    default_biology = st.session_state.get('biology_reset', 'MLH1')
+    
     col_left, col_right = st.columns(2)
     with col_left:
-        week = st.selectbox("📅 Week", weeks, index=8, key="forward_week")
+        week = st.selectbox("📅 Week", weeks, index=weeks.index(default_week_forward) if default_week_forward in weeks else 8, key="forward_week")
     with col_right:
-        biology = st.selectbox("🧬 Biology", names, index=1)
+        biology = st.selectbox("🧬 Biology", names, index=names.index(default_biology) if default_biology in names else 1)
 
     if st.button("Predict Size", use_container_width=True):
         with st.spinner("Calculating predicted size..."):
