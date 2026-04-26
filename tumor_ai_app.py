@@ -159,7 +159,6 @@ st.markdown("""
 ### 🔍 What this app does
 
 st.markdown("""
-### 🔍 What this app does
 
 This tool uses a **stochastic model** (STEV) built on real clinical data from Lynch syndrome colorectal cancer patients treated with dostarlimab. The app is organized into four main sections:
 
