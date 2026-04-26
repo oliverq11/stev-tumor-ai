@@ -40,6 +40,18 @@ if 'expander_math' not in st.session_state:
 if 'expander_clinical' not in st.session_state:
     st.session_state.expander_clinical = False
 
+# Flag to clear prediction results
+if 'show_prediction' not in st.session_state:
+    st.session_state.show_prediction = False
+if 'prediction_probs' not in st.session_state:
+    st.session_state.prediction_probs = None
+if 'prediction_most_likely' not in st.session_state:
+    st.session_state.prediction_most_likely = None
+if 'prediction_week' not in st.session_state:
+    st.session_state.prediction_week = None
+if 'prediction_size' not in st.session_state:
+    st.session_state.prediction_size = None
+
 # ============================================================
 # CUSTOM CSS WITH FORCED WHITE BUTTON TEXT (ALL MODES)
 # ============================================================
@@ -645,6 +657,13 @@ with st.sidebar:
         st.session_state.week_forward = 8
         st.session_state.biology = 'MLH1'
         
+        # Clear prediction results
+        st.session_state.show_prediction = False
+        st.session_state.prediction_probs = None
+        st.session_state.prediction_most_likely = None
+        st.session_state.prediction_week = None
+        st.session_state.prediction_size = None
+        
         # Close all expanders
         st.session_state.expander_growth = False
         st.session_state.expander_twohit = False
@@ -682,7 +701,21 @@ with tab1:
         with st.spinner("Computing probabilities..."):
             probs = predict_inverse(size, week)
         most_likely = max(probs, key=probs.get)
+        
+        # Store in session state
+        st.session_state.show_prediction = True
+        st.session_state.prediction_probs = probs
+        st.session_state.prediction_most_likely = most_likely
+        st.session_state.prediction_week = week
+        st.session_state.prediction_size = size
 
+    # Display prediction results if they exist
+    if st.session_state.show_prediction and st.session_state.prediction_probs is not None:
+        probs = st.session_state.prediction_probs
+        most_likely = st.session_state.prediction_most_likely
+        week = st.session_state.prediction_week
+        size = st.session_state.prediction_size
+        
         col_a, col_b = st.columns(2)
         col_a.metric("🧬 Most likely biology", most_likely)
         col_b.metric("📊 Probability", f"{probs[most_likely]:.1%}")
@@ -703,4 +736,27 @@ with tab1:
 with tab2:
     col_left, col_right = st.columns(2)
     with col_left:
-        week
+        week = st.selectbox("📅 Week", weeks, index=weeks.index(st.session_state.week_forward), key="week_forward")
+    with col_right:
+        biology = st.selectbox("🧬 Biology", names, index=names.index(st.session_state.biology) if st.session_state.biology in names else 1, key="biology")
+
+    if st.button("Predict Size", use_container_width=True):
+        with st.spinner("Calculating predicted size..."):
+            mu, sigma, ci = predict_forward(biology, week)
+
+        col_a, col_b = st.columns(2)
+        col_a.metric("📏 Predicted mean size", f"{mu:.2f} mm")
+        col_b.metric("📊 95% credible interval", f"[{ci[0]:.2f}, {ci[1]:.2f}] mm")
+
+        x_vals = np.linspace(max(0, mu - 4*sigma), mu + 4*sigma, 200)
+        y_vals = norm.pdf(x_vals, mu, sigma)
+        fig = go.Figure()
+        fig.add_trace(go.Scatter(x=x_vals, y=y_vals, fill='tozeroy', line_color='#1e466e', name='Density'))
+        fig.add_vline(x=mu, line_dash="dash", line_color="red", annotation_text=f"Mean = {mu:.2f} mm")
+        fig.update_layout(title=f'{biology} at week {week}',
+                          xaxis_title='Tumor size (mm)',
+                          yaxis_title='Probability density')
+        st.plotly_chart(fig, use_container_width=True)
+
+        st.markdown("---")
+        st.caption("⚠️ Disclaimer: For research and education only - not medical advice. Always consult your doctor.")
