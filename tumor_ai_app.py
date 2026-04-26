@@ -130,7 +130,7 @@ with st.expander("📈 Tumor Growth and Immunotherapy Response", expanded=False)
     col1, col2 = st.columns([2, 1])
     with col1:
         if os.path.exists("MLH1_55TMB.png"):
-            st.image("MLH1_55TMB.png", caption="~20mm to ~1.5mm in 9.3 weeks", width=350)
+            st.image("MLH1_55TMB.png", caption="~20mm to ~1.5mm in 9.3 weeks", width=400)
     with col2:
         st.markdown("**MLH1 | TMB=55.4** | Faster than population mean")
 
@@ -348,15 +348,15 @@ with st.expander("📐 Mathematical Framework of the STEV Model", expanded=False
 # ============================================================
 with st.expander("📋 Clinical Case: Benign Polyp", expanded=False):
     st.markdown("""
-    **Patient:** Lynch syndrome on dostarlimab. Flat benign polyp (~5-6mm) in descending colon. Could not be removed (ESD failed).
+    **Patient:** Lynch syndrome on dostarlimab. Flat benign polyp (~50-55mm) in descending colon. Could not be removed (ESD failed).
     
-    **Outcome:** Polyp shrank progressively (slower than MLH1 mean). Third colonoscopy removed it successfully. Benign pathology.
+    **Outcome:** Polyp shrank progressively (slower rate than Population mean). Third colonoscopy removed it successfully. Benign pathology.
     
     **Validation:** Both fast MLH1 tumor and slower benign polyp fell within model's 90% credible interval.
     """)
     if os.path.exists("benign_polyp_STEV.png"):
-        st.image("benign_polyp_STEV.png", caption="STEV projection vs. actual measurements", use_container_width=True)
-
+ #      st.image("benign_polyp_STEV.png", caption="STEV projection vs. actual measurements", use_container_width=True)
+        st.image("benign_polyp_STEV.png", caption="~20mm to ~1.5mm in 9.3 weeks", width=400)
 # ============================================================
 # PARAMETERS
 # ============================================================
