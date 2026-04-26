@@ -98,16 +98,16 @@ st.markdown('<div class="author">Horatio Quinones / Sherry Johnson / et-al</div>
 st.markdown("""
 ### 🔍 What this app does
 
-This tool uses a **stochastic model** (STEV) built on real clinical data from Lynch Syndrome Colorectal Cancer patients and treated with dostarlimab without other previous treatments.
+This tool uses a **Stochastic Model** (STEV) built the Tumor Evolution based on clinical data from Lynch Syndrome Colorectal Cancer patients treated with Immunotherapy (Dostarlimab) without other previous treatments.
 
-#### 1. 🔍 Size -> Biology
-Given tumor size and time (week), returns most likely biology (POLE, MLH1, MSH2, MSI-H, MSH6).
+#### 1. 🔍 Size -> Genotype
+Given tumor size and treatment time (weeks), returns most likely Tumor Genotype (POLE, MLH1, MSH2, MSI-H, MSH6).
 
-#### 2. 🔮 Biology -> Size
-Given biology and week, predicts expected tumor size range with 95% credible intervals.
+#### 2. 🔮 Genotype -> Size
+Given tumor genotype and treatment time (weeks), predicts expected tumor size and range with 95% Credible Intervals.
 
 #### 3. 📈 Growth and Immunotherapy Curves
-Trajectories of the Evolution of Geometrical Dimension Changes in Time, from tiny to 30mm/60mm followed by volume shrinkage, with 90% credible bands.
+Trajectories of the Evolution of Geometrical Dimension Changes in Time, from tiny to 30mm/60mm followed by volume shrinkage, with 90% Credible Bands.
 
 #### 4. 🕰️ Two-Hit Dynamics
 Incubation, latency, conditional and unconditional probability plots.
@@ -409,8 +409,8 @@ def predict_inverse(size, week):
         return {name: 0.2 for name in names}
     return {name: unnorm[name]/total for name in names}
 
-def predict_forward(biology, week):
-    mu = means[week][biology]
+def predict_forward(genotype, week):
+    mu = means[week][genotype]
     sigma = sigma_env[week]
     ci_95 = (mu - 1.96*sigma, mu + 1.96*sigma)
     return mu, sigma, ci_95
@@ -433,8 +433,8 @@ with st.sidebar:
     st.code(app_url, language="text")
     
     st.markdown("### ℹ️ How to use")
-    st.markdown("- **Size -> Biology:** Enter size, get biology")
-    st.markdown("- **Biology -> Size:** Select biology, get size range")
+    st.markdown("- **Size -> Genotype:** Enter size, get genotype")
+    st.markdown("- **Genotype -> Size:** Select genotype, get size range")
     st.markdown("- **Expanders:** Click to view curves, dynamics, math, and cases")
     st.markdown("---")
     st.markdown("**STEV model** - Lynch Syndrome")
@@ -443,9 +443,9 @@ with st.sidebar:
 # ============================================================
 # MAIN APP WITH TWO TABS
 # ============================================================
-tab1, tab2 = st.tabs(["🔍 Size -> Biology", "🔮 Biology -> Size"])
+tab1, tab2 = st.tabs(["🔍 Size -> iology", "🔮 Genotype -> Size"])
 
-# ========== TAB 1: SIZE -> BIOLOGY ==========
+# ========== TAB 1: SIZE -> GENOTYPE ==========
 with tab1:
     col_left, col_right = st.columns(2)
     with col_left:
@@ -453,7 +453,7 @@ with tab1:
     with col_right:
         size = st.slider("📏 Tumor size (mm)", 0.0, 30.0, 1.4, 0.1)
 
-    if st.button("Predict Biology", use_container_width=True):
+    if st.button("Predict Genotype", use_container_width=True):
         probs = predict_inverse(size, week)
         most_likely = max(probs, key=probs.get)
         st.session_state.show_prediction = True
@@ -470,28 +470,28 @@ with tab1:
         size = st.session_state.prediction_size
         
         col_a, col_b = st.columns(2)
-        col_a.metric("🧬 Most likely biology", most_likely)
+        col_a.metric("🧬 Most likely Genotype", most_likely)
         col_b.metric("📊 Probability", f"{probs[most_likely]:.1%}")
         
-        df = pd.DataFrame(list(probs.items()), columns=['Biology', 'Probability'])
-        fig = px.bar(df, x='Biology', y='Probability', color='Biology',
+        df = pd.DataFrame(list(probs.items()), columns=['Genotype', 'Probability'])
+        fig = px.bar(df, x='Genotype', y='Probability', color='Genotype',
                      color_discrete_sequence=px.colors.qualitative.Set2,
                      title=f'Week {week}, size = {size} mm')
-        fig.update_layout(yaxis_title='Posterior probability', xaxis_title='Biology')
+        fig.update_layout(yaxis_title='Posterior probability', xaxis_title='genotype')
         st.plotly_chart(fig, use_container_width=True)
         
         st.caption("⚠️ Research & education only - not medical advice")
 
-# ========== TAB 2: BIOLOGY -> SIZE ==========
+# ========== TAB 2: GENOTYPE -> SIZE ==========
 with tab2:
     col_left, col_right = st.columns(2)
     with col_left:
         week = st.selectbox("📅 Week", weeks, index=8, key="forward_week")
     with col_right:
-        biology = st.selectbox("🧬 Biology", names, index=1)
+        genotype = st.selectbox("🧬 Genotype", names, index=1)
 
     if st.button("Predict Size", use_container_width=True):
-        mu, sigma, ci = predict_forward(biology, week)
+        mu, sigma, ci = predict_forward(genotype, week)
         
         col_a, col_b = st.columns(2)
         col_a.metric("📏 Predicted mean size", f"{mu:.2f} mm")
@@ -502,7 +502,7 @@ with tab2:
         fig = go.Figure()
         fig.add_trace(go.Scatter(x=x_vals, y=y_vals, fill='tozeroy', line_color='#1e466e', name='Density'))
         fig.add_vline(x=mu, line_dash="dash", line_color="red", annotation_text=f"Mean = {mu:.2f} mm")
-        fig.update_layout(title=f'{biology} at week {week}',
+        fig.update_layout(title=f'{genotype} at week {week}',
                           xaxis_title='Tumor size (mm)',
                           yaxis_title='Probability density')
         st.plotly_chart(fig, use_container_width=True)
