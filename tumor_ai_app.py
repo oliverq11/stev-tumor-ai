@@ -424,13 +424,22 @@ def predict_inverse(size, week):
         return {name: 0.2 for name in names}
     return {name: unnorm[name]/total for name in names}
 
-def predict_forward(biology, week):
+def predict_forward(biology, week, tmb=55):
     mu = means[week][biology]
     sigma = sigma_env[week]
-    lower = max(0, mu - 1.96 * sigma)  # Prevents negative tumor size (biologically impossible)
-    upper = mu + 1.96 * sigma
+    
+    # TMB adjustment factor (reference = 55)
+    # Higher TMB -> smaller tumor (better response)
+    tmb_factor = (55 / tmb) ** 0.25
+    mu_adjusted = mu * tmb_factor
+    mu_adjusted = max(1.1, mu_adjusted)  # Don't go below cure floor
+    
+    sigma_adjusted = sigma * (tmb_factor ** 0.5)
+    
+    lower = max(0, mu_adjusted - 1.96 * sigma_adjusted)
+    upper = mu_adjusted + 1.96 * sigma_adjusted
     ci_95 = (lower, upper)
-    return mu, sigma, ci_95
+    return mu_adjusted, sigma_adjusted, ci_95
 
 # ============================================================
 # SIDEBAR
@@ -506,13 +515,25 @@ with tab2:
         week = st.selectbox("📅 Week", weeks, index=8, key="forward_week")
     with col_right:
         genotype = st.selectbox("🧬 Genotype", names, index=1)
+    
+    # TMB input - optional, defaults to 55
+    tmb = st.number_input(
+        "🧬 Tumor Mutational Burden (TMB) - optional",
+        min_value=0,
+        max_value=200,
+        value=55,
+        step=5,
+        help="Skip to use default (55). Higher TMB predicts better response."
+    )
 
     if st.button("Predict Size", use_container_width=True):
-        mu, sigma, ci = predict_forward(genotype, week)
+        mu, sigma, ci = predict_forward(genotype, week, tmb)
         
         col_a, col_b = st.columns(2)
         col_a.metric("📏 Predicted mean size", f"{mu:.2f} mm")
         col_b.metric("📊 95% credible interval", f"[{ci[0]:.2f}, {ci[1]:.2f}] mm")
+        
+        st.caption(f"📊 Prediction based on TMB = {tmb} (default is 55)")
         
         x_vals = np.linspace(max(0, mu - 4*sigma), mu + 4*sigma, 200)
         y_vals = norm.pdf(x_vals, mu, sigma)
