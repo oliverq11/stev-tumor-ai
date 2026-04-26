@@ -509,10 +509,10 @@ with st.expander("📐 Mathematical Framework of the STEV Model", expanded=False
     $$
     
     **What it does:** Provides the 90% credible intervals shown as shaded bands in the plots.
+    """)
 
+    # --- SEPARATE SECTION FOR TWO-HIT DYNAMICS ---
     st.markdown(r"""
-    ---
-    
     ### Two‑Hit Dynamics: Mathematical Formulation
     
     The following equations describe the **stochastic process of tumor initiation and detection** in Lynch syndrome.
@@ -569,49 +569,31 @@ with st.expander("📐 Mathematical Framework of the STEV Model", expanded=False
     
     #### Equation 19: Conditional Probability of Detection by Age
     
-    Given that a second hit has occurred (by age $t$), the **conditional probability** that the tumor has been detected is:
-    
-    $$
-    P_{\text{cond}}(t) = \frac{\int_{0}^{t} f_{\text{det}}(\tau) \, d\tau}{\int_{0}^{\infty} f_{\text{inc}}(\tau) \, d\tau}
-    $$
-    
-    Or more simply, if we assume the second hit always occurs eventually:
+    Given that a second hit has occurred, the **conditional probability** that the tumor has been detected by age $t$ is:
     
     $$
     P_{\text{cond}}(t) = \int_{0}^{t} f_{\text{det}}(\tau) \, d\tau
     $$
     
-    **What it does:** Answers the question: *"If a Lynch patient has already experienced the second hit, what is the probability that their tumor has been detected by age $t$?"*
+    **What it does:** Answers: *"If a Lynch patient has already experienced the second hit, what is the probability that their tumor has been detected by age $t$?"*
     
     ---
     
     #### Equation 20: Unconditional Probability of Detection by Age
     
-    The **unconditional probability** accounts for the fact that not all Lynch patients experience the second hit. Let $P_{\text{second}}(t)$ be the probability that a second hit has occurred by age $t$:
-    
-    $$
-    P_{\text{second}}(t) = \int_{0}^{t} f_{\text{inc}}(\tau) \, d\tau
-    $$
-    
-    The unconditional probability of detection by age $t$ is:
-    
-    $$
-    P_{\text{uncond}}(t) = \int_{0}^{t} f_{\text{det}}(\tau) \cdot P_{\text{second}}(t - \tau) \, d\tau
-    $$
-    
-    Alternatively, if lifetime risk of a second hit is $R_{\text{lifetime}}$ (typically ~80% for Lynch syndrome):
+    The **unconditional probability** accounts for the fact that not all Lynch patients experience the second hit. Let $R_{\text{lifetime}}$ be the lifetime risk of a second hit (~80% for MLH1/MSH2):
     
     $$
     P_{\text{uncond}}(t) = R_{\text{lifetime}} \cdot P_{\text{cond}}(t)
     $$
     
-    **What it does:** Answers the question: *"At birth, what is the overall chance that a Lynch patient will have a detected tumor by age $t$?"*
+    **What it does:** Answers: *"At birth, what is the overall chance that a Lynch patient will have a detected tumor by age $t$?"*
     
     ---
     
-    #### Equation 21: Lifetime Risk Calibration
+    #### Equation 21: Lifetime Risk by Gene
     
-    For Lynch syndrome, the lifetime risk of colorectal cancer is approximately:
+    For Lynch syndrome, the lifetime risk of colorectal cancer varies by gene:
     
     | Gene | Lifetime Risk |
     |------|---------------|
@@ -620,8 +602,49 @@ with st.expander("📐 Mathematical Framework of the STEV Model", expanded=False
     | MSH6 | ~50–60% |
     | PMS2 | ~15–20% |
     
-    These values are used to calibrate the scale parameter $\theta$ in the incubation Gamma distribution.
+    These values calibrate the scale parameter $\theta$ in the incubation Gamma distribution.
     
+    ---
+    
+    #### Summary of Two‑Hit Parameters
+    
+    | Parameter | Meaning | Typical Range |
+    |-----------|---------|----------------|
+    | $k_{\text{inc}}$ | Incubation shape | 4–6 |
+    | $\theta_{\text{inc}}$ | Incubation scale | 5–8 years |
+    | $k_{\text{lat}}$ | Latency shape | 2–4 |
+    | $\theta_{\text{lat}}$ | Latency scale | 1–3 years |
+    | $R_{\text{lifetime}}$ | Lifetime risk of second hit | 0.50–0.80 |
+    
+    *Distributions calibrated to published Lynch syndrome data (Hampel et al., 2008; Jenkins et al., 2006).*
+    """)
+
+    # --- FINAL SUMMARY TABLE ---
+    st.markdown(r"""
+    ---
+    
+    ### Summary: All Parameters at a Glance
+    
+    | Parameter | Meaning | Value |
+    |-----------|---------|-------|
+    | $L$ | Lower physical bound | 1.0 mm |
+    | $U$ | Upper physical bound | 60.0 mm |
+    | $r$ | Growth rate (logit/week) | 0.0426 |
+    | $\sigma_{\text{floor}}$ | Minimum noise | 0.5 mm |
+    | $\sigma_{\text{rel}}$ | Relative noise factor | 0.20 |
+    | $t_{\text{delay}}$ | Immunotherapy delay | 1.5–3.0 weeks |
+    | $\text{Var}(r)$ | Slope variance (growth) | Calibrated |
+    | $\text{Var}(r_{\text{decay}})$ | Slope variance (cure) | Calibrated |
+    | $\phi_{\text{bio}}$ | Biological variance fraction | 0–0.70 |
+    | $k_{\text{inc}}$ | Incubation shape | 4–6 |
+    | $\theta_{\text{inc}}$ | Incubation scale | 5–8 years |
+    | $k_{\text{lat}}$ | Latency shape | 2–4 |
+    | $\theta_{\text{lat}}$ | Latency scale | 1–3 years |
+    
+    ---
+    
+    *Full simulation code available in the repository. Model parameters calibrated to published trial data (GARNET, KEYNOTE-177) and Lynch syndrome epidemiology.*
+    """)
     ---
     
     #### Summary of Two‑Hit Parameters
