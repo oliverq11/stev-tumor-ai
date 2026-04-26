@@ -197,20 +197,24 @@ All predictions and plots are based on published clinical data (GARNET, KEYNOTE-
 # ============================================================
 # EXPANDER 1: GROWTH CURVES (30mm and 60mm)
 # ============================================================
-with st.expander("📈 Tumor Growth and Immunotherapy Response (30mm and 60mm starting points)", expanded=False):
+with st.expander("📈 Tumor Growth and Immunotherapy Response (Treatment initiated at 30mm and 60mm)", expanded=False):
     st.markdown("""
     ### 📖 What these curves show
     
     Each plot traces the **complete tumor size trajectory** over time (weeks) for Lynch syndrome patients treated with dostarlimab immunotherapy.
+    
+    - **Growth phase:** Tumor grows from a very small, barely detectable size (~1.1 mm) until it reaches a threshold size.
+    - **Treatment initiation:** At the threshold (30 mm or 60 mm), immunotherapy begins.
+    - **Cure phase:** The tumor then shrinks back down toward the minimal residual size (~1.1 mm).
     """)
     
     col1, col2 = st.columns(2)
     with col1:
-        st.image("30mm.png", caption="**Plot 1:** Start size = 30 mm", use_container_width=True)
-        st.caption("Tumor grows to 30 mm, then shrinks after immunotherapy. Shaded band = 90% credible interval.")
+        st.image("30mm.png", caption="**Plot 1:** Treatment initiated at 30 mm", use_container_width=True)
+        st.caption("Tumor grows from tiny to 30 mm, then shrinks after immunotherapy. Shaded band = 90% credible interval.")
     with col2:
-        st.image("60mm.png", caption="**Plot 2:** Start size = 60 mm", use_container_width=True)
-        st.caption("Same treatment, but tumor starts larger. Compare the shrinkage trajectory.")
+        st.image("60mm.png", caption="**Plot 2:** Treatment initiated at 60 mm", use_container_width=True)
+        st.caption("Tumor grows from tiny to 60 mm, then shrinks after immunotherapy. Compare the shrinkage trajectory.")
 
 # ============================================================
 # EXPANDER 2: TWO-HIT DYNAMICS (6 plots)
