@@ -157,7 +157,7 @@ st.markdown('<div class="subtitle">Lynch Syndrome Colorectal Tumors</div>', unsa
 st.markdown('<div class="author">Horatio Quinones / Sherry Johnson / et-al</div>', unsafe_allow_html=True)
 
 # ============================================================
-# WHAT THIS APP DOES (EXPANDED - WITH ICONS, FIXED DASHES)
+# WHAT THIS APP DOES (EXPANDED)
 # ============================================================
 st.markdown("""
 ### 🔍 What this app does
@@ -173,19 +173,19 @@ Given a tumor size at a specific week, the model returns the **most likely under
 Given a known tumor biology, the model predicts the **expected tumor size range** at any week, including 95% credible intervals.
 
 #### 3. 📈 Growth and Immunotherapy Curves (Visualization)
-Plots showing the **complete tumor trajectory** (growth from tiny to 30 mm or 60 mm, then immunotherapy shrinkage to cure floor), with 90% credible bands.
+Two plots showing the **complete tumor trajectory** (growth from tiny to 30 mm or 60 mm, then immunotherapy shrinkage to cure floor), with 90% credible bands.
 
 #### 4. 🕰️ Two-Hit Dynamics (Visualization)
-Plots that illustrate the **stochastic process of tumor initiation** in Lynch syndrome:
-- Incubation (first hit (at birth) to second hit)
-- Latency (second hit to detectable tumor, >1mm)
+Six plots that illustrate the **stochastic process of tumor initiation** in Lynch syndrome:
+- Incubation (birth to second hit)
+- Latency (second hit to detectable tumor)
 - Conditional and unconditional detection age distributions and probability curves
 
 ---
 
 #### Additionally, the app includes:
 
-- **📐 Mathematical Framework** - Full mathematical formulation of the Stochastic Model, including logit transformation, variance decomposition, CLT confidence bands, Gamma distributions, and convolution for two-hit dynamics.
+- **📐 Mathematical Framework** - Full 18-equation formulation of the stochastic model, including logit transformation, variance decomposition, CLT confidence bands, Gamma distributions, and convolution for two-hit dynamics.
 
 - **📋 Clinical Case** - Real-world validation: a benign flat polyp that shrank under dostarlimab, with response slower than the model mean but within the 90% credible interval.
 
@@ -204,8 +204,8 @@ with st.expander("📈 Tumor Growth and Immunotherapy Response (Treatment initia
     Each plot traces the **complete tumor size trajectory** over time (weeks) for Lynch syndrome patients treated with dostarlimab immunotherapy.
     
     - **Growth phase:** Tumor grows from a very small, barely detectable size (~1.1 mm) until it reaches a threshold size.
-    - **Treatment initiation:** At tumor sizes of 30mm and 60mm, immunotherapy begins.
-    - **Cure phase:** The tumor then shrinks back down toward the minimal residual size (<1.1mm).
+    - **Treatment initiation:** At the threshold (30 mm or 60 mm), immunotherapy begins.
+    - **Cure phase:** The tumor then shrinks back down toward the minimal residual size (~1.1 mm).
     """)
     
     col1, col2 = st.columns(2)
@@ -445,7 +445,7 @@ with st.expander("📐 Mathematical Framework of the STEV Model", expanded=False
     """)
 
 # ============================================================
-# EXPANDER 4: CLINICAL CASE
+# EXPANDER 4: CLINICAL CASE (WITH PLOT)
 # ============================================================
 with st.expander("📋 Clinical Case: Benign Polyp Responded to Dostarlimab", expanded=False):
     st.markdown("""
@@ -465,7 +465,13 @@ with st.expander("📋 Clinical Case: Benign Polyp Responded to Dostarlimab", ex
     - Both trajectories - the fast MLH1 tumor and the slower benign polyp - fell **within the model's 90% credible interval**
     - Third colonoscopy successfully removed the polyp without complications
     - Post-removal pathology confirmed **benign** histology
+    """)
     
+    # --- STEV MODEL PROJECTION PLOT ---
+    st.markdown("### STEV Model Projection vs. Actual Polyp Measurements")
+    st.image("benign_polyp_STEV.png", caption="STEV model projection (blue line with 90% credible band) vs. actual benign polyp measurements (red circles). The measured dimensions fall within the predicted credible interval, validating the model's applicability to benign MMR-deficient lesions.", use_container_width=True)
+    
+    st.markdown("""
     **Why this matters:**
     
     1. **Model validation** - The STEV model's credible interval captured **both** an exceptionally fast malignant tumor and a slower benign polyp
@@ -557,7 +563,7 @@ with st.sidebar:
     - **📈 Growth and Immunotherapy:** Click expander to see 30mm and 60mm curves.
     - **🕰️ Two-Hit Dynamics:** Click expander to see incubation, latency, conditional and unconditional plots.
     - **📐 Mathematical Framework:** Click expander to see the full mathematical formulation.
-    - **📋 Clinical Case:** Click expander to see real-world validation.
+    - **📋 Clinical Case:** Click expander to see real-world validation with STEV projection.
     """)
     st.markdown("---")
     st.markdown("**STEV model** - Lynch Syndrome Colorectal Tumors")
