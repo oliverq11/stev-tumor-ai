@@ -28,6 +28,7 @@ st.markdown("""
     .subtitle { color: #2c6e9e; font-size: 1.2rem; margin-bottom: 1rem; }
     .author { color: #6c757d; font-size: 0.9rem; margin-bottom: 2rem; }
     
+    /* ===== BUTTONS: FORCE WHITE TEXT IN ALL SITUATIONS ===== */
     .stButton button,
     .stButton button:link,
     .stButton button:visited,
@@ -195,7 +196,7 @@ with st.expander("🕰️ Two‑Hit Dynamics: Incubation, Latency, Age at Detect
     
     - **First hit (inherited mutation):** A person with Lynch syndrome is born with **one faulty copy** of an MMR gene (e.g., MLH1, MSH2) inherited from a parent. This alone does not cause cancer – it only creates a **predisposition**.
       
-    - **Second hit (acquired mutation):** At some point later in life, the **second healthy copy** of that MMR gene is damaged or lost (due to random chance, environment, or aging). When this happens, the cell can no longer repair DNA mistakes, leading to microsatellite instability (MSI) and eventually **tumor formation**.
+    - **Second hit (acquired mutation):** At some point later in life, the **second healthy copy** of that MMR gene is damaged or lost. When this happens, the cell can no longer repair DNA mistakes, leading to microsatellite instability (MSI) and eventually **tumor formation**.
     """)
     
     st.markdown("### Complete stochastic model output (6 plots)")
@@ -236,6 +237,334 @@ with st.expander("🕰️ Two‑Hit Dynamics: Incubation, Latency, Age at Detect
     - **Unconditional (bottom row c & d):** *"At birth, what is your overall chance of ever having a detected tumor by age X?"*
     
     The unconditional curves are always lower because some Lynch patients never experience the second hit.
+    """)
+
+# ============================================================
+# EXPANDER 3: MATHEMATICAL FRAMEWORK (15 EQUATIONS)
+# ============================================================
+with st.expander("📐 Mathematical Framework of the STEV Model", expanded=False):
+    st.markdown(r"""
+    ### A True Stochastic Process
+    
+    The STEV model is a **purely stochastic simulation**. At each weekly cycle, tumor growth or shrinkage is random. The mean path is only the average of many random realizations – no single patient follows the mean exactly.
+    
+    ---
+    
+    ### Equation 1: Logit Transformation
+    
+    $$
+    Z = \ln\left(\frac{S - L}{U - S}\right)
+    $$
+    
+    | Symbol | Meaning | Value |
+    |--------|---------|-------|
+    | $S$ | Tumor size (mm) | 1.1 – 60 mm |
+    | $L$ | Lower physical bound | 1.0 mm |
+    | $U$ | Upper physical bound | 60.0 mm |
+    | $Z$ | Logit-transformed size | $-\infty$ to $+\infty$ |
+    
+    **What it does:** Transforms bounded tumor size into an unbounded variable where linear equations work.
+    
+    **Inverse:**
+    $$
+    S = L + \frac{U - L}{1 + e^{-Z}}
+    $$
+    
+    ---
+    
+    ### Equation 2: Sensitivity Coefficient
+    
+    $$
+    \kappa(S) = \frac{dZ}{dS} = \frac{U - L}{(S - L)(U - S)}
+    $$
+    
+    **What it does:** Converts changes in $S$ to changes in $Z$. Essential for variance conversion.
+    
+    ---
+    
+    ### Equation 3: Stochastic Process at Each Cycle
+    
+    At each weekly cycle, the logit variable evolves as:
+    
+    $$
+    Z_{t+1} = Z_t + \Delta Z_t
+    $$
+    
+    where $\Delta Z_t$ is random. The deterministic increment (drift) is constant:
+    
+    $$
+    \mathbb{E}[\Delta Z_t] = r
+    $$
+    
+    The variance of the increment depends on current tumor size:
+    
+    $$
+    \text{Var}(\Delta Z_t) = \sigma_{\text{cycle}}^2(S_t)
+    $$
+    
+    **What it does:** At **every cycle**, growth or shrinkage is random. The mean path is only an average, not a deterministic trajectory.
+    
+    ---
+    
+    ### Equation 4: Growth Phase – Mean Path
+    
+    $$
+    \mu_Z(t) = \alpha + r \cdot t
+    $$
+    
+    | Symbol | Meaning | Value |
+    |--------|---------|-------|
+    | $r$ | Growth rate (logit/week) | $0.149133 / 3.5 \approx 0.0426$ |
+    | $\alpha$ | Intercept | $-r \cdot t_0 \approx -6.44$ |
+    | $t_0$ | Time offset | $43.19 \times 3.5 \approx 151.17$ weeks |
+    
+    **Convert to mm:**
+    $$
+    \mu_S(t) = L + \frac{U - L}{1 + e^{-\mu_Z(t)}}
+    $$
+    
+    ---
+    
+    ### Equation 5: Per‑Cycle Noise (mm space)
+    
+    $$
+    \sigma_{S}(S) = \max(\sigma_{\text{floor}},\; \sigma_{\text{rel}} \cdot S)
+    $$
+    
+    | Symbol | Meaning | Value |
+    |--------|---------|-------|
+    | $\sigma_{\text{floor}}$ | Minimum noise | 0.5 mm |
+    | $\sigma_{\text{rel}}$ | Relative noise factor | 0.20 |
+    
+    **What it does:** Larger tumors have larger absolute fluctuations.
+    
+    ---
+    
+    ### Equation 6: Convert Noise to Logit Variance
+    
+    $$
+    \sigma_{Z}(S) = \kappa(S) \cdot \sigma_{S}(S)
+    $$
+    
+    $$
+    \sigma_{\text{cycle}}^2(S) = [\kappa(S) \cdot \sigma_S(S)]^2
+    $$
+    
+    **What it does:** Translates mm‑space variance to logit space using the sensitivity coefficient.
+    
+    ---
+    
+    ### Equation 7: Biological Modulation (TMB & MMR)
+    
+    $$
+    \text{TMB}_{\text{norm}} = \frac{\ln(1 + \text{TMB})}{\ln(11)}
+    $$
+    
+    $$
+    \text{strength} = \text{TMB}_{\text{norm}} \times f_{\text{MMR}}
+    $$
+    
+    | MMR Status | $f_{\text{MMR}}$ |
+    |------------|------------------|
+    | dMMR / MSI-H | 1.3 |
+    | MSS | 1.0 |
+    | POLE | 1.5 |
+    
+    ---
+    
+    ### Equation 8: Immunotherapy Delay
+    
+    $$
+    t_{\text{delay}} = 3.0 \times \left(1 - 0.30 \cdot \frac{\text{strength}}{1 + \text{strength}}\right)
+    $$
+    
+    $$
+    t_{\text{delay}} = \max(1.5,\; t_{\text{delay}})
+    $$
+    
+    **What it does:** Higher TMB/dMMR shortens the delay (down to 1.5 weeks). Lower TMB/MSS lengthens it (up to 3.0 weeks).
+    
+    ---
+    
+    ### Equation 9: Cure Phase – 4PL Mean Path
+    
+    $$
+    S_{\text{cure}}(\tau) = K_c + \frac{L_c - K_c}{1 + e^{-k_c (\tau - x_{0c})}}
+    $$
+    
+    where $\tau = t - t_{\text{start}}$ (weeks since treatment started).
+    
+    **With effective delay:**
+    $$
+    S(t) = \begin{cases}
+    S_{\text{start}}, & t < t_{\text{delay}} \\[4pt]
+    K_c + \frac{L_c - K_c}{1 + e^{-k_c ((t - t_{\text{delay}}) - x_{0c})}}, & t \ge t_{\text{delay}}
+    \end{cases}
+    $$
+    
+    | Symbol | Meaning |
+    |--------|---------|
+    | $L_c$ | Upper asymptote (starting size) |
+    | $K_c$ | Lower asymptote (cure floor ~1.1 mm) |
+    | $k_c$ | Slope (negative = decay) |
+    | $x_{0c}$ | Inflection point |
+    
+    ---
+    
+    ### Equation 10: Logit Transform for Cure Phase (LK Space)
+    
+    Because the cure phase has different bounds ($L_c$ and $K_c$):
+    
+    $$
+    Z_{\text{cure}} = \ln\left(\frac{S - K_c}{L_c - S}\right)
+    $$
+    
+    **Inverse:**
+    $$
+    S = K_c + \frac{L_c - K_c}{1 + e^{-Z_{\text{cure}}}}
+    $$
+    
+    ---
+    
+    ### Equation 11: Total Variance – Growth Phase
+    
+    The total variance in $Z$ comes from **two independent sources**:
+    
+    $$
+    \text{Var}[Z(t)] = t^2 \cdot \text{Var}(r) + \sum_{i=1}^{t} \sigma_{\text{cycle}}^2(\mu_S(i))
+    $$
+    
+    | Term | Meaning |
+    |------|---------|
+    | $t^2 \cdot \text{Var}(r)$ | Patient‑to‑patient heterogeneity (slope variance) |
+    | $\sum \sigma_{\text{cycle}}^2$ | Within‑patient stochasticity (per‑cycle noise) |
+    
+    **Why two sources?** This separates between‑patient variation from week‑to‑week randomness.
+    
+    ---
+    
+    ### Equation 12: Total Variance – Cure Phase
+    
+    For $t \ge t_{\text{delay}}$:
+    
+    $$
+    \text{Var}[Z_{\text{cure}}(t)] = (t - t_{\text{delay}})^2 \cdot \text{Var}(r_{\text{decay}}) + \sum_{i=1}^{t - t_{\text{delay}}} \sigma_{\text{cycle}}^2(S_{\text{cure}}(i))
+    $$
+    
+    **Variance freezing:** When the mean tumor size hits the floor $K_c$, variance stops accumulating.
+    
+    ---
+    
+    ### Equation 13: Biological Variance Fraction
+    
+    $$
+    \phi_{\text{bio}} = \min\left(0.70,\; \frac{\text{strength}}{1 + \text{strength}}\right)
+    $$
+    
+    The per‑cycle variance is multiplied by $(1 - \phi_{\text{bio}})$:
+    
+    - High $\phi_{\text{bio}}$ (strong biology) → **less** stochastic variance
+    - Low $\phi_{\text{bio}}$ (weak biology) → **more** stochastic variance
+    
+    ---
+    
+    ### Equation 14: Biological Time Factor
+    
+    Let:
+    $$
+    I(t) = \frac{1}{1 + e^{-1.2 (t - t_{\text{delay}})}}
+    $$
+    
+    Then:
+    $$
+    \psi(t) = (1 - I(t)) + 0.25 \cdot I(t)
+    $$
+    
+    **What it does:** Reduces variance to 25% after immunotherapy response begins.
+    
+    ---
+    
+    ### Equation 15: CLT Confidence Bands (90% Credible Intervals)
+    
+    In logit space, because increments are independent, the Central Limit Theorem applies:
+    
+    $$
+    z_{0.95} = \Phi^{-1}(0.95) \approx 1.645
+    $$
+    
+    **Lower bound:**
+    $$
+    Z_{\text{lo}}(t) = \mu_Z(t) - 1.645 \cdot \sqrt{\text{Var}[Z(t)]}
+    $$
+    
+    **Upper bound:**
+    $$
+    Z_{\text{hi}}(t) = \mu_Z(t) + 1.645 \cdot \sqrt{\text{Var}[Z(t)]}
+    $$
+    
+    **Convert back to mm:**
+    $$
+    S_{\text{lo}}(t) = L + \frac{U - L}{1 + e^{-Z_{\text{lo}}(t)}}, \quad
+    S_{\text{hi}}(t) = L + \frac{U - L}{1 + e^{-Z_{\text{hi}}(t)}}
+    $$
+    
+    **What it does:** Provides the 90% credible intervals shown as shaded bands in the plots.
+    
+    ---
+    
+    ### Summary: All Parameters at a Glance
+    
+    | Parameter | Meaning | Value |
+    |-----------|---------|-------|
+    | $L$ | Lower physical bound | 1.0 mm |
+    | $U$ | Upper physical bound | 60.0 mm |
+    | $r$ | Growth rate (logit/week) | 0.0426 |
+    | $\sigma_{\text{floor}}$ | Minimum noise | 0.5 mm |
+    | $\sigma_{\text{rel}}$ | Relative noise factor | 0.20 |
+    | $t_{\text{delay}}$ | Immunotherapy delay | 1.5–3.0 weeks |
+    | $\text{Var}(r)$ | Slope variance (growth) | Calibrated |
+    | $\text{Var}(r_{\text{decay}})$ | Slope variance (cure) | Calibrated |
+    | $\phi_{\text{bio}}$ | Biological variance fraction | 0–0.70 |
+    
+    ---
+    
+    *Full simulation code available in the repository. Model parameters calibrated to published trial data (GARNET, KEYNOTE-177).*
+    """)
+
+# ============================================================
+# EXPANDER 4: CLINICAL CASE (BENIGN POLYP RESPONSE)
+# ============================================================
+with st.expander("📋 Clinical Case: Benign Polyp Responded to Dostarlimab", expanded=False):
+    st.markdown("""
+    ### A Surprising Validation of the STEV Model
+    
+    **Clinical history:**
+    
+    - Patient with Lynch syndrome undergoing dostarlimab immunotherapy
+    - Prior **MLH1‑deficient malignant tumor** (TMB = 55) showed shrinkage **faster than the STEV model's population mean**
+    - A **flat, benign polyp** (~5–6 mm) in the descending colon (≈30 cm from anal orifice)
+    - **Could not be removed** during two colonoscopies – the second attempted by a specialist using **Endoscopic Submucosal Dissection (ESD)**, which failed due to the polyp's flat, fibrotic morphology
+    
+    **Outcome:**
+    
+    - During dostarlimab treatment, the benign polyp **shrank progressively**
+    - Shrinkage was **slower than the STEV model's population mean** (unlike the faster‑than‑mean MLH1 tumor)
+    - Both trajectories – the fast MLH1 tumor and the slower benign polyp – fell **within the model's 90% credible interval**
+    - Third colonoscopy successfully removed the polyp without complications
+    - Post‑removal pathology confirmed **benign** histology
+    
+    **Why this matters:**
+    
+    1. **Model validation** – The STEV model's credible interval captured **both** an exceptionally fast malignant tumor and a slower benign polyp
+    
+    2. **Biological insight** – Response speed varies continuously:
+       - MLH1, high TMB → faster than mean
+       - Benign polyps → slower than mean
+       - Both still within the model's stochastic range
+    
+    3. **Practical guidance** – For flat, unresectable polyps where ESD fails, a trial of immunotherapy may enable subsequent removal – but response may be **slower than the model's mean**
+    
+    4. **Future directions** – This suggests possible **chemoprevention** applications of immunotherapy in Lynch syndrome
     """)
 
 # ============================================================
@@ -296,7 +625,7 @@ def predict_forward(biology, week):
     return mu, sigma, ci_95
 
 # ============================================================
-# SIDEBAR (UPDATED WITH SEPARATE SECTIONS AND ICONS)
+# SIDEBAR
 # ============================================================
 with st.sidebar:
     app_url = "https://stev-tumor-ai-skrobcqyqyyz4sjpvqdqmh.streamlit.app/"
@@ -317,6 +646,10 @@ with st.sidebar:
     - **📈 Growth & Immunotherapy:** Click expander to see 30mm and 60mm tumor growth/shrinkage curves.
     
     - **🕰️ Two‑Hit Dynamics:** Click expander to see incubation, latency, conditional & unconditional probability plots.
+    
+    - **📐 Mathematical Framework:** Click expander to see the full 15‑equation formulation.
+    
+    - **📋 Clinical Case:** Click expander to see real‑world validation with a benign polyp.
     """)
     st.markdown("---")
     st.markdown("**STEV model** – Lynch Syndrome Colorectal Tumors")
