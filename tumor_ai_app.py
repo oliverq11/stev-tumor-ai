@@ -8,7 +8,7 @@ import pandas as pd
 import qrcode
 from io import BytesIO
 import os
-# HQS
+
 # ============================================================
 # PAGE CONFIGURATION
 # ============================================================
@@ -152,12 +152,13 @@ st.markdown("""
 if 'disclaimer_shown' not in st.session_state:
     st.session_state.disclaimer_shown = False
 
-st.title("🧬 STEV: Stochastic Tumor Evolution and Immunological Response")
+st.title("STEV: Stochastic Tumor Evolution and Immunological Response")
 st.markdown('<div class="subtitle">Lynch Syndrome Colorectal Tumors</div>', unsafe_allow_html=True)
 st.markdown('<div class="author">Horatio Quinones / Sherry Johnson / et-al</div>', unsafe_allow_html=True)
-st.markdown("""
-### 🔍 What this app does
 
+# ============================================================
+# WHAT THIS APP DOES (EXPANDED - NO SPECIAL CHARACTERS)
+# ============================================================
 st.markdown("""
 ### What this app does
 
@@ -171,7 +172,7 @@ Given a tumor size at a specific week, the model returns the **most likely under
 #### 2. Biology -> Size (Prediction Tool)
 Given a known tumor biology, the model predicts the **expected tumor size range** at any week, including 95% credible intervals.
 
-#### 3. Growth & Immunotherapy Curves (Visualization)
+#### 3. Growth and Immunotherapy Curves (Visualization)
 Two plots showing the **complete tumor trajectory** (growth + immunotherapy shrinkage) starting from 30 mm and 60 mm, with 90% credible bands.
 
 #### 4. Two-Hit Dynamics (Visualization)
@@ -196,26 +197,25 @@ All predictions and plots are based on published clinical data (GARNET, KEYNOTE-
 # ============================================================
 # EXPANDER 1: GROWTH CURVES (30mm and 60mm)
 # ============================================================
-with st.expander("📈 Tumor Growth & Immunotherapy Response (30mm & 60mm starting points)", expanded=False):
+with st.expander("Tumor Growth and Immunotherapy Response (30mm and 60mm starting points)", expanded=False):
     st.markdown("""
-    ### 📖 What these curves show
+    ### What these curves show
     
     Each plot traces the **complete tumor size trajectory** over time (weeks) for Lynch syndrome patients treated with dostarlimab immunotherapy.
     """)
     
     col1, col2 = st.columns(2)
     with col1:
-        st.image("30mm.png", caption="**Plot 1:** Start size = 30 mm", use_container_width=True)
+        st.image("30mm.png", caption="Plot 1: Start size = 30 mm", use_container_width=True)
         st.caption("Tumor grows to 30 mm, then shrinks after immunotherapy. Shaded band = 90% credible interval.")
     with col2:
-        st.image("60mm.png", caption="**Plot 2:** Start size = 60 mm", use_container_width=True)
+        st.image("60mm.png", caption="Plot 2: Start size = 60 mm", use_container_width=True)
         st.caption("Same treatment, but tumor starts larger. Compare the shrinkage trajectory.")
 
 # ============================================================
 # EXPANDER 2: TWO-HIT DYNAMICS (6 plots)
 # ============================================================
-
-with st.expander("Two-Hit Dynamics: Incubation, Latency, Age at Detection & Risk", expanded=False):
+with st.expander("Two-Hit Dynamics: Incubation, Latency, Age at Detection and Risk", expanded=False):
     st.markdown("""
     ### What is "First Hit" and "Second Hit"?
     
@@ -263,11 +263,11 @@ with st.expander("Two-Hit Dynamics: Incubation, Latency, Age at Detection & Risk
 # ============================================================
 # EXPANDER 3: MATHEMATICAL FRAMEWORK
 # ============================================================
-with st.expander("📐 Mathematical Framework of the STEV Model", expanded=False):
+with st.expander("Mathematical Framework of the STEV Model", expanded=False):
     st.markdown(r"""
     ### A True Stochastic Process
     
-    The STEV model is a **purely stochastic simulation**. At each weekly cycle, tumor growth or shrinkage is random. The mean path is only the average of many random realizations – no single patient follows the mean exactly.
+    The STEV model is a **purely stochastic simulation**. At each weekly cycle, tumor growth or shrinkage is random. The mean path is only the average of many random realizations - no single patient follows the mean exactly.
     
     ---
     
@@ -294,7 +294,7 @@ with st.expander("📐 Mathematical Framework of the STEV Model", expanded=False
     
     ---
     
-    **Equation 4: Growth Phase – Mean Path**
+    **Equation 4: Growth Phase - Mean Path**
     $$
     \mu_Z(t) = \alpha + r \cdot t
     $$
@@ -302,7 +302,7 @@ with st.expander("📐 Mathematical Framework of the STEV Model", expanded=False
     
     ---
     
-    **Equation 5: Per‑Cycle Noise (mm space)**
+    **Equation 5: Per-Cycle Noise (mm space)**
     $$
     \sigma_{S}(S) = \max(0.5,\; 0.20 \cdot S) \text{ mm}
     $$
@@ -316,7 +316,7 @@ with st.expander("📐 Mathematical Framework of the STEV Model", expanded=False
     
     ---
     
-    **Equation 7: Biological Modulation (TMB & MMR)**
+    **Equation 7: Biological Modulation (TMB and MMR)**
     $$
     \text{strength} = \frac{\ln(1 + \text{TMB})}{\ln(11)} \times f_{\text{MMR}}
     $$
@@ -331,7 +331,7 @@ with st.expander("📐 Mathematical Framework of the STEV Model", expanded=False
     
     ---
     
-    **Equation 9: Cure Phase – 4PL Mean Path**
+    **Equation 9: Cure Phase - 4PL Mean Path**
     $$
     S_{\text{cure}}(t) = K_c + \frac{L_c - K_c}{1 + e^{-k_c (t - t_{\text{delay}} - x_{0c})}}, \quad t \ge t_{\text{delay}}
     $$
@@ -339,14 +339,14 @@ with st.expander("📐 Mathematical Framework of the STEV Model", expanded=False
     
     ---
     
-    **Equation 10: Total Variance – Growth Phase**
+    **Equation 10: Total Variance - Growth Phase**
     $$
     \text{Var}[Z(t)] = t^2 \cdot \text{Var}(r) + \sum_{i=1}^{t} \sigma_{\text{cycle}}^2(\mu_S(i))
     $$
     
     ---
     
-    **Equation 11: Total Variance – Cure Phase**
+    **Equation 11: Total Variance - Cure Phase**
     $$
     \text{Var}[Z_{\text{cure}}(t)] = (t - t_{\text{delay}})^2 \cdot \text{Var}(r_{\text{decay}}) + \sum_{i=1}^{t - t_{\text{delay}}} \sigma_{\text{cycle}}^2(S_{\text{cure}}(i))
     $$
@@ -372,11 +372,11 @@ with st.expander("📐 Mathematical Framework of the STEV Model", expanded=False
     
     ---
     
-    ### Two‑Hit Dynamics: Mathematical Formulation
+    ### Two-Hit Dynamics: Mathematical Formulation
     
     ---
     
-    **Equation 14: Incubation (Birth → Second Hit)**
+    **Equation 14: Incubation (Birth to Second Hit)**
     $$
     f_{\text{inc}}(t) = \frac{t^{k-1} e^{-t/\theta}}{\theta^k \, \Gamma(k)}, \quad t \ge 0
     $$
@@ -384,7 +384,7 @@ with st.expander("📐 Mathematical Framework of the STEV Model", expanded=False
     
     ---
     
-    **Equation 15: Latency (Second Hit → Detectable Tumor)**
+    **Equation 15: Latency (Second Hit to Detectable Tumor)**
     $$
     f_{\text{lat}}(t) = \frac{t^{k_{\text{lat}}-1} e^{-t/\theta_{\text{lat}}}}{\theta_{\text{lat}}^{k_{\text{lat}}} \, \Gamma(k_{\text{lat}})}, \quad t \ge 0
     $$
@@ -415,10 +415,10 @@ with st.expander("📐 Mathematical Framework of the STEV Model", expanded=False
     ---
     
     **Lifetime Risk by Gene**
-    - MLH1: 70–80%
-    - MSH2: 70–80%
-    - MSH6: 50–60%
-    - PMS2: 15–20%
+    - MLH1: 70-80%
+    - MSH2: 70-80%
+    - MSH6: 50-60%
+    - PMS2: 15-20%
     
     ---
     
@@ -431,11 +431,11 @@ with st.expander("📐 Mathematical Framework of the STEV Model", expanded=False
     | $r$ | Growth rate | 0.0426 /week |
     | $\sigma_{\text{floor}}$ | Minimum noise | 0.5 mm |
     | $\sigma_{\text{rel}}$ | Relative noise | 0.20 |
-    | $t_{\text{delay}}$ | Immunotherapy delay | 1.5–3.0 weeks |
-    | $k_{\text{inc}}$ | Incubation shape | 4–6 |
-    | $\theta_{\text{inc}}$ | Incubation scale | 5–8 years |
-    | $k_{\text{lat}}$ | Latency shape | 2–4 |
-    | $\theta_{\text{lat}}$ | Latency scale | 1–3 years |
+    | $t_{\text{delay}}$ | Immunotherapy delay | 1.5-3.0 weeks |
+    | $k_{\text{inc}}$ | Incubation shape | 4-6 |
+    | $\theta_{\text{inc}}$ | Incubation scale | 5-8 years |
+    | $k_{\text{lat}}$ | Latency shape | 2-4 |
+    | $\theta_{\text{lat}}$ | Latency scale | 1-3 years |
     
     *Model parameters calibrated to published trial data (GARNET, KEYNOTE-177) and Lynch syndrome epidemiology.*
     """)
@@ -443,37 +443,37 @@ with st.expander("📐 Mathematical Framework of the STEV Model", expanded=False
 # ============================================================
 # EXPANDER 4: CLINICAL CASE
 # ============================================================
-with st.expander("📋 Clinical Case: Benign Polyp Responded to Dostarlimab", expanded=False):
+with st.expander("Clinical Case: Benign Polyp Responded to Dostarlimab", expanded=False):
     st.markdown("""
     ### A Surprising Validation of the STEV Model
     
     **Clinical history:**
     
     - Patient with Lynch syndrome undergoing dostarlimab immunotherapy
-    - Prior **MLH1‑deficient malignant tumor** (TMB = 55) showed shrinkage **faster than the STEV model's population mean**
-    - A **flat, benign polyp** (~5–6 mm) in the descending colon (≈30 cm from anal orifice)
-    - **Could not be removed** during two colonoscopies – the second attempted by a specialist using **Endoscopic Submucosal Dissection (ESD)**, which failed due to the polyp's flat, fibrotic morphology
+    - Prior **MLH1-deficient malignant tumor** (TMB = 55) showed shrinkage **faster than the STEV model's population mean**
+    - A **flat, benign polyp** (approximately 5-6 mm) in the descending colon (about 30 cm from anal orifice)
+    - **Could not be removed** during two colonoscopies - the second attempted by a specialist using **Endoscopic Submucosal Dissection (ESD)**, which failed due to the polyp's flat, fibrotic morphology
     
     **Outcome:**
     
     - During dostarlimab treatment, the benign polyp **shrank progressively**
-    - Shrinkage was **slower than the STEV model's population mean** (unlike the faster‑than‑mean MLH1 tumor)
-    - Both trajectories – the fast MLH1 tumor and the slower benign polyp – fell **within the model's 90% credible interval**
+    - Shrinkage was **slower than the STEV model's population mean** (unlike the faster-than-mean MLH1 tumor)
+    - Both trajectories - the fast MLH1 tumor and the slower benign polyp - fell **within the model's 90% credible interval**
     - Third colonoscopy successfully removed the polyp without complications
-    - Post‑removal pathology confirmed **benign** histology
+    - Post-removal pathology confirmed **benign** histology
     
     **Why this matters:**
     
-    1. **Model validation** – The STEV model's credible interval captured **both** an exceptionally fast malignant tumor and a slower benign polyp
+    1. **Model validation** - The STEV model's credible interval captured **both** an exceptionally fast malignant tumor and a slower benign polyp
     
-    2. **Biological insight** – Response speed varies continuously:
-       - MLH1, high TMB → faster than mean
-       - Benign polyps → slower than mean
+    2. **Biological insight** - Response speed varies continuously:
+       - MLH1, high TMB: faster than mean
+       - Benign polyps: slower than mean
        - Both still within the model's stochastic range
     
-    3. **Practical guidance** – For flat, unresectable polyps where ESD fails, a trial of immunotherapy may enable subsequent removal – but response may be **slower than the model's mean**
+    3. **Practical guidance** - For flat, unresectable polyps where ESD fails, a trial of immunotherapy may enable subsequent removal - but response may be **slower than the model's mean**
     
-    4. **Future directions** – This suggests possible **chemoprevention** applications of immunotherapy in Lynch syndrome
+    4. **Future directions** - This suggests possible **chemoprevention** applications of immunotherapy in Lynch syndrome
     """)
 
 # ============================================================
@@ -546,30 +546,30 @@ with st.sidebar:
     img.save(buf, format="PNG")
     st.image(buf.getvalue(), width=150, caption="Scan to open on phone")
     
-    st.markdown("### ℹ️ How to use")
+    st.markdown("### How to use")
     st.markdown("""
-    - **🔍 Size → Biology:** Enter tumor size → get most likely biology.
-    - **🔮 Biology → Size:** Select biology → get predicted size range.
-    - **📈 Growth & Immunotherapy:** Click expander to see 30mm and 60mm curves.
-    - **🕰️ Two‑Hit Dynamics:** Click expander to see incubation, latency, conditional & unconditional plots.
-    - **📐 Mathematical Framework:** Click expander to see the full mathematical formulation.
-    - **📋 Clinical Case:** Click expander to see real‑world validation.
+    - **Size -> Biology:** Enter tumor size -> get most likely biology.
+    - **Biology -> Size:** Select biology -> get predicted size range.
+    - **Growth and Immunotherapy:** Click expander to see 30mm and 60mm curves.
+    - **Two-Hit Dynamics:** Click expander to see incubation, latency, conditional and unconditional plots.
+    - **Mathematical Framework:** Click expander to see the full mathematical formulation.
+    - **Clinical Case:** Click expander to see real-world validation.
     """)
     st.markdown("---")
-    st.markdown("**STEV model** – Lynch Syndrome Colorectal Tumors")
+    st.markdown("**STEV model** - Lynch Syndrome Colorectal Tumors")
     st.markdown("*Horatio Quinones / Sherry Johnson / et al*")
 
 # ============================================================
 # MAIN APP WITH TWO TABS
 # ============================================================
-tab1, tab2 = st.tabs(["🔍 Size → Biology", "🔮 Biology → Size"])
+tab1, tab2 = st.tabs(["Size -> Biology", "Biology -> Size"])
 
 with tab1:
     col_left, col_right = st.columns(2)
     with col_left:
-        week = st.selectbox("📅 Week", weeks, index=8)
+        week = st.selectbox("Week", weeks, index=8)
     with col_right:
-        size = st.slider("📏 Tumor size (mm)", min_value=0.0, max_value=30.0, value=1.4, step=0.1)
+        size = st.slider("Tumor size (mm)", min_value=0.0, max_value=30.0, value=1.4, step=0.1)
 
     if st.button("Predict Biology", use_container_width=True):
         with st.spinner("Computing probabilities..."):
@@ -577,8 +577,8 @@ with tab1:
         most_likely = max(probs, key=probs.get)
 
         col_a, col_b = st.columns(2)
-        col_a.metric("🧬 Most likely biology", most_likely)
-        col_b.metric("📊 Probability", f"{probs[most_likely]:.1%}")
+        col_a.metric("Most likely biology", most_likely)
+        col_b.metric("Probability", f"{probs[most_likely]:.1%}")
 
         df = pd.DataFrame(list(probs.items()), columns=['Biology', 'Probability'])
         fig = px.bar(df, x='Biology', y='Probability', color='Biology',
@@ -587,26 +587,26 @@ with tab1:
         fig.update_layout(yaxis_title='Posterior probability', xaxis_title='Biology')
         st.plotly_chart(fig, use_container_width=True)
 
-        with st.expander("📋 Detailed probabilities"):
+        with st.expander("Detailed probabilities"):
             st.dataframe(df.style.format({'Probability': '{:.3f}'}))
 
         st.markdown("---")
-        st.caption("⚠️ Disclaimer: For research & education only – not medical advice. Always consult your doctor.")
+        st.caption("Disclaimer: For research and education only - not medical advice. Always consult your doctor.")
 
 with tab2:
     col_left, col_right = st.columns(2)
     with col_left:
-        week = st.selectbox("📅 Week", weeks, index=8, key="forward_week")
+        week = st.selectbox("Week", weeks, index=8, key="forward_week")
     with col_right:
-        biology = st.selectbox("🧬 Biology", names, index=1)
+        biology = st.selectbox("Biology", names, index=1)
 
     if st.button("Predict Size", use_container_width=True):
         with st.spinner("Calculating predicted size..."):
             mu, sigma, ci = predict_forward(biology, week)
 
         col_a, col_b = st.columns(2)
-        col_a.metric("📏 Predicted mean size", f"{mu:.2f} mm")
-        col_b.metric("📊 95% credible interval", f"[{ci[0]:.2f}, {ci[1]:.2f}] mm")
+        col_a.metric("Predicted mean size", f"{mu:.2f} mm")
+        col_b.metric("95% credible interval", f"[{ci[0]:.2f}, {ci[1]:.2f}] mm")
 
         x_vals = np.linspace(max(0, mu - 4*sigma), mu + 4*sigma, 200)
         y_vals = norm.pdf(x_vals, mu, sigma)
@@ -619,4 +619,4 @@ with tab2:
         st.plotly_chart(fig, use_container_width=True)
 
         st.markdown("---")
-        st.caption("⚠️ Disclaimer: For research & education only – not medical advice. Always consult your doctor.")
+        st.caption("Disclaimer: For research and education only - not medical advice. Always consult your doctor.")
