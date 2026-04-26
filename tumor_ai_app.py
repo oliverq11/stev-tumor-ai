@@ -138,7 +138,7 @@ with st.expander("📈 Tumor Growth and Immunotherapy Response", expanded=False)
 # ============================================================
 # EXPANDER 2: TWO-HIT DYNAMICS
 # ============================================================
-with st.expander("🕰️ Two-Hit Dynamics", expanded=False):
+with st.expander("🕰️ Two-Hit Dynamics: Tumor Incubation, Latency, Detection Phase, Risk Assement", expanded=False):
     col1, col2 = st.columns(2)
     with col1:
         if os.path.exists("incubation.png"):
