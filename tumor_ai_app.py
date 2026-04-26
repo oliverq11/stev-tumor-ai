@@ -173,7 +173,7 @@ Given a tumor size at a specific week, the model returns the **most likely under
 Given a known tumor biology, the model predicts the **expected tumor size range** at any week, including 95% credible intervals.
 
 #### 3. 📈 Growth and Immunotherapy Curves (Visualization)
-Two plots showing the **complete tumor trajectory** (growth from tiny to 30 mm or 60 mm, then immunotherapy shrinkage to cure floor), with 90% credible bands.
+Two plots showing the **complete tumor trajectory** (growth from tiny to 30 mm or 60 mm, then immunotherapy shrinkage to cure floor), with 90% credible bands. Includes real patient validation data.
 
 #### 4. 🕰️ Two-Hit Dynamics (Visualization)
 Six plots that illustrate the **stochastic process of tumor initiation** in Lynch syndrome:
@@ -195,7 +195,7 @@ All predictions and plots are based on published clinical data (GARNET, KEYNOTE-
 """)
 
 # ============================================================
-# EXPANDER 1: GROWTH CURVES
+# EXPANDER 1: GROWTH CURVES (30mm and 60mm) + MLH1 VALIDATION
 # ============================================================
 with st.expander("📈 Tumor Growth and Immunotherapy Response (Treatment initiated at 30mm and 60mm)", expanded=False):
     st.markdown("""
@@ -221,6 +221,29 @@ with st.expander("📈 Tumor Growth and Immunotherapy Response (Treatment initia
             st.caption("Tumor grows from tiny to 60 mm, then shrinks after immunotherapy. Compare the shrinkage trajectory.")
         else:
             st.warning("60mm.png not found")
+    
+    # --- REAL PATIENT VALIDATION: MLH1 TUMOR ---
+    st.markdown("---")
+    st.markdown("### 📊 Real Patient Validation: MLH1 Tumor (TMB = 55.4)")
+    
+    col1, col2 = st.columns([2, 1])
+    with col1:
+        if os.path.exists("MLH1_55TMB.png"):
+            st.image("MLH1_55TMB.png", caption="Actual MLH1 tumor response (red dot: ~20 mm to ~1.5 mm in 9 weeks) overlaid on STEV model projection.", use_container_width=True)
+        else:
+            st.info("📁 MLH1_55TMB.png not found. Upload this file to see model validation.")
+    
+    with col2:
+        st.markdown("""
+        **Patient data:**
+        - Biology: **MLH1**
+        - TMB: **55.4** (very high)
+        - Starting size: **~20 mm**
+        - After 9 weeks: **~1.5 mm**
+        - Response speed: **Faster than population mean**
+        
+        **Key insight:** High TMB + MLH1 drives exceptionally fast immunotherapy response, consistent with the model's upper credible bound.
+        """)
 
 # ============================================================
 # EXPANDER 2: TWO-HIT DYNAMICS
@@ -469,7 +492,7 @@ with st.expander("📐 Mathematical Framework of the STEV Model", expanded=False
     """)
 
 # ============================================================
-# EXPANDER 4: CLINICAL CASE (WITH PROPER INDENTATION)
+# EXPANDER 4: CLINICAL CASE (Benign Polyp)
 # ============================================================
 with st.expander("📋 Clinical Case: Benign Polyp Responded to Dostarlimab", expanded=False):
     st.markdown("""
@@ -478,7 +501,7 @@ with st.expander("📋 Clinical Case: Benign Polyp Responded to Dostarlimab", ex
     **Clinical history:**
     
     - Patient with Lynch syndrome undergoing dostarlimab immunotherapy
-    - Prior **MLH1-deficient malignant tumor** (TMB = 55) showed shrinkage **faster than the STEV model's population mean**
+    - Prior **MLH1-deficient malignant tumor** (TMB = 55.4) showed shrinkage **faster than the STEV model's population mean** (see Expander 1)
     - A **flat, benign polyp** (approximately 5-6 mm) in the descending colon (about 30 cm from anal orifice)
     - **Could not be removed** during two colonoscopies - the second attempted by a specialist using **Endoscopic Submucosal Dissection (ESD)**, which failed due to the polyp's flat, fibrotic morphology
     
@@ -493,16 +516,10 @@ with st.expander("📋 Clinical Case: Benign Polyp Responded to Dostarlimab", ex
     
     st.markdown("### STEV Model Projection vs. Actual Polyp Measurements")
     
-    # Safe file handling for the clinical case plot
-    try:
-        if os.path.exists("benign_polyp_STEV.png"):
-            st.image("benign_polyp_STEV.png", caption="STEV model projection (blue line with 90% credible band) vs. actual benign polyp measurements (red circles). The measured dimensions fall within the predicted credible interval, validating the model's applicability to benign MMR-deficient lesions.", use_container_width=True)
-        else:
-            st.warning("⚠️ Benign polyp projection plot not found. Please upload the file 'benign_polyp_STEV.png' to the repository.")
-            st.info("The plot shows: STEV model projection vs. actual benign polyp measurements. The measured dimensions fall within the predicted credible interval.")
-    except Exception as e:
-        st.warning(f"⚠️ Could not display the image. The file may be corrupted.")
-        st.info("Please re-upload 'benign_polyp_STEV.png' as a valid PNG file.")
+    if os.path.exists("benign_polyp_STEV.png"):
+        st.image("benign_polyp_STEV.png", caption="STEV model projection (blue line with 90% credible band) vs. actual benign polyp measurements (red circles). The measured dimensions fall within the predicted credible interval, validating the model's applicability to benign MMR-deficient lesions.", use_container_width=True)
+    else:
+        st.info("📁 benign_polyp_STEV.png not found. Upload this file to see the model validation for the benign polyp.")
     
     st.markdown("""
     **Why this matters:**
@@ -593,10 +610,10 @@ with st.sidebar:
     st.markdown("""
     - **🔍 Size -> Biology:** Enter tumor size -> get most likely biology.
     - **🔮 Biology -> Size:** Select biology -> get predicted size range.
-    - **📈 Growth and Immunotherapy:** Click expander to see 30mm and 60mm curves.
+    - **📈 Growth and Immunotherapy:** Click expander to see 30mm and 60mm curves + MLH1 validation.
     - **🕰️ Two-Hit Dynamics:** Click expander to see incubation, latency, conditional and unconditional plots.
     - **📐 Mathematical Framework:** Click expander to see the full mathematical formulation.
-    - **📋 Clinical Case:** Click expander to see real-world validation with STEV projection.
+    - **📋 Clinical Case:** Click expander to see benign polyp validation.
     """)
     st.markdown("---")
     st.markdown("**STEV model** - Lynch Syndrome Colorectal Tumors")
