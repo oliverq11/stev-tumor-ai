@@ -8,7 +8,7 @@ import pandas as pd
 import qrcode
 from io import BytesIO
 import os
-#  HQS
+
 # ============================================================
 # PAGE CONFIGURATION
 # ============================================================
@@ -28,7 +28,6 @@ st.markdown("""
     .subtitle { color: #2c6e9e; font-size: 1.2rem; margin-bottom: 1rem; }
     .author { color: #6c757d; font-size: 0.9rem; margin-bottom: 2rem; }
     
-    /* ===== BUTTONS: FORCE WHITE TEXT IN ALL SITUATIONS ===== */
     .stButton button,
     .stButton button:link,
     .stButton button:visited,
@@ -201,7 +200,6 @@ with st.expander("🕰️ Two‑Hit Dynamics: Incubation, Latency, Age at Detect
     
     st.markdown("### Complete stochastic model output (6 plots)")
     
-    # Row 1: incubation and latency
     col1, col2 = st.columns(2)
     with col1:
         st.image("incubation.png", caption="**Plot a:** Incubation (birth → second hit)", use_container_width=True)
@@ -210,7 +208,6 @@ with st.expander("🕰️ Two‑Hit Dynamics: Incubation, Latency, Age at Detect
         st.image("latency.png", caption="**Plot b:** Latency (second hit → detectable tumor >1 mm)", use_container_width=True)
         st.caption("Waiting time from the second hit until the tumor becomes detectable.")
     
-    # Row 2: detection_age_conditional and probability_conditional
     col1, col2 = st.columns(2)
     with col1:
         st.image("detection_age_conditional.png", caption="**Plot c (Conditional):** Detection age distribution", use_container_width=True)
@@ -219,7 +216,6 @@ with st.expander("🕰️ Two‑Hit Dynamics: Incubation, Latency, Age at Detect
         st.image("probability_conditional.png", caption="**Plot d (Conditional):** Probability of detection by age", use_container_width=True)
         st.caption("Given a second hit, the cumulative probability that the tumor has been detected by a given age.")
     
-    # Row 3: detection_age_unconditional and probability_uconditional
     col1, col2 = st.columns(2)
     with col1:
         st.image("detection_age_unconditional.png", caption="**Plot c (Unconditional):** Detection age distribution", use_container_width=True)
@@ -233,14 +229,13 @@ with st.expander("🕰️ Two‑Hit Dynamics: Incubation, Latency, Age at Detect
     ### 🔑 Conditional vs. Unconditional
     
     - **Conditional (top row c & d):** *"Given that you already had the second hit, what is the probability of detection by age X?"*
-      
     - **Unconditional (bottom row c & d):** *"At birth, what is your overall chance of ever having a detected tumor by age X?"*
     
     The unconditional curves are always lower because some Lynch patients never experience the second hit.
     """)
 
 # ============================================================
-# EXPANDER 3: MATHEMATICAL FRAMEWORK (15 EQUATIONS)
+# EXPANDER 3: MATHEMATICAL FRAMEWORK
 # ============================================================
 with st.expander("📐 Mathematical Framework of the STEV Model", expanded=False):
     st.markdown(r"""
@@ -250,442 +245,177 @@ with st.expander("📐 Mathematical Framework of the STEV Model", expanded=False
     
     ---
     
-    ### Equation 1: Logit Transformation
-    
+    **Equation 1: Logit Transformation**
     $$
     Z = \ln\left(\frac{S - L}{U - S}\right)
     $$
-    
-    | Symbol | Meaning | Value |
-    |--------|---------|-------|
-    | $S$ | Tumor size (mm) | 1.1 – 60 mm |
-    | $L$ | Lower physical bound | 1.0 mm |
-    | $U$ | Upper physical bound | 60.0 mm |
-    | $Z$ | Logit-transformed size | $-\infty$ to $+\infty$ |
-    
-    **What it does:** Transforms bounded tumor size into an unbounded variable where linear equations work.
-    
-    **Inverse:**
-    $$
-    S = L + \frac{U - L}{1 + e^{-Z}}
-    $$
+    **Inverse:** $S = L + \frac{U - L}{1 + e^{-Z}}$
+    - $L = 1.0$ mm (lower bound), $U = 60.0$ mm (upper bound)
     
     ---
     
-    ### Equation 2: Sensitivity Coefficient
-    
+    **Equation 2: Sensitivity Coefficient**
     $$
     \kappa(S) = \frac{dZ}{dS} = \frac{U - L}{(S - L)(U - S)}
     $$
     
-    **What it does:** Converts changes in $S$ to changes in $Z$. Essential for variance conversion.
+    ---
+    
+    **Equation 3: Stochastic Process at Each Cycle**
+    $$
+    Z_{t+1} = Z_t + \Delta Z_t, \quad \mathbb{E}[\Delta Z_t] = r, \quad \text{Var}(\Delta Z_t) = \sigma_{\text{cycle}}^2(S_t)
+    $$
     
     ---
     
-    ### Equation 3: Stochastic Process at Each Cycle
-    
-    At each weekly cycle, the logit variable evolves as:
-    
-    $$
-    Z_{t+1} = Z_t + \Delta Z_t
-    $$
-    
-    where $\Delta Z_t$ is random. The deterministic increment (drift) is constant:
-    
-    $$
-    \mathbb{E}[\Delta Z_t] = r
-    $$
-    
-    The variance of the increment depends on current tumor size:
-    
-    $$
-    \text{Var}(\Delta Z_t) = \sigma_{\text{cycle}}^2(S_t)
-    $$
-    
-    **What it does:** At **every cycle**, growth or shrinkage is random. The mean path is only an average, not a deterministic trajectory.
-    
-    ---
-    
-    ### Equation 4: Growth Phase – Mean Path
-    
+    **Equation 4: Growth Phase – Mean Path**
     $$
     \mu_Z(t) = \alpha + r \cdot t
     $$
+    - $r = 0.0426$ per week, $\alpha \approx -6.44$
     
-    | Symbol | Meaning | Value |
-    |--------|---------|-------|
-    | $r$ | Growth rate (logit/week) | $0.149133 / 3.5 \approx 0.0426$ |
-    | $\alpha$ | Intercept | $-r \cdot t_0 \approx -6.44$ |
-    | $t_0$ | Time offset | $43.19 \times 3.5 \approx 151.17$ weeks |
+    ---
     
-    **Convert to mm:**
+    **Equation 5: Per‑Cycle Noise (mm space)**
     $$
-    \mu_S(t) = L + \frac{U - L}{1 + e^{-\mu_Z(t)}}
+    \sigma_{S}(S) = \max(0.5,\; 0.20 \cdot S) \text{ mm}
     $$
     
     ---
     
-    ### Equation 5: Per‑Cycle Noise (mm space)
-    
-    $$
-    \sigma_{S}(S) = \max(\sigma_{\text{floor}},\; \sigma_{\text{rel}} \cdot S)
-    $$
-    
-    | Symbol | Meaning | Value |
-    |--------|---------|-------|
-    | $\sigma_{\text{floor}}$ | Minimum noise | 0.5 mm |
-    | $\sigma_{\text{rel}}$ | Relative noise factor | 0.20 |
-    
-    **What it does:** Larger tumors have larger absolute fluctuations.
-    
-    ---
-    
-    ### Equation 6: Convert Noise to Logit Variance
-    
-    $$
-    \sigma_{Z}(S) = \kappa(S) \cdot \sigma_{S}(S)
-    $$
-    
+    **Equation 6: Convert Noise to Logit Variance**
     $$
     \sigma_{\text{cycle}}^2(S) = [\kappa(S) \cdot \sigma_S(S)]^2
     $$
     
-    **What it does:** Translates mm‑space variance to logit space using the sensitivity coefficient.
+    ---
+    
+    **Equation 7: Biological Modulation (TMB & MMR)**
+    $$
+    \text{strength} = \frac{\ln(1 + \text{TMB})}{\ln(11)} \times f_{\text{MMR}}
+    $$
+    - dMMR/MSI-H: $f=1.3$, MSS: $f=1.0$, POLE: $f=1.5$
     
     ---
     
-    ### Equation 7: Biological Modulation (TMB & MMR)
-    
+    **Equation 8: Immunotherapy Delay**
     $$
-    \text{TMB}_{\text{norm}} = \frac{\ln(1 + \text{TMB})}{\ln(11)}
-    $$
-    
-    $$
-    \text{strength} = \text{TMB}_{\text{norm}} \times f_{\text{MMR}}
-    $$
-    
-    | MMR Status | $f_{\text{MMR}}$ |
-    |------------|------------------|
-    | dMMR / MSI-H | 1.3 |
-    | MSS | 1.0 |
-    | POLE | 1.5 |
-    
-    ---
-    
-    ### Equation 8: Immunotherapy Delay
-    
-    $$
-    t_{\text{delay}} = 3.0 \times \left(1 - 0.30 \cdot \frac{\text{strength}}{1 + \text{strength}}\right)
-    $$
-    
-    $$
-    t_{\text{delay}} = \max(1.5,\; t_{\text{delay}})
-    $$
-    
-    **What it does:** Higher TMB/dMMR shortens the delay (down to 1.5 weeks). Lower TMB/MSS lengthens it (up to 3.0 weeks).
-    
-    ---
-    
-    ### Equation 9: Cure Phase – 4PL Mean Path
-    
-    $$
-    S_{\text{cure}}(\tau) = K_c + \frac{L_c - K_c}{1 + e^{-k_c (\tau - x_{0c})}}
-    $$
-    
-    where $\tau = t - t_{\text{start}}$ (weeks since treatment started).
-    
-    **With effective delay:**
-    $$
-    S(t) = \begin{cases}
-    S_{\text{start}}, & t < t_{\text{delay}} \\[4pt]
-    K_c + \frac{L_c - K_c}{1 + e^{-k_c ((t - t_{\text{delay}}) - x_{0c})}}, & t \ge t_{\text{delay}}
-    \end{cases}
-    $$
-    
-    | Symbol | Meaning |
-    |--------|---------|
-    | $L_c$ | Upper asymptote (starting size) |
-    | $K_c$ | Lower asymptote (cure floor ~1.1 mm) |
-    | $k_c$ | Slope (negative = decay) |
-    | $x_{0c}$ | Inflection point |
-    
-    ---
-    
-    ### Equation 10: Logit Transform for Cure Phase (LK Space)
-    
-    Because the cure phase has different bounds ($L_c$ and $K_c$):
-    
-    $$
-    Z_{\text{cure}} = \ln\left(\frac{S - K_c}{L_c - S}\right)
-    $$
-    
-    **Inverse:**
-    $$
-    S = K_c + \frac{L_c - K_c}{1 + e^{-Z_{\text{cure}}}}
+    t_{\text{delay}} = \max\left(1.5,\; 3.0 \times \left(1 - 0.30 \cdot \frac{\text{strength}}{1 + \text{strength}}\right)\right)
     $$
     
     ---
     
-    ### Equation 11: Total Variance – Growth Phase
+    **Equation 9: Cure Phase – 4PL Mean Path**
+    $$
+    S_{\text{cure}}(t) = K_c + \frac{L_c - K_c}{1 + e^{-k_c (t - t_{\text{delay}} - x_{0c})}}, \quad t \ge t_{\text{delay}}
+    $$
+    - $L_c$ = starting size, $K_c \approx 1.1$ mm (cure floor)
     
-    The total variance in $Z$ comes from **two independent sources**:
+    ---
     
+    **Equation 10: Total Variance – Growth Phase**
     $$
     \text{Var}[Z(t)] = t^2 \cdot \text{Var}(r) + \sum_{i=1}^{t} \sigma_{\text{cycle}}^2(\mu_S(i))
     $$
     
-    | Term | Meaning |
-    |------|---------|
-    | $t^2 \cdot \text{Var}(r)$ | Patient‑to‑patient heterogeneity (slope variance) |
-    | $\sum \sigma_{\text{cycle}}^2$ | Within‑patient stochasticity (per‑cycle noise) |
-    
-    **Why two sources?** This separates between‑patient variation from week‑to‑week randomness.
-    
     ---
     
-    ### Equation 12: Total Variance – Cure Phase
-    
-    For $t \ge t_{\text{delay}}$:
-    
+    **Equation 11: Total Variance – Cure Phase**
     $$
     \text{Var}[Z_{\text{cure}}(t)] = (t - t_{\text{delay}})^2 \cdot \text{Var}(r_{\text{decay}}) + \sum_{i=1}^{t - t_{\text{delay}}} \sigma_{\text{cycle}}^2(S_{\text{cure}}(i))
     $$
     
-    **Variance freezing:** When the mean tumor size hits the floor $K_c$, variance stops accumulating.
-    
     ---
     
-    ### Equation 13: Biological Variance Fraction
-    
+    **Equation 12: Biological Variance Fraction**
     $$
     \phi_{\text{bio}} = \min\left(0.70,\; \frac{\text{strength}}{1 + \text{strength}}\right)
     $$
     
-    The per‑cycle variance is multiplied by $(1 - \phi_{\text{bio}})$:
-    
-    - High $\phi_{\text{bio}}$ (strong biology) → **less** stochastic variance
-    - Low $\phi_{\text{bio}}$ (weak biology) → **more** stochastic variance
-    
     ---
     
-    ### Equation 14: Biological Time Factor
-    
-    Let:
+    **Equation 13: CLT Confidence Bands (90% Credible Intervals)**
     $$
-    I(t) = \frac{1}{1 + e^{-1.2 (t - t_{\text{delay}})}}
-    $$
-    
-    Then:
-    $$
-    \psi(t) = (1 - I(t)) + 0.25 \cdot I(t)
-    $$
-    
-    **What it does:** Reduces variance to 25% after immunotherapy response begins.
-    
-    ---
-    
-    ### Equation 15: CLT Confidence Bands (90% Credible Intervals)
-    
-    In logit space, because increments are independent, the Central Limit Theorem applies:
-    
-    $$
-    z_{0.95} = \Phi^{-1}(0.95) \approx 1.645
-    $$
-    
-    **Lower bound:**
-    $$
-    Z_{\text{lo}}(t) = \mu_Z(t) - 1.645 \cdot \sqrt{\text{Var}[Z(t)]}
-    $$
-    
-    **Upper bound:**
-    $$
+    Z_{\text{lo}}(t) = \mu_Z(t) - 1.645 \cdot \sqrt{\text{Var}[Z(t)]}, \quad
     Z_{\text{hi}}(t) = \mu_Z(t) + 1.645 \cdot \sqrt{\text{Var}[Z(t)]}
     $$
-    
-    **Convert back to mm:**
     $$
     S_{\text{lo}}(t) = L + \frac{U - L}{1 + e^{-Z_{\text{lo}}(t)}}, \quad
     S_{\text{hi}}(t) = L + \frac{U - L}{1 + e^{-Z_{\text{hi}}(t)}}
     $$
     
-    **What it does:** Provides the 90% credible intervals shown as shaded bands in the plots.
-    """)
-
-    # --- SEPARATE SECTION FOR TWO-HIT DYNAMICS ---
-    st.markdown(r"""
-    ### Two‑Hit Dynamics: Mathematical Formulation
+    ---
     
-    The following equations describe the **stochastic process of tumor initiation and detection** in Lynch syndrome.
+    ### Two‑Hit Dynamics: Mathematical Formulation
     
     ---
     
-    #### Equation 16: Incubation (Birth → Second Hit)
-    
-    The time from birth until the second hit occurs follows a **Gamma distribution**:
-    
+    **Equation 14: Incubation (Birth → Second Hit)**
     $$
     f_{\text{inc}}(t) = \frac{t^{k-1} e^{-t/\theta}}{\theta^k \, \Gamma(k)}, \quad t \ge 0
     $$
-    
-    | Symbol | Meaning | Typical Value |
-    |--------|---------|----------------|
-    | $k$ | Shape parameter | ~4–6 |
-    | $\theta$ | Scale parameter | ~5–8 years |
-    | $\Gamma(k)$ | Gamma function | |
-    
-    **What it does:** Models the random waiting time for the second MMR hit. Most second hits occur between ages 30–55 years.
+    - Gamma distribution, shape $k \approx 4-6$, scale $\theta \approx 5-8$ years
     
     ---
     
-    #### Equation 17: Latency (Second Hit → Detectable Tumor)
-    
-    Once the second hit occurs, the tumor grows until it becomes detectable (>1 mm). This waiting time also follows a **Gamma distribution**:
-    
+    **Equation 15: Latency (Second Hit → Detectable Tumor)**
     $$
     f_{\text{lat}}(t) = \frac{t^{k_{\text{lat}}-1} e^{-t/\theta_{\text{lat}}}}{\theta_{\text{lat}}^{k_{\text{lat}}} \, \Gamma(k_{\text{lat}})}, \quad t \ge 0
     $$
     
-    **What it does:** Models the time from tumor initiation to clinical detection. Shorter latency means faster-growing tumors.
-    
     ---
     
-    #### Equation 18: Convolution (Incubation + Latency)
-    
-    The **age at detection** is the sum of two independent random variables:
-    
+    **Equation 16: Convolution (Incubation + Latency)**
     $$
-    T_{\text{detection}} = T_{\text{inc}} + T_{\text{lat}}
-    $$
-    
-    The probability density of the sum is the **convolution integral**:
-    
-    $$
+    T_{\text{detection}} = T_{\text{inc}} + T_{\text{lat}}, \quad
     f_{\text{det}}(t) = \int_{0}^{t} f_{\text{inc}}(\tau) \, f_{\text{lat}}(t - \tau) \, d\tau
     $$
     
-    **What it does:** Combines the waiting time for the second hit with the subsequent growth time to get the overall age at clinical detection.
-    
     ---
     
-    #### Equation 19: Conditional Probability of Detection by Age
-    
-    Given that a second hit has occurred, the **conditional probability** that the tumor has been detected by age $t$ is:
-    
+    **Equation 17: Conditional Probability of Detection by Age**
     $$
     P_{\text{cond}}(t) = \int_{0}^{t} f_{\text{det}}(\tau) \, d\tau
     $$
     
-    **What it does:** Answers: *"If a Lynch patient has already experienced the second hit, what is the probability that their tumor has been detected by age $t$?"*
-    
     ---
     
-    #### Equation 20: Unconditional Probability of Detection by Age
-    
-    The **unconditional probability** accounts for the fact that not all Lynch patients experience the second hit. Let $R_{\text{lifetime}}$ be the lifetime risk of a second hit (~80% for MLH1/MSH2):
-    
+    **Equation 18: Unconditional Probability of Detection by Age**
     $$
     P_{\text{uncond}}(t) = R_{\text{lifetime}} \cdot P_{\text{cond}}(t)
     $$
-    
-    **What it does:** Answers: *"At birth, what is the overall chance that a Lynch patient will have a detected tumor by age $t$?"*
-    
-    ---
-    
-    #### Equation 21: Lifetime Risk by Gene
-    
-    For Lynch syndrome, the lifetime risk of colorectal cancer varies by gene:
-    
-    | Gene | Lifetime Risk |
-    |------|---------------|
-    | MLH1 | ~70–80% |
-    | MSH2 | ~70–80% |
-    | MSH6 | ~50–60% |
-    | PMS2 | ~15–20% |
-    
-    These values calibrate the scale parameter $\theta$ in the incubation Gamma distribution.
+    - $R_{\text{lifetime}} \approx 0.70-0.80$ for MLH1/MSH2
     
     ---
     
-    #### Summary of Two‑Hit Parameters
+    **Lifetime Risk by Gene**
+    - MLH1: 70–80%
+    - MSH2: 70–80%
+    - MSH6: 50–60%
+    - PMS2: 15–20%
     
-    | Parameter | Meaning | Typical Range |
-    |-----------|---------|----------------|
-    | $k_{\text{inc}}$ | Incubation shape | 4–6 |
-    | $\theta_{\text{inc}}$ | Incubation scale | 5–8 years |
-    | $k_{\text{lat}}$ | Latency shape | 2–4 |
-    | $\theta_{\text{lat}}$ | Latency scale | 1–3 years |
-    | $R_{\text{lifetime}}$ | Lifetime risk of second hit | 0.50–0.80 |
-    
-    *Distributions calibrated to published Lynch syndrome data (Hampel et al., 2008; Jenkins et al., 2006).*
-    """)
-
-    # --- FINAL SUMMARY TABLE ---
-    st.markdown(r"""
     ---
     
-    ### Summary: All Parameters at a Glance
+    ### Summary of All Parameters
     
     | Parameter | Meaning | Value |
     |-----------|---------|-------|
-    | $L$ | Lower physical bound | 1.0 mm |
-    | $U$ | Upper physical bound | 60.0 mm |
-    | $r$ | Growth rate (logit/week) | 0.0426 |
+    | $L$ | Lower bound | 1.0 mm |
+    | $U$ | Upper bound | 60.0 mm |
+    | $r$ | Growth rate | 0.0426 /week |
     | $\sigma_{\text{floor}}$ | Minimum noise | 0.5 mm |
-    | $\sigma_{\text{rel}}$ | Relative noise factor | 0.20 |
+    | $\sigma_{\text{rel}}$ | Relative noise | 0.20 |
     | $t_{\text{delay}}$ | Immunotherapy delay | 1.5–3.0 weeks |
-    | $\text{Var}(r)$ | Slope variance (growth) | Calibrated |
-    | $\text{Var}(r_{\text{decay}})$ | Slope variance (cure) | Calibrated |
-    | $\phi_{\text{bio}}$ | Biological variance fraction | 0–0.70 |
     | $k_{\text{inc}}$ | Incubation shape | 4–6 |
     | $\theta_{\text{inc}}$ | Incubation scale | 5–8 years |
     | $k_{\text{lat}}$ | Latency shape | 2–4 |
     | $\theta_{\text{lat}}$ | Latency scale | 1–3 years |
     
-    ---
-    
-    *Full simulation code available in the repository. Model parameters calibrated to published trial data (GARNET, KEYNOTE-177) and Lynch syndrome epidemiology.*
-    """)
-    ---
-    
-    #### Summary of Two‑Hit Parameters
-    
-    | Parameter | Meaning | Typical Range |
-    |-----------|---------|----------------|
-    | $k_{\text{inc}}$ | Incubation shape | 4–6 |
-    | $\theta_{\text{inc}}$ | Incubation scale | 5–8 years |
-    | $k_{\text{lat}}$ | Latency shape | 2–4 |
-    | $\theta_{\text{lat}}$ | Latency scale | 1–3 years |
-    | $R_{\text{lifetime}}$ | Lifetime risk of second hit | 0.50–0.80 |
-    
-    ---
-    
-    *Distributions calibrated to published Lynch syndrome data (Hampel et al., 2008; Jenkins et al., 2006).*
-    """)
-
-    
-    ---
-    
-    ### Summary: All Parameters at a Glance
-    
-    | Parameter | Meaning | Value |
-    |-----------|---------|-------|
-    | $L$ | Lower physical bound | 1.0 mm |
-    | $U$ | Upper physical bound | 60.0 mm |
-    | $r$ | Growth rate (logit/week) | 0.0426 |
-    | $\sigma_{\text{floor}}$ | Minimum noise | 0.5 mm |
-    | $\sigma_{\text{rel}}$ | Relative noise factor | 0.20 |
-    | $t_{\text{delay}}$ | Immunotherapy delay | 1.5–3.0 weeks |
-    | $\text{Var}(r)$ | Slope variance (growth) | Calibrated |
-    | $\text{Var}(r_{\text{decay}})$ | Slope variance (cure) | Calibrated |
-    | $\phi_{\text{bio}}$ | Biological variance fraction | 0–0.70 |
-    
-    ---
-    
-    *Full simulation code available in the repository. Model parameters calibrated to published trial data (GARNET, KEYNOTE-177).*
+    *Model parameters calibrated to published trial data (GARNET, KEYNOTE-177) and Lynch syndrome epidemiology.*
     """)
 
 # ============================================================
-# EXPANDER 4: CLINICAL CASE (BENIGN POLYP RESPONSE)
+# EXPANDER 4: CLINICAL CASE
 # ============================================================
 with st.expander("📋 Clinical Case: Benign Polyp Responded to Dostarlimab", expanded=False):
     st.markdown("""
@@ -793,16 +523,11 @@ with st.sidebar:
     st.markdown("### ℹ️ How to use")
     st.markdown("""
     - **🔍 Size → Biology:** Enter tumor size → get most likely biology.
-    
     - **🔮 Biology → Size:** Select biology → get predicted size range.
-    
-    - **📈 Growth & Immunotherapy:** Click expander to see 30mm and 60mm tumor growth/shrinkage curves.
-    
-    - **🕰️ Two‑Hit Dynamics:** Click expander to see incubation, latency, conditional & unconditional probability plots.
-    
-    - **📐 Mathematical Framework:** Click expander to see the full 15‑equation formulation.
-    
-    - **📋 Clinical Case:** Click expander to see real‑world validation with a benign polyp.
+    - **📈 Growth & Immunotherapy:** Click expander to see 30mm and 60mm curves.
+    - **🕰️ Two‑Hit Dynamics:** Click expander to see incubation, latency, conditional & unconditional plots.
+    - **📐 Mathematical Framework:** Click expander to see the full mathematical formulation.
+    - **📋 Clinical Case:** Click expander to see real‑world validation.
     """)
     st.markdown("---")
     st.markdown("**STEV model** – Lynch Syndrome Colorectal Tumors")
