@@ -464,7 +464,7 @@ with st.sidebar:
         st.session_state.expander_math = False
         st.session_state.expander_clinical = False
         
-        st.rerun()
+        # st.rerun()
     
     st.rerun().markdown("### ℹ️ How to use")
     st.markdown("- **Size -> Biology:** Enter size, get biology")
