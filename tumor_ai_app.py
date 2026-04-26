@@ -349,11 +349,11 @@ with st.expander("📐 Mathematical Framework of the STEV Model", expanded=False
 # ============================================================
 with st.expander("📋 Clinical Case: Benign Polyp", expanded=False):
     st.markdown("""
-    **Patient:** Lynch syndrome on dostarlimab. Flat benign polyp (~50-55mm) in descending colon. Could not be removed (ESD failed).
+    **Patient:** Lynch Syndrome on Immunotheraopy (Dostarlimab Infusion 500mg IV every treeb weeks). Flat base benign polyp (~50-55mm) located in descending colon, 30cm from anal verge. Could not be removed (ESD failed).
     
-    **Outcome:** Polyp shrank progressively (slower rate than Population mean). Third colonoscopy removed it successfully. Benign pathology.
+    **Outcome:** Polyp shrank progressively (slower rate than Population mean). Third colonoscopy removed it successfully after shrinkage. Benign pathology.
     
-    **Validation:** Both fast MLH1 tumor and slower benign polyp fell within model's 90% credible interval.
+    **Validation:** Both fast shrinkage rate for MLH1 tumor and slower shrinkage rate for benign polyp fell within model's predictions 90% Credible Interval.
     """)
     if os.path.exists("benign_polyp_STEV.png"):
         st.image("benign_polyp_STEV.png", caption="STEV projection vs. actual measurements", use_container_width=True)
@@ -433,12 +433,12 @@ with st.sidebar:
     st.code(app_url, language="text")
     
     st.markdown("### ℹ️ How to use")
-    st.markdown("- **Size -> Genotype:** Enter size, get genotype")
-    st.markdown("- **Genotype -> Size:** Select genotype, get size range")
+    st.markdown("- **Size -> Genotype:** Enter Time and Size, get Genotype")
+    st.markdown("- **Genotype -> Size:** Enter Time and Select Genotype, get Size Mean/Spread")
     st.markdown("- **Expanders:** Click to view curves, dynamics, math, and cases")
     st.markdown("---")
     st.markdown("**STEV model** - Lynch Syndrome")
-    st.markdown("*Horatio Quinones / et al*")
+    st.markdown("*Horatio Quinones / Sherry Johnson et al*")
 
 # ============================================================
 # MAIN APP WITH TWO TABS
