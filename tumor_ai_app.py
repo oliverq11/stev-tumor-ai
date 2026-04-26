@@ -231,7 +231,7 @@ with st.expander("📈 Tumor Growth and Immunotherapy Response (Treatment initia
         if os.path.exists("MLH1_55TMB.png"):
             st.image("MLH1_55TMB.png", caption="Actual MLH1 tumor response (red dot: ~20 mm to ~1.5 mm in 9 weeks) overlaid on STEV model projection.", with=350)
         else:
-            st.info("📁 MLH1_55TMB.png not found. Upload this file to see model validation.")
+            st.image("MLH1_55TMB.png", caption="Actual MLH1 tumor response...", width=350)
     
     with col2:
         st.markdown("""
