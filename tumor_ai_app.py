@@ -12,29 +12,14 @@ import os
 # ============================================================
 # PAGE CONFIGURATION
 # ============================================================
-st.set_page_config(page_title="STEV: Stochastic Tumor Response AI", layout="wide", page_icon="🧬")
+# Initialize only what is needed
+if 'disclaimer_shown' not in st.session_state:
+    st.session_state.disclaimer_shown = False
 
 # ============================================================
 # INITIALIZE SESSION STATE FOR RESET BUTTON
 # ============================================================
-if 'expander_growth' not in st.session_state:
-    st.session_state.expander_growth = False
-if 'expander_twohit' not in st.session_state:
-    st.session_state.expander_twohit = False
-if 'expander_math' not in st.session_state:
-    st.session_state.expander_math = False
-if 'expander_clinical' not in st.session_state:
-    st.session_state.expander_clinical = False
-if 'clear_prediction' not in st.session_state:
-    st.session_state.clear_prediction = False
-if 'week_reset' not in st.session_state:
-    st.session_state.week_reset = 8
-if 'size_reset' not in st.session_state:
-    st.session_state.size_reset = 1.4
-if 'week_forward_reset' not in st.session_state:
-    st.session_state.week_forward_reset = 8
-if 'biology_reset' not in st.session_state:
-    st.session_state.biology_reset = 'MLH1'
+
 
 # ============================================================
 # CUSTOM CSS WITH FORCED WHITE BUTTON TEXT (ALL MODES)
@@ -216,7 +201,7 @@ All predictions and plots are based on published clinical data (GARNET, KEYNOTE-
 # ============================================================
 # EXPANDER 1: GROWTH CURVES (30mm and 60mm) + MLH1 VALIDATION
 # ============================================================
-with st.expander("📈 Tumor Growth and Immunotherapy Response (Treatment initiated at 30mm and 60mm)", expanded=st.session_state.expander_growth):
+with st.expander("...", expanded=False):
     st.markdown("""
     ### 📖 What these curves show
     
@@ -267,7 +252,7 @@ with st.expander("📈 Tumor Growth and Immunotherapy Response (Treatment initia
 # ============================================================
 # EXPANDER 2: TWO-HIT DYNAMICS
 # ============================================================
-with st.expander("🕰️ Two-Hit Dynamics: Incubation, Latency, Age at Detection and Risk", expanded=st.session_state.expander_twohit):
+with st.expander("...", expanded=False):
     st.markdown("""
     ### 📖 What is "First Hit" and "Second Hit"?
     
@@ -333,7 +318,7 @@ with st.expander("🕰️ Two-Hit Dynamics: Incubation, Latency, Age at Detectio
 # ============================================================
 # EXPANDER 3: MATHEMATICAL FRAMEWORK (FULL 18 EQUATIONS)
 # ============================================================
-with st.expander("📐 Mathematical Framework of the STEV Model", expanded=st.session_state.expander_math):
+with st.expander("...", expanded=False):
     st.markdown(r"""
     ### A True Stochastic Process
     
@@ -513,7 +498,7 @@ with st.expander("📐 Mathematical Framework of the STEV Model", expanded=st.se
 # ============================================================
 # EXPANDER 4: CLINICAL CASE (Benign Polyp)
 # ============================================================
-with st.expander("📋 Clinical Case: Benign Polyp Responded to Dostarlimab", expanded=st.session_state.expander_clinical):
+with st.expander("...", expanded=False):
     st.markdown("""
     ### A Surprising Validation of the STEV Model
     
@@ -526,8 +511,7 @@ with st.expander("📋 Clinical Case: Benign Polyp Responded to Dostarlimab", ex
     
     **Outcome:**
     
-    - During dostarlimab treatment, the benign polyp **shrank progressively**
-    - Shrinkage was **slower than the STEV model's population mean** (unlike the faster-than-mean MLH1 tumor)
+    - During dostar **slower than the STEV model's population mean** (unlike the faster-than-mean MLH1 tumor)
     - Both trajectories - the fast MLH1 tumor and the slower benign polyp - fell **within the model's 90% credible interval**
     - Third colonoscopy successfully removed the polyp without complications
     - Post-removal pathology confirmed **benign** histology
@@ -632,23 +616,11 @@ with st.sidebar:
     
     st.markdown("---")
     
-    # RESET BUTTON
+    # RESET BUTTON - SIMPLE AND RELIABLE
     if st.button("🔄 Reset Everything", use_container_width=True):
-        # Reset widget values
-        st.session_state.week_reset = 8
-        st.session_state.size_reset = 1.4
-        st.session_state.week_forward_reset = 8
-        st.session_state.biology_reset = 'MLH1'
-        
-        # Clear prediction display
-        st.session_state.clear_prediction = True
-        
-        # Close all expanders
-        st.session_state.expander_growth = False
-        st.session_state.expander_twohit = False
-        st.session_state.expander_math = False
-        st.session_state.expander_clinical = False
-        
+        # Clear all session state values
+        for key in st.session_state.keys():
+            del st.session_state[key]
         st.rerun()
     
     st.markdown("### ℹ️ How to use")
@@ -677,7 +649,8 @@ with tab1:
     
     col_left, col_right = st.columns(2)
     with col_left:
-        week = st.selectbox("📅 Week", weeks, index=weeks.index(default_week) if default_week in weeks else 8)
+        week = st.selectbox("📅 Week", weeks, index=8, key="forward_week")
+        biology = st.selectbox("🧬 Biology", names, index=1)
     with col_right:
         size = st.slider("📏 Tumor size (mm)", min_value=0.0, max_value=30.0, value=default_size, step=0.1)
 
@@ -716,9 +689,10 @@ with tab2:
     
     col_left, col_right = st.columns(2)
     with col_left:
-        week = st.selectbox("📅 Week", weeks, index=weeks.index(default_week_forward) if default_week_forward in weeks else 8, key="forward_week")
+        week = st.selectbox("📅 Week", weeks, index=8)
+        size = st.slider("📏 Tumor size (mm)", min_value=0.0, max_value=30.0, value=1.4, step=0.1)
     with col_right:
-        biology = st.selectbox("🧬 Biology", names, index=names.index(default_biology) if default_biology in names else 1)
+        
 
     if st.button("Predict Size", use_container_width=True):
         with st.spinner("Calculating predicted size..."):
