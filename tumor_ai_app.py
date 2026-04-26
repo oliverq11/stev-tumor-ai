@@ -8,7 +8,7 @@ import pandas as pd
 import qrcode
 from io import BytesIO
 import os
-# HQS
+
 # ============================================================
 # PAGE CONFIGURATION
 # ============================================================
@@ -104,7 +104,7 @@ This tool uses a **Stochastic Model** (STEV) built the Tumor Evolution based on 
 Given tumor size and treatment time (weeks), returns most likely Tumor Genotype (POLE, MLH1, MSH2, MSI-H, MSH6).
 
 #### 2. 🔮 Genotype -> Size
-Given tumor genotype and treatment time (weeks), predicts expected tumor size and range with 95% Credible Intervals.
+Given tumor genotype and treatment time (weeks), predicts expected tumor size and range with 95% predictive intervals based on natural TMB distribution.
 
 #### 3. 📈 Growth and Immunotherapy Curves
 Trajectories of the Evolution of Geometrical Dimension Changes in Time, from tiny to 30mm/60mm followed by volume shrinkage, with 90% Credible Bands.
@@ -116,7 +116,7 @@ Incubation, latency, conditional and unconditional probability plots.
 Stochastic Tumor EVolution model (STEV).
 
 #### 6.  📋 Clinical Case 
-Colon Benign Poly Response to Immunotheraoy
+Colon Benign Polyp Response to Immunotherapy
 
 """)
 
@@ -363,7 +363,7 @@ with st.expander("📐 Mathematical Framework of the STEV Model", expanded=False
 # ============================================================
 with st.expander("📋 Clinical Case: Benign Polyp", expanded=False):
     st.markdown("""
-    **Patient:** Lynch Syndrome on Immunotheraopy (Dostarlimab Infusion 500mg IV every treeb weeks). A Sessile Polyp of the descending colon (712728006), estimated initial size (~50-55mm), and about 30cm from anal verge. Could not be removed (ESD failed).
+    **Patient:** Lynch Syndrome on Immunotherapy (Dostarlimab Infusion 500mg IV every three weeks). A Sessile Polyp of the descending colon (712728006), estimated initial size (~50-55mm), and about 30cm from anal verge. Could not be removed (ESD failed).
     
     **Outcome:** Polyp shrank progressively (slower rate than Population mean). Third colonoscopy removed it successfully after shrinkage. No dysplasia or malignancy.
     
@@ -406,6 +406,15 @@ for w in weeks:
 
 priors = {name: 1.0/5 for name in names}
 
+# TMB distribution parameters by genotype (mean, standard deviation)
+tmb_distribution = {
+    'POLE': {'mean': 100, 'std': 25},
+    'MLH1': {'mean': 55, 'std': 12.5},
+    'MSH2': {'mean': 50, 'std': 12.5},
+    'MSIH': {'mean': 45, 'std': 10},
+    'MSH6': {'mean': 25, 'std': 8}
+}
+
 def normal_pdf(x, mu, sigma):
     if sigma <= 0:
         return 1e-10
@@ -423,22 +432,55 @@ def predict_inverse(size, week):
         return {name: 0.2 for name in names}
     return {name: unnorm[name]/total for name in names}
 
-def predict_forward(biology, week, tmb=55):
-    mu = means[week][biology]
-    sigma = sigma_env[week]
+def predict_size_from_genotype(genotype, week):
+    """
+    Analytical prediction of tumor size based on TMB distribution for the genotype.
+    Returns expected size and 95% predictive interval.
+    """
+    # Get TMB distribution parameters for this genotype
+    tmb_mean = tmb_distribution[genotype]['mean']
+    tmb_std = tmb_distribution[genotype]['std']
     
-    # TMB adjustment factor (reference = 55)
-    # Higher TMB -> smaller tumor (better response)
-    tmb_factor = (55 / tmb) ** 0.25
-    mu_adjusted = mu * tmb_factor
-    mu_adjusted = max(1.1, mu_adjusted)  # Don't go below cure floor
+    # Create fine grid of TMB values (0.1 to 200, 2000 points)
+    tmb_grid = np.linspace(0.1, 200, 2000)
     
-    sigma_adjusted = sigma * (tmb_factor ** 0.5)
+    # Calculate Gaussian weights (PDF) - unnormalized
+    weights = norm.pdf(tmb_grid, tmb_mean, tmb_std)
+    # Normalize to sum to 1 (discrete approximation of the distribution)
+    weights = weights / weights.sum()
     
-    lower = max(0, mu_adjusted - 1.96 * sigma_adjusted)
-    upper = mu_adjusted + 1.96 * sigma_adjusted
-    ci_95 = (lower, upper)
-    return mu_adjusted, sigma_adjusted, ci_95
+    # Calculate predicted size for each TMB
+    sizes = []
+    for tmb in tmb_grid:
+        mu_base = means[week][genotype]
+        # TMB adjustment factor (reference = 55)
+        tmb_factor = (55 / tmb) ** 0.25
+        mu_adjusted = max(1.1, mu_base * tmb_factor)
+        sizes.append(mu_adjusted)
+    sizes = np.array(sizes)
+    
+    # Expected value (weighted average)
+    expected_size = np.sum(sizes * weights)
+    
+    # Sort for percentile calculation
+    sorted_indices = np.argsort(sizes)
+    sorted_sizes = sizes[sorted_indices]
+    sorted_weights = weights[sorted_indices]
+    cumulative_weights = np.cumsum(sorted_weights)
+    
+    # Find 2.5th and 97.5th percentiles
+    lower_idx = np.searchsorted(cumulative_weights, 0.025)
+    upper_idx = np.searchsorted(cumulative_weights, 0.975)
+    
+    # Ensure indices are within bounds
+    lower_idx = max(0, min(lower_idx, len(sorted_sizes) - 1))
+    upper_idx = max(0, min(upper_idx, len(sorted_sizes) - 1))
+    
+    lower_size = sorted_sizes[lower_idx]
+    upper_size = sorted_sizes[upper_idx]
+    
+    # Also return the weighted density for plotting
+    return expected_size, (lower_size, upper_size), sizes, weights
 
 # ============================================================
 # SIDEBAR
@@ -459,7 +501,7 @@ with st.sidebar:
     
     st.markdown("### ℹ️ How to use")
     st.markdown("- **Size -> Genotype:** Enter Time and Size, get Genotype")
-    st.markdown("- **Genotype -> Size:** Enter Time and Select Genotype, get Size Mean/Spread")
+    st.markdown("- **Genotype -> Size:** Enter Time and Select Genotype, get Size Expected Value and Range")
     st.markdown("- **Expanders:** Click to view curves, dynamics, math, and cases")
     st.markdown("---")
     st.markdown("**STEV model** - Lynch Syndrome")
@@ -510,7 +552,7 @@ with tab1:
         st.markdown("The table below shows the **top 10 most likely (Genotype, TMB) combinations** for the same week and tumor size:")
         
         # TMB range: 10 to 95, step 5
-        tmb_values = list(range(10, 100, 5))  # 10, 15, 20, ..., 95
+        tmb_values = list(range(10, 100, 5))
         all_combinations = []
         
         for tmb in tmb_values:
@@ -553,30 +595,33 @@ with tab2:
     with col_right:
         genotype = st.selectbox("🧬 Genotype", names, index=1)
     
-    # TMB input - optional, defaults to 55
-    tmb = st.number_input(
-        "🧬 Tumor Mutational Burden (TMB) - optional",
-        min_value=0,
-        max_value=200,
-        value=55,
-        step=5,
-        help="Skip to use default (55). Higher TMB predicts better response."
-    )
-
     if st.button("Predict Size", use_container_width=True):
-        mu, sigma, ci = predict_forward(genotype, week, tmb)
+        expected_size, ci, sizes, weights = predict_size_from_genotype(genotype, week)
         
         col_a, col_b = st.columns(2)
-        col_a.metric("📏 Predicted mean size", f"{mu:.2f} mm")
-        col_b.metric("📊 95% credible interval", f"[{ci[0]:.2f}, {ci[1]:.2f}] mm")
+        col_a.metric("📏 Expected size", f"{expected_size:.2f} mm")
+        col_b.metric("📊 95% predictive interval", f"[{ci[0]:.2f}, {ci[1]:.2f}] mm")
         
-        st.caption(f"📊 Prediction based on TMB = {tmb} (default is 55)")
+        # Add caption explaining the method
+        tmb_mean = tmb_distribution[genotype]['mean']
+        tmb_std = tmb_distribution[genotype]['std']
+        st.caption(f"💡 Based on natural TMB distribution for {genotype} (mean={tmb_mean}, SD={tmb_std})")
         
-        x_vals = np.linspace(max(0, mu - 4*sigma), mu + 4*sigma, 200)
-        y_vals = norm.pdf(x_vals, mu, sigma)
+        # Create weighted density plot
+        # We need to create a smooth curve from the weighted samples
+        # Use kernel density estimation on weighted points
+        from scipy import stats
+        
+        # Create weighted KDE
+        kde = stats.gaussian_kde(sizes, weights=weights)
+        x_vals = np.linspace(max(0.5, min(sizes) * 0.8), max(sizes) * 1.2, 200)
+        y_vals = kde(x_vals)
+        
         fig = go.Figure()
-        fig.add_trace(go.Scatter(x=x_vals, y=y_vals, fill='tozeroy', line_color='#1e466e', name='Density'))
-        fig.add_vline(x=mu, line_dash="dash", line_color="red", annotation_text=f"Mean = {mu:.2f} mm")
+        fig.add_trace(go.Scatter(x=x_vals, y=y_vals, fill='tozeroy', line_color='#1e466e', name='Probability density'))
+        fig.add_vline(x=expected_size, line_dash="dash", line_color="red", annotation_text=f"Expected = {expected_size:.2f} mm")
+        fig.add_vline(x=ci[0], line_dash="dot", line_color="gray", annotation_text=f"2.5%")
+        fig.add_vline(x=ci[1], line_dash="dot", line_color="gray", annotation_text=f"97.5%")
         fig.update_layout(title=f'{genotype} at week {week}',
                           xaxis_title='Tumor size (mm)',
                           yaxis_title='Probability density')
