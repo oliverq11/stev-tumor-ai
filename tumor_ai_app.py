@@ -509,6 +509,136 @@ with st.expander("📐 Mathematical Framework of the STEV Model", expanded=False
     $$
     
     **What it does:** Provides the 90% credible intervals shown as shaded bands in the plots.
+
+    st.markdown(r"""
+    ---
+    
+    ### Two‑Hit Dynamics: Mathematical Formulation
+    
+    The following equations describe the **stochastic process of tumor initiation and detection** in Lynch syndrome.
+    
+    ---
+    
+    #### Equation 16: Incubation (Birth → Second Hit)
+    
+    The time from birth until the second hit occurs follows a **Gamma distribution**:
+    
+    $$
+    f_{\text{inc}}(t) = \frac{t^{k-1} e^{-t/\theta}}{\theta^k \, \Gamma(k)}, \quad t \ge 0
+    $$
+    
+    | Symbol | Meaning | Typical Value |
+    |--------|---------|----------------|
+    | $k$ | Shape parameter | ~4–6 |
+    | $\theta$ | Scale parameter | ~5–8 years |
+    | $\Gamma(k)$ | Gamma function | |
+    
+    **What it does:** Models the random waiting time for the second MMR hit. Most second hits occur between ages 30–55 years.
+    
+    ---
+    
+    #### Equation 17: Latency (Second Hit → Detectable Tumor)
+    
+    Once the second hit occurs, the tumor grows until it becomes detectable (>1 mm). This waiting time also follows a **Gamma distribution**:
+    
+    $$
+    f_{\text{lat}}(t) = \frac{t^{k_{\text{lat}}-1} e^{-t/\theta_{\text{lat}}}}{\theta_{\text{lat}}^{k_{\text{lat}}} \, \Gamma(k_{\text{lat}})}, \quad t \ge 0
+    $$
+    
+    **What it does:** Models the time from tumor initiation to clinical detection. Shorter latency means faster-growing tumors.
+    
+    ---
+    
+    #### Equation 18: Convolution (Incubation + Latency)
+    
+    The **age at detection** is the sum of two independent random variables:
+    
+    $$
+    T_{\text{detection}} = T_{\text{inc}} + T_{\text{lat}}
+    $$
+    
+    The probability density of the sum is the **convolution integral**:
+    
+    $$
+    f_{\text{det}}(t) = \int_{0}^{t} f_{\text{inc}}(\tau) \, f_{\text{lat}}(t - \tau) \, d\tau
+    $$
+    
+    **What it does:** Combines the waiting time for the second hit with the subsequent growth time to get the overall age at clinical detection.
+    
+    ---
+    
+    #### Equation 19: Conditional Probability of Detection by Age
+    
+    Given that a second hit has occurred (by age $t$), the **conditional probability** that the tumor has been detected is:
+    
+    $$
+    P_{\text{cond}}(t) = \frac{\int_{0}^{t} f_{\text{det}}(\tau) \, d\tau}{\int_{0}^{\infty} f_{\text{inc}}(\tau) \, d\tau}
+    $$
+    
+    Or more simply, if we assume the second hit always occurs eventually:
+    
+    $$
+    P_{\text{cond}}(t) = \int_{0}^{t} f_{\text{det}}(\tau) \, d\tau
+    $$
+    
+    **What it does:** Answers the question: *"If a Lynch patient has already experienced the second hit, what is the probability that their tumor has been detected by age $t$?"*
+    
+    ---
+    
+    #### Equation 20: Unconditional Probability of Detection by Age
+    
+    The **unconditional probability** accounts for the fact that not all Lynch patients experience the second hit. Let $P_{\text{second}}(t)$ be the probability that a second hit has occurred by age $t$:
+    
+    $$
+    P_{\text{second}}(t) = \int_{0}^{t} f_{\text{inc}}(\tau) \, d\tau
+    $$
+    
+    The unconditional probability of detection by age $t$ is:
+    
+    $$
+    P_{\text{uncond}}(t) = \int_{0}^{t} f_{\text{det}}(\tau) \cdot P_{\text{second}}(t - \tau) \, d\tau
+    $$
+    
+    Alternatively, if lifetime risk of a second hit is $R_{\text{lifetime}}$ (typically ~80% for Lynch syndrome):
+    
+    $$
+    P_{\text{uncond}}(t) = R_{\text{lifetime}} \cdot P_{\text{cond}}(t)
+    $$
+    
+    **What it does:** Answers the question: *"At birth, what is the overall chance that a Lynch patient will have a detected tumor by age $t$?"*
+    
+    ---
+    
+    #### Equation 21: Lifetime Risk Calibration
+    
+    For Lynch syndrome, the lifetime risk of colorectal cancer is approximately:
+    
+    | Gene | Lifetime Risk |
+    |------|---------------|
+    | MLH1 | ~70–80% |
+    | MSH2 | ~70–80% |
+    | MSH6 | ~50–60% |
+    | PMS2 | ~15–20% |
+    
+    These values are used to calibrate the scale parameter $\theta$ in the incubation Gamma distribution.
+    
+    ---
+    
+    #### Summary of Two‑Hit Parameters
+    
+    | Parameter | Meaning | Typical Range |
+    |-----------|---------|----------------|
+    | $k_{\text{inc}}$ | Incubation shape | 4–6 |
+    | $\theta_{\text{inc}}$ | Incubation scale | 5–8 years |
+    | $k_{\text{lat}}$ | Latency shape | 2–4 |
+    | $\theta_{\text{lat}}$ | Latency scale | 1–3 years |
+    | $R_{\text{lifetime}}$ | Lifetime risk of second hit | 0.50–0.80 |
+    
+    ---
+    
+    *Distributions calibrated to published Lynch syndrome data (Hampel et al., 2008; Jenkins et al., 2006).*
+    """)
+
     
     ---
     
