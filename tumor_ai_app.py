@@ -98,16 +98,16 @@ st.markdown('<div class="author">Horatio Quinones / Sherry Johnson / et-al</div>
 st.markdown("""
 ### 🔍 What this app does
 
-This tool uses a **stochastic model** (STEV) built on real clinical data from Lynch syndrome colorectal cancer patients treated with dostarlimab.
+This tool uses a **stochastic model** (STEV) built on real clinical data from Lynch Syndrome Colorectal Cancer patients and treated with dostarlimab without other previous treatments.
 
 #### 1. 🔍 Size -> Biology
-Given tumor size and week, returns most likely biology (POLE, MLH1, MSH2, MSI-H, MSH6).
+Given tumor size and time (week), returns most likely biology (POLE, MLH1, MSH2, MSI-H, MSH6).
 
 #### 2. 🔮 Biology -> Size
 Given biology and week, predicts expected tumor size range with 95% credible intervals.
 
 #### 3. 📈 Growth and Immunotherapy Curves
-Trajectories from tiny to 30mm/60mm, then shrinkage, with 90% credible bands.
+Trajectories of the Evolution of Geometrical Dimension Changes in Time, from tiny to 30mm/60mm followed by volume shrinkage, with 90% credible bands.
 
 #### 4. 🕰️ Two-Hit Dynamics
 Incubation, latency, conditional and unconditional probability plots.
