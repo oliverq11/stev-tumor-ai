@@ -159,22 +159,22 @@ st.markdown("""
 ### 🔍 What this app does
 
 st.markdown("""
-### 🔍 What this app does
+### What this app does
 
 This tool uses a **stochastic model** (STEV) built on real clinical data from Lynch syndrome colorectal cancer patients treated with dostarlimab. The app is organized into four main sections:
 
 ---
 
-#### 1. 🔍 Size -> Biology (Prediction Tool)
+#### 1. Size -> Biology (Prediction Tool)
 Given a tumor size at a specific week, the model returns the **most likely underlying biology** (POLE, MLH1, MSH2, MSI-H, or MSH6) with full probability distribution.
 
-#### 2. 🔮 Biology -> Size (Prediction Tool)
+#### 2. Biology -> Size (Prediction Tool)
 Given a known tumor biology, the model predicts the **expected tumor size range** at any week, including 95% credible intervals.
 
-#### 3. 📈 Growth & Immunotherapy Curves (Visualization)
+#### 3. Growth & Immunotherapy Curves (Visualization)
 Two plots showing the **complete tumor trajectory** (growth + immunotherapy shrinkage) starting from 30 mm and 60 mm, with 90% credible bands.
 
-#### 4. 🕰️ Two-Hit Dynamics (Visualization)
+#### 4. Two-Hit Dynamics (Visualization)
 Six plots that illustrate the **stochastic process of tumor initiation** in Lynch syndrome:
 - Incubation (birth to second hit)
 - Latency (second hit to detectable tumor)
@@ -184,9 +184,9 @@ Six plots that illustrate the **stochastic process of tumor initiation** in Lync
 
 #### Additionally, the app includes:
 
-- **📐 Mathematical Framework** - Full 18-equation formulation of the stochastic model, including logit transformation, variance decomposition, CLT confidence bands, Gamma distributions, and convolution for two-hit dynamics.
+- **Mathematical Framework** - Full 18-equation formulation of the stochastic model, including logit transformation, variance decomposition, CLT confidence bands, Gamma distributions, and convolution for two-hit dynamics.
 
-- **📋 Clinical Case** - Real-world validation: a benign flat polyp that shrank under dostarlimab, with response slower than the model mean but within the 90% credible interval.
+- **Clinical Case** - Real-world validation: a benign flat polyp that shrank under dostarlimab, with response slower than the model mean but within the 90% credible interval.
 
 ---
 
