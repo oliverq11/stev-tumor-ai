@@ -424,10 +424,12 @@ def predict_inverse(size, week):
         return {name: 0.2 for name in names}
     return {name: unnorm[name]/total for name in names}
 
-def predict_forward(genotype, week):
-    mu = means[week][genotype]
+def predict_forward(biology, week):
+    mu = means[week][biology]
     sigma = sigma_env[week]
-    ci_95 = (mu - 1.96*sigma, mu + 1.96*sigma)
+    lower = max(0, mu - 1.96 * sigma)  # Prevents negative tumor size (biologically impossible)
+    upper = mu + 1.96 * sigma
+    ci_95 = (lower, upper)
     return mu, sigma, ci_95
 
 # ============================================================
