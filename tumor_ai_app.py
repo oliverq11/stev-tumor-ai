@@ -598,17 +598,20 @@ def predict_forward(biology, week):
 # ============================================================
 with st.sidebar:
     app_url = "https://stev-tumor-ai-skrobcqyqyyz4sjpvqdqmh.streamlit.app/"
+    
+    # QR Code for phone users
     qr = qrcode.QRCode(box_size=5, border=2)
     qr.add_data(app_url)
     qr.make(fit=True)
     img = qr.make_image(fill_color="black", back_color="white")
     buf = BytesIO()
     img.save(buf, format="PNG")
-    st.image(buf.getvalue(), width=150, caption="Scan to open on phone")
+    st.image(buf.getvalue(), width=150, caption="Scan with phone camera to open")
     
-    # --- CLICKABLE LINK FOR PC USERS ---
-    st.markdown("**Or open directly on PC:**")
-    st.markdown(f'<a href="{app_url}" target="_blank">{app_url}</a>', unsafe_allow_html=True)
+    # Copyable link for sharing between devices
+    st.markdown("**Or copy this link to share:**")
+    st.code(app_url, language="text")
+    st.caption("Tap the copy icon (top-right of code box) or select and copy the text")
     
     st.markdown("### ℹ️ How to use")
     st.markdown("""
