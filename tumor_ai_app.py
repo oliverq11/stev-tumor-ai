@@ -130,15 +130,23 @@ def predict_size_from_genotype(genotype, week, initial_size):
     
     return adjusted_size, (lower_size, upper_size), sizes, tmb_weights
 
-def predict_inverse(size, week):
-    """Size -> Genotype prediction (from your original code)"""
-    # Use hazard ratios with reference S0=23
+def predict_inverse(current_size, week, initial_size):
+    """Size -> Genotype prediction using initial size for trajectory scaling"""
     unnorm = {}
     for name in names:
-        # Scale the mean based on the reference
-        mu = S0_ref + HR[name] * (interpolate_trajectory(S0_ref, week) - S0_ref)
-        like = normal_pdf(size, mu, 2.0)  # Simplified sigma for inverse
+        # Get expected size at this week for this genotype (using initial_size)
+        expected_size = interpolate_trajectory(initial_size, week)
+        
+        # Apply hazard ratio for this genotype
+        adjusted_expected = expected_size * HR[name]
+        
+        # Likelihood (simplified - you can adjust sigma as needed)
+        sigma = 2.0  # You can make this week-dependent
+        like = normal_pdf(current_size, adjusted_expected, sigma)
+        
+        # Multiply by population prior
         unnorm[name] = like * genotype_prior[name]
+    
     total = sum(unnorm.values())
     if total == 0:
         return {name: 0.2 for name in names}
@@ -360,15 +368,19 @@ with st.sidebar:
 tab1, tab2 = st.tabs(["🔍 Size -> Genotype", "🔮 Genotype -> Size"])
 
 # ========== TAB 1: SIZE -> GENOTYPE ==========
+# ========== TAB 1: SIZE -> GENOTYPE ==========
 with tab1:
-    col_left, col_right = st.columns(2)
+    col_left, col_mid, col_right = st.columns(3)
     with col_left:
-        week = st.selectbox("📅 Week", weeks_list[:25], index=8)  # Weeks 0-24
+        week = st.selectbox("📅 Week", weeks_list[:25], index=8)
+    with col_mid:
+        initial_size = st.slider("📏 Initial size at week 0 (mm)", min_value=10.0, max_value=60.0, value=23.0, step=1.0, help="Baseline tumor size before treatment")
     with col_right:
-        size = st.slider("📏 Tumor size (mm)", 0.0, 60.0, 1.4, 0.1)
+        size = st.slider("📏 Current tumor size (mm)", 0.0, 60.0, 1.4, 0.1)
 
     if st.button("Predict Genotype", use_container_width=True):
-        probs = predict_inverse(size, week)
+        # Modified predict_inverse to use initial_size
+        probs = predict_inverse(size, week, initial_size)
         most_likely = max(probs, key=probs.get)
         
         col_a, col_b = st.columns(2)
@@ -378,7 +390,7 @@ with tab1:
         df = pd.DataFrame(list(probs.items()), columns=['Genotype', 'Probability'])
         fig = px.bar(df, x='Genotype', y='Probability', color='Genotype',
                      color_discrete_sequence=px.colors.qualitative.Set2,
-                     title=f'Week {week}, size = {size} mm')
+                     title=f'Initial size = {initial_size} mm, Week {week}, Current size = {size} mm')
         fig.update_layout(yaxis_title='Posterior probability', xaxis_title='Genotype')
         st.plotly_chart(fig, use_container_width=True)
         
