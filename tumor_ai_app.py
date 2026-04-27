@@ -7,7 +7,7 @@ from scipy.integrate import trapezoid, cumulative_trapezoid
 np.random.seed(42)
 # HQS 04/27/2026 morning early
 # ------------------------------
-# Second hit distribution (Gamma)
+# Second hit distribution (Gamma) hqs
 # ------------------------------
 inc_mean = 44.0
 inc_std = 10.0
