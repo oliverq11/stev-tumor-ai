@@ -201,7 +201,8 @@ def get_growth_time(target_size, genotype='MLH1', tmb=55):
     """
     # Scaling factors
     tmb_factor = (55 / tmb) ** 0.25
-    hr_factor = HR[genotype] / HR['MLH1']  # Relative to MLH1
+   # hr_factor = HR[genotype] / HR['MLH1']  # Relative to MLH1
+    hr_factor = HR['MLH1'] / HR[name]
     
     # Total scaling for time
     time_factor = tmb_factor * hr_factor
