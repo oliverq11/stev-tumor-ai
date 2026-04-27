@@ -238,18 +238,34 @@ def normal_pdf(x, mu, sigma):
     return np.exp(-0.5 * ((x - mu)/sigma)**2) / (sigma * np.sqrt(2*np.pi))
 
 def predict_inverse(current_size, week, initial_size):
-    """Size -> Genotype prediction using your cure data and sigma from growth data"""
+    """
+    Returns posterior probability for each genotype.
+    Uses inverted HR scaling for cure phase (week >= 3) and growth_data SD for early weeks.
+    """
     unnorm = {}
     
+    # Determine sigma based on week
+    if week <= 2:
+        # Growth phase: use SD from growth_data
+        if week in growth_data:
+            sigma = growth_data[week][1]
+        else:
+            sigma = 0.5
+    else:
+        # Cure phase: use fixed sigma (calibrated to 0.75 mm)
+        sigma = 0.75
+    
+    # Debug print
+    print(f"\n--- Debug: Week={week}, Initial={initial_size}, Current={current_size}, Sigma={sigma} ---")
+    
     for name in names:
-        # Get expected size from cure data
+        # Get expected size from cure_data
         week_data = cure_data[week]
         
-        # Interpolate expected size for this initial_size
         if initial_size <= 10:
-            expected = week_data[0]
+            expected_raw = week_data[0]
         elif initial_size >= 60:
-            expected = week_data[-1]
+            expected_raw = week_data[-1]
         else:
             for i in range(len(starting_sizes)-1):
                 if starting_sizes[i] <= initial_size <= starting_sizes[i+1]:
@@ -258,37 +274,44 @@ def predict_inverse(current_size, week, initial_size):
                     low_v = week_data[i]
                     high_v = week_data[i+1]
                     frac = (initial_size - low_s) / (high_s - low_s)
-                    expected = low_v + frac * (high_v - low_v)
+                    expected_raw = low_v + frac * (high_v - low_v)
                     break
         
-        # Apply genotype scaling from your HR factors
-        hr_factor = HR[name] / HR['MLH1']
-        expected = expected * hr_factor
+        # Apply INVERTED HR scaling for cure phase (higher HR = faster shrinkage = smaller expected)
+        # For growth phase (week <=2), you might want different scaling
+        if week <= 2:
+            # Growth phase: higher HR = larger expected (faster growth)
+            hr_factor = HR[name] / HR['MLH1']
+        else:
+            # Cure phase: higher HR = smaller expected (faster shrinkage)
+            hr_factor = HR['MLH1'] / HR[name]
+        
+        expected = expected_raw * hr_factor
         expected = max(1.1, expected)
         
-        # Sigma from your growth data (standard deviation at this week)
-        if week in growth_data:
-            sigma = growth_data[week][1]  # SD_S_sum from your data
-        else:
-            sigma = 0.5  # fallback, though your data covers weeks 0-90
-
-        print(f"Genotype: {name}")
-        print(f"  Expected (raw): {expected}")
-        print(f"  HR factor: {hr_factor}")
-        print(f"  Expected (scaled): {expected}")
-        print(f"  Current: {current_size}")
-        print(f"  Sigma: {sigma}")
-        print(f"  Likelihood: {like}")
+        # Calculate likelihood (normal PDF)
+        diff = current_size - expected
+        z_score = diff / sigma
+        likelihood = np.exp(-0.5 * z_score * z_score) / (sigma * np.sqrt(2 * np.pi))
         
-        # Likelihood (normal PDF using your sigma)
-        like = np.exp(-0.5 * ((current_size - expected) / sigma)**2) / (sigma * np.sqrt(2*np.pi))
+        # Debug print
+        print(f"  {name}: expected_raw={expected_raw:.3f}, hr_factor={hr_factor:.4f}, expected={expected:.3f}, diff={diff:.3f}, likelihood={likelihood:.6e}")
         
-        unnorm[name] = like * genotype_prior[name]
+        # Apply prior
+        unnorm[name] = likelihood * genotype_prior[name]
     
     total = sum(unnorm.values())
     if total == 0:
-        return {name: 0.2 for name in names}
-    return {name: unnorm[name]/total for name in names}
+        return {name: 1.0/len(names) for name in names}
+    
+    # Normalize to get posterior probabilities
+    posterior = {name: unnorm[name]/total for name in names}
+    
+    print(f"  Total unnormalized: {total:.6e}")
+    for name in names:
+        print(f"  {name} posterior: {posterior[name]:.4f}")
+    
+    return posterior
 
 # ============================================================
 # CUSTOM CSS (same as before)
