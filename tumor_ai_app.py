@@ -117,7 +117,7 @@ ENV_INFLATION = 1.0 / np.sqrt(0.70)  # ≈ 1.195
 
 # Genotype HR factors (from your code)
 HR = {'POLE': 1.159, 'MLH1': 1.127, 'MSH2': 1.117, 'MSIH': 1.099, 'MSH6': 1.091, 'PMS2': 1.000}
-names = ['POLE', 'MLH1', 'MSH2', 'MSIH', 'MSH6']
+names = ['POLE', 'MLH1', 'MSH2', 'MSIH', 'MSH6' , 'PMS2']
 
 # Population priors for genotypes
 genotype_prior = {'POLE': 0.03, 'MLH1': 0.40, 'MSH2': 0.40, 'MSIH': 0.02, 'MSH6': 0.15, 'PMS2': 0.11}
@@ -281,7 +281,11 @@ def predict_inverse(current_size, week, initial_size):
         # For growth phase (week <=2), you might want different scaling
         if week <= 2:
             # Growth phase: higher HR = larger expected (faster growth)
-            hr_factor = HR[name] / HR['MLH1']
+            # For cure phase (week >= 3), invert the HR scaling
+if week <= 2:
+    hr_factor = HR[name] / HR['MLH1']
+else:
+    hr_factor = HR['MLH1'] / HR[name]
         else:
             # Cure phase: higher HR = smaller expected (faster shrinkage)
             hr_factor = HR['MLH1'] / HR[name]
