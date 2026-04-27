@@ -400,7 +400,7 @@ with tab1:
 with tab2:
     col_left, col_right = st.columns(2)
     with col_left:
-        week = st.selectbox("📅 Week", weeks_list[:25], index=8, key="forward_week")
+        week = st.selectbox("📅 Week", weeks_list, index=8, key="forward_week")
     with col_right:
         genotype = st.selectbox("🧬 Genotype", names, index=1)
     
