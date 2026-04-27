@@ -202,7 +202,7 @@ def get_growth_time(target_size, genotype='MLH1', tmb=55):
     """
     # Scaling factors
     tmb_factor = (55 / tmb) ** 0.25
-   # hr_factor = HR[genotype] / HR['MLH1']  # Relative to MLH1
+   #= HR[genotype] / HR['MLH1']  # Relative to MLH1
     hr_factor = HR['MLH1'] / HR[genotype]
     
     # Total scaling for time
@@ -284,6 +284,14 @@ def predict_inverse(current_size, week, initial_size):
             # For cure phase (week >= 3), invert the HR scaling
 if week <= 2:
     hr_factor = HR[name] / HR['MLH1']
+    # Apply genotype scaling (INVERTED for cure phase)
+        if week <= 2:
+            hr_factor = HR[name] / HR['MLH1']
+        else:
+            hr_factor = HR['MLH1'] / HR[name]
+        expected = expected * hr_factor
+
+
 else:
     hr_factor = HR['MLH1'] / HR[name]
         else:
