@@ -255,9 +255,6 @@ def predict_inverse(current_size, week, initial_size):
         # Cure phase: use fixed sigma (calibrated to 0.75 mm)
         sigma = 0.75
     
-    # Debug print
-    print(f"\n--- Debug: Week={week}, Initial={initial_size}, Current={current_size}, Sigma={sigma} ---")
-    
     for name in names:
         # Get expected size from cure_data
         week_data = cure_data[week]
@@ -277,7 +274,7 @@ def predict_inverse(current_size, week, initial_size):
                     expected_raw = low_v + frac * (high_v - low_v)
                     break
         
-        # Apply INVERTED HR scaling for cure phase
+        # Apply HR scaling (INVERTED for cure phase)
         if week <= 2:
             # Growth phase: higher HR = larger expected (faster growth)
             hr_factor = HR[name] / HR['MLH1']
@@ -293,9 +290,6 @@ def predict_inverse(current_size, week, initial_size):
         z_score = diff / sigma
         likelihood = np.exp(-0.5 * z_score * z_score) / (sigma * np.sqrt(2 * np.pi))
         
-        # Debug print
-        print(f"  {name}: expected_raw={expected_raw:.3f}, hr_factor={hr_factor:.4f}, expected={expected:.3f}, diff={diff:.3f}, likelihood={likelihood:.6e}")
-        
         # Apply prior
         unnorm[name] = likelihood * genotype_prior[name]
     
@@ -305,44 +299,6 @@ def predict_inverse(current_size, week, initial_size):
     
     # Normalize to get posterior probabilities
     posterior = {name: unnorm[name]/total for name in names}
-    
-    print(f"  Total unnormalized: {total:.6e}")
-    for name in names:
-        print(f"  {name} posterior: {posterior[name]:.4f}")
-    
-    return posterior
-
-
-else:
-    hr_factor = HR['MLH1'] / HR[name]
-        else:
-            # Cure phase: higher HR = smaller expected (faster shrinkage)
-            hr_factor = HR['MLH1'] / HR[name]
-        
-        expected = expected_raw * hr_factor
-        expected = max(1.1, expected)
-        
-        # Calculate likelihood (normal PDF)
-        diff = current_size - expected
-        z_score = diff / sigma
-        likelihood = np.exp(-0.5 * z_score * z_score) / (sigma * np.sqrt(2 * np.pi))
-        
-        # Debug print
-        print(f"  {name}: expected_raw={expected_raw:.3f}, hr_factor={hr_factor:.4f}, expected={expected:.3f}, diff={diff:.3f}, likelihood={likelihood:.6e}")
-        
-        # Apply prior
-        unnorm[name] = likelihood * genotype_prior[name]
-    
-    total = sum(unnorm.values())
-    if total == 0:
-        return {name: 1.0/len(names) for name in names}
-    
-    # Normalize to get posterior probabilities
-    posterior = {name: unnorm[name]/total for name in names}
-    
-    print(f"  Total unnormalized: {total:.6e}")
-    for name in names:
-        print(f"  {name} posterior: {posterior[name]:.4f}")
     
     return posterior
 
