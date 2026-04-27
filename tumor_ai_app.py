@@ -638,7 +638,8 @@ with tab1:
         current_size = st.slider("📏 Current tumor size (mm)", 0.0, 60.0, 1.4, 0.1)
     
     # Show estimated growth time
-    weeks_to_grow, lower_grow, upper_grow = (initial_size)
+ #   weeks_to_grow, lower_grow, upper_grow = (initial_size)
+    weeks_to_grow, lower_grow, upper_grow = get_growth_time(initial_size, 'MLH1')
     st.caption(f"📈 Estimated time to reach {initial_size:.1f} mm: **{weeks_to_grow:.0f} weeks** [90% CI: {lower_grow:.0f}-{upper_grow:.0f}]")
     
     if st.button("Predict Genotype", use_container_width=True):
