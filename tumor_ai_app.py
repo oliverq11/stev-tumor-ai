@@ -664,12 +664,12 @@ with tab1:
     if current_size > initial_size:
         st.error(
             "🚨 **ALERT: TUMOR NOT RESPONDING TO IMMUNOTHERAPY** 🚨\n\n"
-            f"Current size ({current_size:.1f} mm) is LARGER than initial size ({initial_size:.1f} mm).\n\n"
-            "Consider: treatment change, biopsy, or clinical review."
+            f"Current size ({current_size:.1f} mm) is LARGER than Initial size ({initial_size:.1f} mm).\n\n"
+            "Consider: Prompt Clinical Review, Alternate Treatment."
         )
     elif current_size > initial_size * 0.9:
         st.warning(
-            f"⚠️ **Minimal response:** Current size ({current_size:.1f} mm) is >90% of initial size ({initial_size:.1f} mm). Monitor closely."
+            f"⚠️ **Minimal Response:** Current size ({current_size:.1f} mm) is >90% of Initial size ({initial_size:.1f} mm). Monitor closely."
         )
     # ============================================================
     
