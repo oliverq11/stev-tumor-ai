@@ -400,8 +400,8 @@ with st.expander("🕰️ Two-Hit Dynamics: Tumor Incubation, Latency, Detection
     st.markdown("""
     ### 📖 What is "First Hit" and "Second Hit"?
     
-    - **First hit (inherited mutation):** A person with Lynch syndrome is born with **one faulty copy** of an MMR gene inherited from a parent.
-    - **Second hit (acquired mutation):** The second healthy copy is damaged or lost, leading to MSI and tumor formation.
+    - **First hit (inherited mutation):** Germline Mutation Inherited from a parent. Present at birth (age 0) with **one faulty copy** of an MMR gene inherited from a parent.
+    - **Second hit (acquired mutation):** Somatic inactivation of the remaining normal allele, second healthy copy is damaged or lost, leading to MSI and tumor early phase evolution.
     """)
     
     col1, col2 = st.columns(2)
