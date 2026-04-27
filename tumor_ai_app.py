@@ -272,13 +272,13 @@ def predict_inverse(current_size, week, initial_size):
         else:
             sigma = 0.5  # fallback, though your data covers weeks 0-90
 
-    print(f"Genotype: {name}")
-    print(f"  Expected (raw): {expected}")
-    print(f"  HR factor: {hr_factor}")
-    print(f"  Expected (scaled): {expected}")
-    print(f"  Current: {current_size}")
-    print(f"  Sigma: {sigma}")
-    print(f"  Likelihood: {like}")
+        print(f"Genotype: {name}")
+        print(f"  Expected (raw): {expected}")
+        print(f"  HR factor: {hr_factor}")
+        print(f"  Expected (scaled): {expected}")
+        print(f"  Current: {current_size}")
+        print(f"  Sigma: {sigma}")
+        print(f"  Likelihood: {like}")
         
         # Likelihood (normal PDF using your sigma)
         like = np.exp(-0.5 * ((current_size - expected) / sigma)**2) / (sigma * np.sqrt(2*np.pi))
