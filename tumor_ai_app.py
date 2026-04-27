@@ -116,11 +116,11 @@ growth_data = {
 ENV_INFLATION = 1.0 / np.sqrt(0.70)  # ≈ 1.195
 
 # Genotype HR factors (from your code)
-HR = {'POLE': 1.159, 'MLH1': 1.127, 'MSH2': 1.117, 'MSIH': 1.099, 'MSH6': 1.091}
+HR = {'POLE': 1.159, 'MLH1': 1.127, 'MSH2': 1.117, 'MSIH': 1.099, 'MSH6': 1.091, 'PMS2': 1.000}
 names = ['POLE', 'MLH1', 'MSH2', 'MSIH', 'MSH6']
 
 # Population priors for genotypes
-genotype_prior = {'POLE': 0.03, 'MLH1': 0.40, 'MSH2': 0.40, 'MSIH': 0.02, 'MSH6': 0.15}
+genotype_prior = {'POLE': 0.03, 'MLH1': 0.40, 'MSH2': 0.40, 'MSIH': 0.02, 'MSH6': 0.15, 'PMS2': 0.11}
 
 # TMB distribution parameters
 tmb_distribution = {
@@ -129,6 +129,7 @@ tmb_distribution = {
     'MSH2': {'mean': 50, 'std': 12.5},
     'MSIH': {'mean': 45, 'std': 10},
     'MSH6': {'mean': 25, 'std': 8},
+    'PMS2': {'mean': 18, 'std': 6},
 }
 
 
@@ -270,6 +271,14 @@ def predict_inverse(current_size, week, initial_size):
             sigma = growth_data[week][1]  # SD_S_sum from your data
         else:
             sigma = 0.5  # fallback, though your data covers weeks 0-90
+
+    print(f"Genotype: {name}")
+    print(f"  Expected (raw): {expected}")
+    print(f"  HR factor: {hr_factor}")
+    print(f"  Expected (scaled): {expected}")
+    print(f"  Current: {current_size}")
+    print(f"  Sigma: {sigma}")
+    print(f"  Likelihood: {like}")
         
         # Likelihood (normal PDF using your sigma)
         like = np.exp(-0.5 * ((current_size - expected) / sigma)**2) / (sigma * np.sqrt(2*np.pi))
