@@ -658,8 +658,22 @@ with tab1:
     with col_right:
         current_size = st.slider("📏 Current tumor size (mm)", 0.0, 60.0, 1.4, 0.1)
     
+    # ============================================================
+    # ALERT: Tumor not responding to immunotherapy
+    # ============================================================
+    if current_size > initial_size:
+        st.error(
+            "🚨 **ALERT: TUMOR NOT RESPONDING TO IMMUNOTHERAPY** 🚨\n\n"
+            f"Current size ({current_size:.1f} mm) is LARGER than initial size ({initial_size:.1f} mm).\n\n"
+            "Consider: treatment change, biopsy, or clinical review."
+        )
+    elif current_size > initial_size * 0.9:
+        st.warning(
+            f"⚠️ **Minimal response:** Current size ({current_size:.1f} mm) is >90% of initial size ({initial_size:.1f} mm). Monitor closely."
+        )
+    # ============================================================
+    
     # Show estimated growth time
- #   weeks_to_grow, lower_grow, upper_grow = (initial_size)
     weeks_to_grow, lower_grow, upper_grow = get_growth_time(initial_size, 'MLH1')
     st.caption(f"📈 Estimated time to reach {initial_size:.1f} mm: **{weeks_to_grow:.0f} weeks** [90% CI: {lower_grow:.0f}-{upper_grow:.0f}]")
     
