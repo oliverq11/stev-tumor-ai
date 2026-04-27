@@ -1,8 +1,10 @@
 import streamlit as st
 import numpy as np
-import pandas as pd
+import matplotlib.pyplot as plt
+from scipy.stats import norm
 import plotly.express as px
 import plotly.graph_objects as go
+import pandas as pd
 import qrcode
 from io import BytesIO
 import os
@@ -13,178 +15,479 @@ import os
 st.set_page_config(page_title="STEV: Stochastic Tumor Response AI", layout="wide", page_icon="🧬")
 
 # ============================================================
-# CURE PHASE DATA (weeks 0-48, starting sizes 10-60 mm)
+# MINIMAL SESSION STATE (ONLY FOR PREDICTION DISPLAY)
 # ============================================================
-starting_sizes = [10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60]
-
-cure_data = {
-    0: [10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60],
-    1: [10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 59],
-    2: [9, 14, 19, 24, 30, 35, 40, 45, 49, 55, 59],
-    3: [7.886, 12.416, 17.491, 23.214, 29.718, 34.864, 39.897, 44.915, 49.925, 54.931, 58.935],
-    4: [5.188, 8.662, 13.257, 19.62, 29.014, 34.562, 39.684, 44.744, 49.778, 54.8, 58.812],
-    5: [3.349, 5.748, 9.367, 15.457, 27.856, 34.122, 39.399, 44.526, 49.595, 54.638, 58.662],
-    6: [2.179, 3.718, 6.268, 11.314, 26.032, 33.488, 39.017, 44.246, 49.367, 54.44, 58.481],
-    7: [1.467, 2.408, 4.066, 7.768, 23.354, 32.587, 38.509, 43.889, 49.082, 54.197, 58.26],
-    8: [1.1, 1.605, 2.627, 5.105, 19.795, 31.334, 37.839, 43.435, 48.729, 53.9, 57.994],
-    9: [1.1, 1.127, 1.737, 3.294, 15.647, 29.637, 36.965, 42.86, 48.291, 53.539, 57.672],
-    10: [1.1, 1.1, 1.205, 2.145, 11.489, 27.429, 35.839, 42.138, 47.751, 53.099, 57.283],
-    11: [1.1, 1.1, 1.1, 1.447, 7.908, 24.692, 34.413, 41.238, 47.089, 52.566, 56.816],
-    12: [1.1, 1.1, 1.1, 1.1, 5.204, 21.5, 32.647, 40.127, 46.282, 51.922, 56.256],
-    13: [1.1, 1.1, 1.1, 1.1, 3.359, 18.033, 30.517, 38.775, 45.304, 51.149, 55.587],
-    14: [1.1, 1.1, 1.1, 1.1, 2.185, 14.544, 28.03, 37.152, 44.131, 50.226, 54.792],
-    15: [1.1, 1.1, 1.1, 1.1, 1.471, 11.293, 25.233, 35.242, 42.739, 49.132, 53.852],
-    16: [1.1, 1.1, 1.1, 1.1, 1.1, 8.475, 22.218, 33.042, 41.107, 47.845, 52.747],
-    17: [1.1, 1.1, 1.1, 1.1, 1.1, 6.181, 19.112, 30.569, 39.223, 46.346, 51.459],
-    18: [1.1, 1.1, 1.1, 1.1, 1.1, 4.407, 16.059, 27.868, 37.083, 44.621, 49.969],
-    19: [1.1, 1.1, 1.1, 1.1, 1.1, 3.088, 13.193, 25.006, 34.702, 42.66, 48.263],
-    20: [1.1, 1.1, 1.1, 1.1, 1.1, 2.137, 10.616, 22.069, 32.107, 40.465, 46.332],
-    21: [1.1, 1.1, 1.1, 1.1, 1.1, 1.465, 8.388, 19.155, 29.346, 38.049, 44.175],
-    22: [1.1, 1.1, 1.1, 1.1, 1.1, 1.1, 6.525, 16.357, 26.481, 35.437, 41.799],
-    23: [1.1, 1.1, 1.1, 1.1, 1.1, 1.1, 5.012, 13.755, 23.583, 32.668, 39.224],
-    24: [1.1, 1.1, 1.1, 1.1, 1.1, 1.1, 3.81, 11.405, 20.729, 29.795, 36.481],
-    25: [1.1, 1.1, 1.1, 1.1, 1.1, 1.1, 2.873, 9.338, 17.99, 26.877, 33.612],
-    26: [1.1, 1.1, 1.1, 1.1, 1.1, 1.1, 2.153, 7.562, 15.424, 23.978, 30.668],
-    27: [1.1, 1.1, 1.1, 1.1, 1.1, 1.1, 1.606, 6.068, 13.078, 21.16, 27.705],
-    28: [1.1, 1.1, 1.1, 1.1, 1.1, 1.1, 1.193, 4.831, 10.977, 18.48, 24.783],
-    29: [1.1, 1.1, 1.1, 1.1, 1.1, 1.1, 1.1, 3.822, 9.131, 15.981, 21.956],
-    30: [1.1, 1.1, 1.1, 1.1, 1.1, 1.1, 1.1, 3.008, 7.536, 13.695, 19.273],
-    31: [1.1, 1.1, 1.1, 1.1, 1.1, 1.1, 1.1, 2.358, 6.178, 11.639, 16.771],
-    32: [1.1, 1.1, 1.1, 1.1, 1.1, 1.1, 1.1, 1.842, 5.036, 9.82, 14.477],
-    33: [1.1, 1.1, 1.1, 1.1, 1.1, 1.1, 1.1, 1.435, 4.086, 8.232, 12.406],
-    34: [1.1, 1.1, 1.1, 1.1, 1.1, 1.1, 1.1, 1.116, 3.302, 6.862, 10.561],
-    35: [1.1, 1.1, 1.1, 1.1, 1.1, 1.1, 1.1, 1.1, 2.66, 5.692, 8.939],
-    36: [1.1, 1.1, 1.1, 1.1, 1.1, 1.1, 1.1, 1.1, 2.137, 4.703, 7.527],
-    37: [1.1, 1.1, 1.1, 1.1, 1.1, 1.1, 1.1, 1.1, 1.713, 3.872, 6.311],
-    38: [1.1, 1.1, 1.1, 1.1, 1.1, 1.1, 1.1, 1.1, 1.371, 3.179, 5.271],
-    39: [1.1, 1.1, 1.1, 1.1, 1.1, 1.1, 1.1, 1.1, 1.1, 2.603, 4.389],
-    40: [1.1, 1.1, 1.1, 1.1, 1.1, 1.1, 1.1, 1.1, 1.1, 2.128, 3.644],
-    41: [1.1, 1.1, 1.1, 1.1, 1.1, 1.1, 1.1, 1.1, 1.1, 1.736, 3.019],
-    42: [1.1, 1.1, 1.1, 1.1, 1.1, 1.1, 1.1, 1.1, 1.1, 1.415, 2.496],
-    43: [1.1, 1.1, 1.1, 1.1, 1.1, 1.1, 1.1, 1.1, 1.1, 1.152, 2.06],
-    44: [1.1, 1.1, 1.1, 1.1, 1.1, 1.1, 1.1, 1.1, 1.1, 1.1, 1.699],
-    45: [1.1, 1.1, 1.1, 1.1, 1.1, 1.1, 1.1, 1.1, 1.1, 1.1, 1.399],
-    46: [1.1, 1.1, 1.1, 1.1, 1.1, 1.1, 1.1, 1.1, 1.1, 1.1, 1.151],
-    47: [1.1, 1.1, 1.1, 1.1, 1.1, 1.1, 1.1, 1.1, 1.1, 1.1, 1.1],
-    48: [1.1, 1.1, 1.1, 1.1, 1.1, 1.1, 1.1, 1.1, 1.1, 1.1, 1.1],
-}
+if 'show_prediction' not in st.session_state:
+    st.session_state.show_prediction = False
+if 'prediction_probs' not in st.session_state:
+    st.session_state.prediction_probs = None
+if 'prediction_most_likely' not in st.session_state:
+    st.session_state.prediction_most_likely = None
+if 'prediction_week' not in st.session_state:
+    st.session_state.prediction_week = None
+if 'prediction_size' not in st.session_state:
+    st.session_state.prediction_size = None
 
 # ============================================================
-# GROWTH PHASE DATA (from your STEV_stage_sigmas_growth.csv)
-# ============================================================
-# Weeks 0-250, mean tumor size during growth phase (starting from ~1.1 mm)
-growth_weeks = list(range(0, 251))
-growth_means = [
-    1.09393894, 1.098021331, 1.102280827, 1.106725082, 1.111362082, 1.116200153, 1.121247979, 1.126514615, 1.132009505, 1.137742495,
-    1.143723853, 1.149964285, 1.156474953, 1.163267497, 1.17035405, 1.177747263, 1.185460322, 1.193506977, 1.201901557, 1.210659001,
-    1.219794876, 1.229325412, 1.23926752, 1.249638823, 1.26045769, 1.271743256, 1.283515463, 1.295795086, 1.308603769, 1.321964058,
-    1.335899441, 1.350434377, 1.365594346, 1.381405878, 1.397896599, 1.415095276, 1.433031854, 1.45173751, 1.471244691, 1.491587169,
-    1.512800088, 1.534920016, 1.557984997, 1.582034606, 1.607110005, 1.633253999, 1.660511098, 1.688927575, 1.718551525, 1.749432937,
-    1.781623749, 1.815177921, 1.8501515, 1.886602685, 1.924591906, 1.964181885, 2.005437713, 2.048426924, 2.093219564, 2.139888267,
-    2.188508332, 2.239157792, 2.291917493, 2.346871167, 2.404105503, 2.463710225, 2.525778158, 2.590405299, 2.657690889, 2.727737473,
-    2.800650967, 2.876540715, 2.955519544, 3.037703817, 3.123213478, 3.212172088, 3.304706866, 3.400948706, 3.501032202, 3.605095652,
-    3.713281058, 3.825734113, 3.942604178, 4.06404424, 4.190210865, 4.321264125, 4.457367516, 4.598687854, 4.745395155, 4.897662487,
-    5.055665808, 5.219583776, 5.389597532, 5.565890463, 5.748647928, 5.938056964, 6.134305952, 6.33758426, 6.548081841, 6.765988811,
-    6.991494978, 7.224789342, 7.466059555, 7.715491344, 7.973267898, 8.239569208, 8.514571383, 8.798445913, 9.091358909, 9.393470296,
-    9.704932979, 10.02589198, 10.35648352, 10.69683413, 11.04705968, 11.4072644, 11.77753994, 12.15796434, 12.54860105, 12.94949797,
-    13.36068639, 13.78218012, 14.21397446, 14.65604536, 15.10834851, 15.5708185, 16.04336813, 16.52588764, 17.01824413, 17.520281,
-    18.03181754, 18.55264857, 19.08254422, 19.62124981, 20.16848587, 20.72394832, 21.28730869, 21.85821458, 22.43629024, 23.02113722,
-    23.61233528, 24.20944335, 24.81200067, 25.41952808, 26.03152936, 26.64749281, 27.26689284, 27.8891917, 28.51384135, 29.14028528,
-    29.76796055, 30.39629973, 31.02473302, 31.65269027, 32.27960303, 32.90490667, 33.52804234, 34.14845897, 34.76561523, 35.37898131,
-    35.98804074, 36.59229203, 37.19125022, 37.78444833, 38.37143867, 38.951794, 39.52510858, 40.09099909, 40.64910534, 41.19909093,
-    41.74064369, 42.27347598, 42.79732496, 43.31195258, 43.81714551, 44.31271501, 44.79849656, 45.27434951, 45.74015652, 46.19582301,
-    46.64127646, 47.07646571, 47.50136009, 47.91594862, 48.32023911, 48.71425719, 49.09804539, 49.47166211, 49.83518072, 50.18868847,
-    50.53228555, 50.8660841, 51.19020724, 51.50478808, 51.80996886, 52.10589997, 52.39273912, 52.67065046, 52.9398038, 53.2003738,
-    53.45253925, 53.69648237, 53.9323881, 54.16044353, 54.38083728, 54.59375895, 54.7993986, 54.99794629, 55.18959163, 55.37452336,
-    55.55292901, 55.72499452, 55.89090396, 56.05083923, 56.20497985, 56.35350269, 56.49658177, 56.63438816, 56.76708972, 56.89485107,
-    57.01783342, 57.13619449, 57.25008847, 57.35966591, 57.46507373, 57.56645514, 57.66394966, 57.75769312, 57.84781762, 57.9344516,
-    58.01771981, 58.0977434, 58.1746399, 58.2485233, 58.31950409, 58.38768931, 58.4531826, 58.5160843, 58.57649147, 58.63449796,
-    58.69019453, 58.74366884, 58.7950056, 58.8442866, 58.8915908, 58.93699438, 58.98057085, 60.0,
-]
-
-# Extend to 250 weeks (pad with last value if needed)
-while len(growth_means) < 251:
-    growth_means.append(60.0)
-
-# ============================================================
-# HELPER FUNCTIONS (interpolation, no inventions)
-# ============================================================
-HR = {'POLE': 1.159, 'MLH1': 1.127, 'MSH2': 1.117, 'MSIH': 1.099, 'MSH6': 1.091}
-names = ['POLE', 'MLH1', 'MSH2', 'MSIH', 'MSH6']
-
-def interpolate_cure_size(initial_size, week, genotype='MLH1'):
-    """Get expected tumor size from cure data using linear interpolation"""
-    week = min(week, 48)
-    week_data = cure_data[week]
-    
-    # Find the two closest starting sizes
-    if initial_size <= starting_sizes[0]:
-        val_low = week_data[0]
-        val_high = week_data[1]
-        size_low = starting_sizes[0]
-        size_high = starting_sizes[1]
-        fraction = 0
-    elif initial_size >= starting_sizes[-1]:
-        val_low = week_data[-2]
-        val_high = week_data[-1]
-        size_low = starting_sizes[-2]
-        size_high = starting_sizes[-1]
-        fraction = 1
-    else:
-        for i in range(len(starting_sizes) - 1):
-            if starting_sizes[i] <= initial_size <= starting_sizes[i + 1]:
-                val_low = week_data[i]
-                val_high = week_data[i + 1]
-                size_low = starting_sizes[i]
-                size_high = starting_sizes[i + 1]
-                fraction = (initial_size - size_low) / (size_high - size_low)
-                break
-    
-    expected_size = val_low + fraction * (val_high - val_low)
-    
-    # Apply genotype scaling
-    hr_factor = HR[genotype] / HR['MLH1']
-    expected_size = expected_size * hr_factor
-    
-    return max(1.1, expected_size)
-
-def get_growth_time(target_size):
-    """Estimate weeks to reach target size during growth phase"""
-    if target_size <= growth_means[0]:
-        return 0
-    if target_size >= growth_means[-1]:
-        return growth_weeks[-1]
-    
-    for i in range(len(growth_weeks) - 1):
-        if growth_means[i] <= target_size <= growth_means[i + 1]:
-            # Linear interpolation
-            fraction = (target_size - growth_means[i]) / (growth_means[i + 1] - growth_means[i])
-            return growth_weeks[i] + fraction * (growth_weeks[i + 1] - growth_weeks[i])
-    return growth_weeks[-1]
-
-# ============================================================
-# CSS
+# CUSTOM CSS
 # ============================================================
 st.markdown("""
 <style>
     .stApp { background-color: #f5f7fb; }
-    h1 { color: #1e466e; }
-    .stButton button { background-color: #1e466e !important; color: white !important; border-radius: 8px !important; width: 100% !important; }
+    h1, h2, h3, .stMarkdown, p, div, span, label {
+        color: #212529;
+    }
+    h1 { color: #1e466e; font-family: 'Segoe UI', sans-serif; }
+    .subtitle { color: #2c6e9e; font-size: 1.2rem; margin-bottom: 1rem; }
+    .author { color: #6c757d; font-size: 0.9rem; margin-bottom: 2rem; }
+    
+    .stButton button {
+        background-color: #1e466e !important;
+        color: white !important;
+        font-weight: bold !important;
+        border-radius: 8px !important;
+        padding: 0.5rem 1rem !important;
+        width: 100% !important;
+        transition: 0.2s !important;
+        border: none !important;
+    }
+    .stButton button:hover {
+        background-color: #0f2e4a !important;
+        color: white !important;
+        transform: scale(1.02) !important;
+    }
+    .stButton button *,
+    .stButton button span,
+    .stButton button div {
+        color: white !important;
+    }
+    
+    .streamlit-expanderHeader { background-color: #e9ecef; border-radius: 8px; color: #212529; }
+    [data-testid="stMetricValue"] { font-size: 2rem; font-weight: bold; color: #1e466e; }
+    [data-testid="stMetricLabel"] { color: #212529; }
+
     @media (prefers-color-scheme: dark) {
-        .stApp { background-color: #0a0a0a !important; }
-        h1 { color: #ffffff !important; }
+        .stApp, .main, .stAppViewContainer {
+            background-color: #0a0a0a !important;
+        }
+        body, p, div, span, label, .stMarkdown, h1, h2, h3, .subtitle, .author {
+            color: #ffffff !important;
+        }
+        .stButton button {
+            background-color: #2c6e9e !important;
+        }
+        .stButton button:hover {
+            background-color: #1e466e !important;
+        }
+        .streamlit-expanderHeader {
+            background-color: #1e1e1e !important;
+            color: white !important;
+        }
+        [data-testid="stMetricValue"] { color: #79c2ff !important; }
     }
 </style>
 """, unsafe_allow_html=True)
 
 st.title("🧬 STEV: Stochastic Tumor Evolution and Immunological Response")
 st.markdown('<div class="subtitle">Lynch Syndrome Colorectal Tumors</div>', unsafe_allow_html=True)
+st.markdown('<div class="author">Horatio Quinones / Sherry Johnson / et-al</div>', unsafe_allow_html=True)
+
+# ============================================================
+# WHAT THIS APP DOES
+# ============================================================
+st.markdown("""
+### 🔍 What this app does
+
+This tool uses a **Stochastic Model** (STEV) built the Tumor Evolution based on clinical data from Lynch Syndrome Colorectal Cancer patients treated with Immunotherapy (Dostarlimab) without other previous treatments.
+
+#### 1. 🔍 Size -> Genotype
+Given tumor size and treatment time (weeks), returns most likely Tumor Genotype (POLE, MLH1, MSH2, MSI-H, MSH6).
+
+#### 2. 🔮 Genotype -> Size
+Given tumor genotype and treatment time (weeks), predicts expected tumor size and range with 95% predictive intervals based on natural TMB distribution.
+
+#### 3. 📈 Growth and Immunotherapy Curves
+Trajectories of the Evolution of Geometrical Dimension Changes in Time, from tiny to 30mm/60mm followed by volume shrinkage, with 90% Credible Bands.
+
+#### 4. 🕰️ Two-Hit Dynamics
+Incubation, latency, conditional and unconditional probability plots.
+
+#### 5.  📐 Mathematical Formulation
+Stochastic Tumor EVolution model (STEV).
+
+#### 6.  📋 Clinical Case 
+Colon Benign Polyp Response to Immunotherapy
+
+""")
+
+# ============================================================
+# EXPANDER 1: GROWTH CURVES
+# ============================================================
+with st.expander("📈 Tumor Growth and Immunotherapy Response", expanded=False):
+    col1, col2 = st.columns(2)
+    with col1:
+        if os.path.exists("30mm.png"):
+            st.image("30mm.png", caption="Treatment initiated at 30 mm", use_container_width=True)
+    with col2:
+        if os.path.exists("60mm.png"):
+            st.image("60mm.png", caption="Treatment initiated at 60 mm", use_container_width=True)
+    
+    st.markdown("---")
+    st.markdown("### 📊 MLH1 Tumor Validation (TMB = 55.4)")
+    col1, col2 = st.columns([2, 1])
+    with col1:
+        if os.path.exists("MLH1_55TMB.png"):
+            st.image("MLH1_55TMB.png", caption="STEV projection vs. actual measurements", use_container_width=True)
+    with col2:
+        st.markdown("**MLH1 | TMB=55.4** | Faster than population mean")
+
+# ============================================================
+# EXPANDER 2: TWO-HIT DYNAMICS
+# ============================================================
+with st.expander("🕰️ Two-Hit Dynamics: Tumor Incubation, Latency, Detection Phase, Risk Assessment", expanded=False):
+    st.markdown("""
+    ### 📖 What is "First Hit" and "Second Hit"?
+    
+    - **First hit (inherited mutation):** A person with Lynch syndrome is born with **one faulty copy** of an MMR gene (e.g., MLH1, MSH2) inherited from a parent. This alone does not cause cancer - it only creates a **predisposition**.
+    
+    - **Second hit (acquired mutation):** At some point later in life, the **second healthy copy** of that MMR gene is damaged or lost (due to random chance, environment, or aging). When this happens, the cell can no longer repair DNA mistakes, leading to microsatellite instability (MSI) and eventually **tumor formation**.
+    """)
+    
+    col1, col2 = st.columns(2)
+    with col1:
+        if os.path.exists("incubation.png"):
+            st.image("incubation.png", caption="Incubation (birth to second hit)", use_container_width=True)
+    with col2:
+        if os.path.exists("latency.png"):
+            st.image("latency.png", caption="Latency (second hit to detectable)", use_container_width=True)
+    
+    col1, col2 = st.columns(2)
+    with col1:
+        if os.path.exists("detection_age_conditional.png"):
+            st.image("detection_age_conditional.png", caption="Detection age (conditional)", use_container_width=True)
+    with col2:
+        if os.path.exists("probability_conditional.png"):
+            st.image("probability_conditional.png", caption="Probability (conditional)", use_container_width=True)
+    
+    col1, col2 = st.columns(2)
+    with col1:
+        if os.path.exists("detection_age_unconditional.png"):
+            st.image("detection_age_unconditional.png", caption="Detection age (unconditional)", use_container_width=True)
+    with col2:
+        if os.path.exists("probability_uconditional.png"):
+            st.image("probability_uconditional.png", caption="Probability (unconditional)", use_container_width=True)
+
+# ============================================================
+# EXPANDER 3: MATHEMATICAL FRAMEWORK
+# ============================================================
+
+with st.expander("📐 Mathematical Framework of the STEV Model", expanded=False):
+    st.markdown(r"""
+    ### A True Stochastic Process
+    
+    The STEV model is a **purely stochastic simulation**. At each weekly cycle, tumor growth or shrinkage is random. The mean path is only the average of many random realizations - no single patient follows the mean exactly.
+    
+    ---
+    
+    **Equation 1: Logit Transformation**
+    $$
+    Z = \ln\left(\frac{S - L}{U - S}\right)
+    $$
+    **Inverse:** $S = L + \frac{U - L}{1 + e^{-Z}}$
+    - $L = 1.0$ mm (lower bound), $U = 60.0$ mm (upper bound)
+    
+    ---
+    
+    **Equation 2: Sensitivity Coefficient**
+    $$
+    \kappa(S) = \frac{dZ}{dS} = \frac{U - L}{(S - L)(U - S)}
+    $$
+    
+    ---
+    
+    **Equation 3: Stochastic Process at Each Cycle**
+    $$
+    Z_{t+1} = Z_t + \Delta Z_t, \quad \mathbb{E}[\Delta Z_t] = r, \quad \text{Var}(\Delta Z_t) = \sigma_{\text{cycle}}^2(S_t)
+    $$
+    
+    ---
+    
+    **Equation 4: Growth Phase - Mean Path**
+    $$
+    \mu_Z(t) = \alpha + r \cdot t
+    $$
+    - $r = 0.0426$ per week, $\alpha \approx -6.44$
+    
+    ---
+    
+    **Equation 5: Per-Cycle Noise (mm space)**
+    $$
+    \sigma_{S}(S) = \max(0.5,\; 0.20 \cdot S) \text{ mm}
+    $$
+    
+    ---
+    
+    **Equation 6: Convert Noise to Logit Variance**
+    $$
+    \sigma_{\text{cycle}}^2(S) = [\kappa(S) \cdot \sigma_S(S)]^2
+    $$
+    
+    ---
+    
+    **Equation 7: Biological Modulation (TMB and MMR)**
+    $$
+    \text{strength} = \frac{\ln(1 + \text{TMB})}{\ln(11)} \times f_{\text{MMR}}
+    $$
+    - dMMR/MSI-H: $f=1.3$, MSS: $f=1.0$, POLE: $f=1.5$
+    
+    ---
+    
+    **Equation 8: Immunotherapy Delay**
+    $$
+    t_{\text{delay}} = \max\left(1.5,\; 3.0 \times \left(1 - 0.30 \cdot \frac{\text{strength}}{1 + \text{strength}}\right)\right)
+    $$
+    
+    ---
+    
+    **Equation 9: Cure Phase - 4PL Mean Path**
+    $$
+    S_{\text{cure}}(t) = K_c + \frac{L_c - K_c}{1 + e^{-k_c (t - t_{\text{delay}} - x_{0c})}}, \quad t \ge t_{\text{delay}}
+    $$
+    - $L_c$ = starting size, $K_c \approx 1.1$ mm (cure floor)
+    
+    ---
+    
+    **Equation 10: Total Variance - Growth Phase**
+    $$
+    \text{Var}[Z(t)] = t^2 \cdot \text{Var}(r) + \sum_{i=1}^{t} \sigma_{\text{cycle}}^2(\mu_S(i))
+    $$
+    
+    ---
+    
+    **Equation 11: Total Variance - Cure Phase**
+    $$
+    \text{Var}[Z_{\text{cure}}(t)] = (t - t_{\text{delay}})^2 \cdot \text{Var}(r_{\text{decay}}) + \sum_{i=1}^{t - t_{\text{delay}}} \sigma_{\text{cycle}}^2(S_{\text{cure}}(i))
+    $$
+    
+    ---
+    
+    **Equation 12: Biological Variance Fraction**
+    $$
+    \phi_{\text{bio}} = \min\left(0.70,\; \frac{\text{strength}}{1 + \text{strength}}\right)
+    $$
+    
+    ---
+    
+    **Equation 13: CLT Confidence Bands (90% Credible Intervals)**
+    $$
+    Z_{\text{lo}}(t) = \mu_Z(t) - 1.645 \cdot \sqrt{\text{Var}[Z(t)]}, \quad
+    Z_{\text{hi}}(t) = \mu_Z(t) + 1.645 \cdot \sqrt{\text{Var}[Z(t)]}
+    $$
+    $$
+    S_{\text{lo}}(t) = L + \frac{U - L}{1 + e^{-Z_{\text{lo}}(t)}}, \quad
+    S_{\text{hi}}(t) = L + \frac{U - L}{1 + e^{-Z_{\text{hi}}(t)}}
+    $$
+    
+    ---
+    
+    ### Two-Hit Dynamics: Mathematical Formulation
+    
+    ---
+    
+    **Equation 14: Incubation (Birth to Second Hit)**
+    $$
+    f_{\text{inc}}(t) = \frac{t^{k-1} e^{-t/\theta}}{\theta^k \, \Gamma(k)}, \quad t \ge 0
+    $$
+    - Gamma distribution, shape $k \approx 4-6$, scale $\theta \approx 5-8$ years
+    
+    ---
+    
+    **Equation 15: Latency (Second Hit to Detectable Tumor)**
+    $$
+    f_{\text{lat}}(t) = \frac{t^{k_{\text{lat}}-1} e^{-t/\theta_{\text{lat}}}}{\theta_{\text{lat}}^{k_{\text{lat}}} \, \Gamma(k_{\text{lat}})}, \quad t \ge 0
+    $$
+    
+    ---
+    
+    **Equation 16: Convolution (Incubation + Latency)**
+    $$
+    T_{\text{detection}} = T_{\text{inc}} + T_{\text{lat}}, \quad
+    f_{\text{det}}(t) = \int_{0}^{t} f_{\text{inc}}(\tau) \, f_{\text{lat}}(t - \tau) \, d\tau
+    $$
+    
+    ---
+    
+    **Equation 17: Conditional Probability of Detection by Age**
+    $$
+    P_{\text{cond}}(t) = \int_{0}^{t} f_{\text{det}}(\tau) \, d\tau
+    $$
+    
+    ---
+    
+    **Equation 18: Unconditional Probability of Detection by Age**
+    $$
+    P_{\text{uncond}}(t) = R_{\text{lifetime}} \cdot P_{\text{cond}}(t)
+    $$
+    - $R_{\text{lifetime}} \approx 0.70-0.80$ for MLH1/MSH2
+    
+    ---
+    
+    **Lifetime Risk by Gene**
+    - MLH1: 70-80%
+    - MSH2: 70-80%
+    - MSH6: 50-60%
+    - PMS2: 15-20%
+    
+    ---
+    
+    ### Summary of All Parameters
+    
+    | Parameter | Meaning | Value |
+    |-----------|---------|-------|
+    | $L$ | Lower bound | 1.0 mm |
+    | $U$ | Upper bound | 60.0 mm |
+    | $r$ | Growth rate | 0.0426 /week |
+    | $\sigma_{\text{floor}}$ | Minimum noise | 0.5 mm |
+    | $\sigma_{\text{rel}}$ | Relative noise | 0.20 |
+    | $t_{\text{delay}}$ | Immunotherapy delay | 1.5-3.0 weeks |
+    | $k_{\text{inc}}$ | Incubation shape | 4-6 |
+    | $\theta_{\text{inc}}$ | Incubation scale | 5-8 years |
+    | $k_{\text{lat}}$ | Latency shape | 2-4 |
+    | $\theta_{\text{lat}}$ | Latency scale | 1-3 years |
+    
+    *Model parameters calibrated to published trial data (GARNET, KEYNOTE-177) and Lynch syndrome epidemiology.*
+    """)
+
+# ============================================================
+# EXPANDER 4: CLINICAL CASE
+# ============================================================
+with st.expander("📋 Clinical Case: Benign Polyp", expanded=False):
+    st.markdown("""
+    **Patient:** Lynch Syndrome on Immunotherapy (Dostarlimab Infusion 500mg IV every three weeks). A Sessile Polyp of the descending colon (712728006), estimated initial size (~50-55mm), and about 30cm from anal verge. Could not be removed (ESD failed).
+    
+    **Outcome:** Polyp shrank progressively (slower rate than Population mean). Third colonoscopy removed it successfully after shrinkage. No dysplasia or malignancy.
+    
+    **Validation:** Both fast shrinkage rate for MLH1 tumor and slower shrinkage rate for benign polyp fell within model's predictions 90% Credible Interval.
+    """)
+    if os.path.exists("benign_polyp_STEV.png"):
+        st.image("benign_polyp_STEV.png", caption="STEV projection vs. actual measurements", use_container_width=True)
+
+# ============================================================
+# PARAMETERS
+# ============================================================
+weeks = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 24]
+
+mu_STEV = {
+    0: 23.00, 1: 23.00, 2: 23.00, 3: 20.79, 4: 16.65, 5: 12.37,
+    6: 8.61, 7: 5.77, 8: 3.84, 9: 2.64, 10: 1.92, 11: 1.51,
+    12: 1.27, 13: 1.14, 14: 1.10, 15: 1.10, 16: 1.10, 17: 1.10,
+    18: 1.10, 19: 1.10, 20: 1.10, 21: 1.10, 24: 1.10
+}
+
+sigma_STEV = {
+    0: 0.00, 1: 0.00, 2: 0.00, 3: 2.00, 4: 2.50, 5: 2.80,
+    6: 2.70, 7: 2.60, 8: 2.62, 9: 2.40, 10: 2.10, 11: 1.80,
+    12: 1.50, 13: 1.20, 14: 0.90, 15: 0.70, 16: 0.50, 17: 0.40,
+    18: 0.30, 19: 0.20, 20: 0.10, 21: 0.05, 24: 0.05
+}
+
+env_factor = 0.30
+sigma_env = {w: sigma_STEV[w] * np.sqrt(env_factor) for w in weeks}
+names = ['POLE', 'MLH1', 'MSH2', 'MSIH', 'MSH6']
+
+S0 = 23.0
+HR = {'POLE': 1.159, 'MLH1': 1.127, 'MSH2': 1.117, 'MSIH': 1.099, 'MSH6': 1.091}
+means = {}
+for w in weeks:
+    means[w] = {}
+    for name in names:
+        m = S0 + HR[name] * (mu_STEV[w] - S0)
+        means[w][name] = max(m, 0.01)
+
+priors = {name: 1.0/5 for name in names}
+
+# TMB distribution parameters by genotype (mean, standard deviation)
+tmb_distribution = {
+    'POLE': {'mean': 100, 'std': 25},
+    'MLH1': {'mean': 55, 'std': 12.5},
+    'MSH2': {'mean': 50, 'std': 12.5},
+    'MSIH': {'mean': 45, 'std': 10},
+    'MSH6': {'mean': 25, 'std': 8}
+}
+
+def normal_pdf(x, mu, sigma):
+    if sigma <= 0:
+        return 1e-10
+    return np.exp(-0.5 * ((x - mu)/sigma)**2) / (sigma * np.sqrt(2*np.pi))
+
+def predict_inverse(size, week):
+    sigma = sigma_env[week]
+    unnorm = {}
+    for name in names:
+        mu = means[week][name]
+        like = normal_pdf(size, mu, sigma)
+        unnorm[name] = like * priors[name]
+    total = sum(unnorm.values())
+    if total == 0:
+        return {name: 0.2 for name in names}
+    return {name: unnorm[name]/total for name in names}
+
+def predict_size_from_genotype(genotype, week):
+    """
+    Analytical prediction of tumor size based on TMB distribution for the genotype.
+    Returns expected size and 95% predictive interval.
+    """
+    # Get TMB distribution parameters for this genotype
+    tmb_mean = tmb_distribution[genotype]['mean']
+    tmb_std = tmb_distribution[genotype]['std']
+    
+    # Create fine grid of TMB values (0.1 to 200, 2000 points)
+    tmb_grid = np.linspace(0.1, 200, 2000)
+    
+    # Calculate Gaussian weights (PDF) - unnormalized
+    weights = norm.pdf(tmb_grid, tmb_mean, tmb_std)
+    # Normalize to sum to 1 (discrete approximation of the distribution)
+    weights = weights / weights.sum()
+    
+    # Calculate predicted size for each TMB
+    sizes = []
+    for tmb in tmb_grid:
+        mu_base = means[week][genotype]
+        # TMB adjustment factor (reference = 55)
+        tmb_factor = (55 / tmb) ** 0.25
+        mu_adjusted = max(1.1, mu_base * tmb_factor)
+        sizes.append(mu_adjusted)
+    sizes = np.array(sizes)
+    
+    # Expected value (weighted average)
+    expected_size = np.sum(sizes * weights)
+    
+    # Sort for percentile calculation
+    sorted_indices = np.argsort(sizes)
+    sorted_sizes = sizes[sorted_indices]
+    sorted_weights = weights[sorted_indices]
+    cumulative_weights = np.cumsum(sorted_weights)
+    
+    # Find 2.5th and 97.5th percentiles
+    lower_idx = np.searchsorted(cumulative_weights, 0.025)
+    upper_idx = np.searchsorted(cumulative_weights, 0.975)
+    
+    # Ensure indices are within bounds
+    lower_idx = max(0, min(lower_idx, len(sorted_sizes) - 1))
+    upper_idx = max(0, min(upper_idx, len(sorted_sizes) - 1))
+    
+    lower_size = sorted_sizes[lower_idx]
+    upper_size = sorted_sizes[upper_idx]
+    
+    # Also return the weighted density for plotting
+    return expected_size, (lower_size, upper_size), sizes, weights
 
 # ============================================================
 # SIDEBAR
 # ============================================================
 with st.sidebar:
     app_url = "https://stev-tumor-ai-skrobcqyqyyz4sjpvqdqmh.streamlit.app/"
+    
     qr = qrcode.QRCode(box_size=5, border=2)
     qr.add_data(app_url)
     qr.make(fit=True)
@@ -192,44 +495,136 @@ with st.sidebar:
     buf = BytesIO()
     img.save(buf, format="PNG")
     st.image(buf.getvalue(), width=150, caption="Scan with phone camera")
+    
     st.markdown("**Or copy link:**")
     st.code(app_url, language="text")
-    st.markdown("### How to use")
-    st.markdown("- **Genotype → Size:** Predict tumor size during treatment")
-    st.markdown("- Initial size = tumor size at week 0")
+    
+    st.markdown("### ℹ️ How to use")
+    st.markdown("- **Size -> Genotype:** Enter Time and Size, get Genotype")
+    st.markdown("- **Genotype -> Size:** Enter Time and Select Genotype, get Size Expected Value and Range")
+    st.markdown("- **Expanders:** Click to view curves, dynamics, math, and cases")
     st.markdown("---")
     st.markdown("**STEV model** - Lynch Syndrome")
+    st.markdown("*Horatio Quinones / Sherry Johnson et al*")
 
 # ============================================================
-# MAIN APP
+# MAIN APP WITH TWO TABS
 # ============================================================
 tab1, tab2 = st.tabs(["🔍 Size -> Genotype", "🔮 Genotype -> Size"])
 
-# ========== TAB 2: GENOTYPE -> SIZE ==========
-with tab2:
-    col1, col2 = st.columns(2)
-    with col1:
-        genotype = st.selectbox("🧬 Genotype", names, index=1)
-    with col2:
-        initial_size = st.slider("📏 Initial tumor size at week 0 (mm)", min_value=10.0, max_value=60.0, value=22.5, step=0.5)
-    
-    week = st.slider("📅 Week of treatment", min_value=0, max_value=48, value=10, step=1)
-    
-    # Estimate growth time
-    growth_weeks_est = get_growth_time(initial_size)
-    st.caption(f"📈 Estimated time to grow from 1.1 mm to {initial_size:.1f} mm: **{growth_weeks_est:.0f} weeks**")
-    
-    # Predict cure size
-    predicted_size = interpolate_cure_size(initial_size, week, genotype)
-    st.metric("📏 Predicted tumor size during treatment", f"{predicted_size:.2f} mm")
-    
-    st.caption("Based on STEV cure phase data (your table).")
-    
-    # Validation note for your case
-    if genotype == "MLH1" and abs(initial_size - 22.5) < 0.5 and week == 10:
-        st.success("✅ Your actual tumor: 2.0 mm at week 9.3 → Model predicts 1.68 mm at week 10 → Close agreement!")
-
 # ========== TAB 1: SIZE -> GENOTYPE ==========
 with tab1:
-    st.info("Size → Genotype prediction will be added in the next version.")
-    st.caption("Currently showing Genotype → Size (cure phase) with your data.")
+    col_left, col_right = st.columns(2)
+    with col_left:
+        week = st.selectbox("📅 Week", weeks, index=8)
+    with col_right:
+        size = st.slider("📏 Tumor size (mm)", 0.0, 30.0, 1.4, 0.1)
+
+    if st.button("Predict Genotype", use_container_width=True):
+        probs = predict_inverse(size, week)
+        most_likely = max(probs, key=probs.get)
+        st.session_state.show_prediction = True
+        st.session_state.prediction_probs = probs
+        st.session_state.prediction_most_likely = most_likely
+        st.session_state.prediction_week = week
+        st.session_state.prediction_size = size
+
+    # Display prediction if it exists
+    if st.session_state.show_prediction and st.session_state.prediction_probs:
+        probs = st.session_state.prediction_probs
+        most_likely = st.session_state.prediction_most_likely
+        week = st.session_state.prediction_week
+        size = st.session_state.prediction_size
+        
+        col_a, col_b = st.columns(2)
+        col_a.metric("🧬 Most likely Genotype", most_likely)
+        col_b.metric("📊 Probability", f"{probs[most_likely]:.1%}")
+        
+        df = pd.DataFrame(list(probs.items()), columns=['Genotype', 'Probability'])
+        fig = px.bar(df, x='Genotype', y='Probability', color='Genotype',
+                     color_discrete_sequence=px.colors.qualitative.Set2,
+                     title=f'Week {week}, size = {size} mm')
+        fig.update_layout(yaxis_title='Posterior probability', xaxis_title='Genotype')
+        st.plotly_chart(fig, use_container_width=True)
+        
+        # --- TMB SENSITIVITY TABLE (TOP 10 COMBINATIONS) ---
+        st.markdown("### 🔬 How TMB influences genotype prediction")
+        st.markdown("The table below shows the **top 10 most likely (Genotype, TMB) combinations** for the same week and tumor size:")
+        
+        # TMB range: 10 to 95, step 5
+        tmb_values = list(range(10, 100, 5))
+        all_combinations = []
+        
+        for tmb in tmb_values:
+            for name in names:
+                mu_base = means[week][name]
+                tmb_factor = (55 / tmb) ** 0.25
+                mu_adjusted = max(1.1, mu_base * tmb_factor)
+                like = normal_pdf(size, mu_adjusted, sigma_env[week])
+                prob = like * priors[name]
+                all_combinations.append({
+                    "TMB": tmb,
+                    "Genotype": name,
+                    "Probability": prob
+                })
+        
+        # Normalize probabilities (sum to 1 across all combinations)
+        total_prob = sum(c["Probability"] for c in all_combinations)
+        if total_prob > 0:
+            for c in all_combinations:
+                c["Probability"] = c["Probability"] / total_prob
+        
+        # Sort by probability (descending) and take top 10
+        all_combinations.sort(key=lambda x: x["Probability"], reverse=True)
+        top_10 = all_combinations[:10]
+        
+        # Create DataFrame for display
+        df_tmb = pd.DataFrame(top_10)
+        df_tmb["Probability"] = df_tmb["Probability"].apply(lambda x: f"{x:.1%}")
+        st.dataframe(df_tmb, use_container_width=True, hide_index=True)
+        
+        st.caption("💡 Higher TMB favors POLE/MSI-H; lower TMB favors MSH6/MSS")
+        
+        st.caption("⚠️ Research & education only - not medical advice")
+
+# ========== TAB 2: GENOTYPE -> SIZE ==========
+with tab2:
+    col_left, col_right = st.columns(2)
+    with col_left:
+        week = st.selectbox("📅 Week", weeks, index=8, key="forward_week")
+    with col_right:
+        genotype = st.selectbox("🧬 Genotype", names, index=1)
+    
+    if st.button("Predict Size", use_container_width=True):
+        expected_size, ci, sizes, weights = predict_size_from_genotype(genotype, week)
+        
+        col_a, col_b = st.columns(2)
+        col_a.metric("📏 Expected size", f"{expected_size:.2f} mm")
+        col_b.metric("📊 95% predictive interval", f"[{ci[0]:.2f}, {ci[1]:.2f}] mm")
+        
+        # Add caption explaining the method
+        tmb_mean = tmb_distribution[genotype]['mean']
+        tmb_std = tmb_distribution[genotype]['std']
+        st.caption(f"💡 Based on natural TMB distribution for {genotype} (mean={tmb_mean}, SD={tmb_std})")
+        
+        # Create weighted density plot
+        # We need to create a smooth curve from the weighted samples
+        # Use kernel density estimation on weighted points
+        from scipy import stats
+        
+        # Create weighted KDE
+        kde = stats.gaussian_kde(sizes, weights=weights)
+        x_vals = np.linspace(max(0.5, min(sizes) * 0.8), max(sizes) * 1.2, 200)
+        y_vals = kde(x_vals)
+        
+        fig = go.Figure()
+        fig.add_trace(go.Scatter(x=x_vals, y=y_vals, fill='tozeroy', line_color='#1e466e', name='Probability density'))
+        fig.add_vline(x=expected_size, line_dash="dash", line_color="red", annotation_text=f"Expected = {expected_size:.2f} mm")
+        fig.add_vline(x=ci[0], line_dash="dot", line_color="gray", annotation_text=f"2.5%")
+        fig.add_vline(x=ci[1], line_dash="dot", line_color="gray", annotation_text=f"97.5%")
+        fig.update_layout(title=f'{genotype} at week {week}',
+                          xaxis_title='Tumor size (mm)',
+                          yaxis_title='Probability density')
+        st.plotly_chart(fig, use_container_width=True)
+        
+        st.caption("⚠️ Research & education only - not medical advice")
