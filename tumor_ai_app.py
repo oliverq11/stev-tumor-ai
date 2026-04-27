@@ -647,18 +647,40 @@ with tab2:
     if st.button("Predict Size", use_container_width=True):
         # For simplicity, use a basic prediction model
         # You can expand this with your full cure-phase logic
-        base_size = initial_size * (1 - week * 0.05)  # Placeholder decay
-        expected_size = max(1.1, base_size)
+        # Use YOUR cure data
+        week_data = cure_data[week]
+        
+        # Interpolate between starting sizes
+        if initial_size <= 10:
+            predicted = week_data[0]
+        elif initial_size >= 60:
+            predicted = week_data[-1]
+        else:
+            for i in range(len(starting_sizes)-1):
+                if starting_sizes[i] <= initial_size <= starting_sizes[i+1]:
+                    low_s = starting_sizes[i]
+                    high_s = starting_sizes[i+1]
+                    low_v = week_data[i]
+                    high_v = week_data[i+1]
+                    frac = (initial_size - low_s) / (high_s - low_s)
+                    predicted = low_v + frac * (high_v - low_v)
+                    break
+        
+        # Apply genotype scaling
+        hr_factor = HR[genotype] / HR['MLH1']
+        predicted = predicted * hr_factor
+        predicted = max(1.1, predicted)
         
         col_a, col_b = st.columns(2)
-        col_a.metric("📏 Expected size", f"{expected_size:.2f} mm")
-        col_b.metric("📊 95% interval", f"[{max(0.5, expected_size*0.7):.2f}, {expected_size*1.3:.2f}] mm")
+        col_a.metric("📏 Expected size", f"{predicted:.2f} mm")
+        col_b.metric("📊 95% interval", f"[{max(1.1, predicted*0.7):.2f}, {predicted*1.3:.2f}] mm")
         
-        # Simple density plot
-        x_vals = np.linspace(0.5, expected_size*1.5, 100)
-        y_vals = norm.pdf(x_vals, expected_size, expected_size*0.15)
+        # Density plot
+        x_vals = np.linspace(max(0.5, predicted*0.6), predicted*1.4, 100)
+        y_vals = norm.pdf(x_vals, predicted, predicted*0.15)
         fig = go.Figure()
         fig.add_trace(go.Scatter(x=x_vals, y=y_vals, fill='tozeroy', line_color='#1e466e', name='Density'))
+        fig.add_vline(x=predicted, line_dash="dash", line_color="red", annotation_text=f"Predicted = {predicted:.2f} mm")
         fig.update_layout(title=f'{genotype} at week {week} (initial size = {initial_size:.1f} mm)',
                           xaxis_title='Tumor size (mm)',
                           yaxis_title='Probability density')
