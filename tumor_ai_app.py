@@ -236,14 +236,14 @@ def normal_pdf(x, mu, sigma):
     return np.exp(-0.5 * ((x - mu)/sigma)**2) / (sigma * np.sqrt(2*np.pi))
 
 def predict_inverse(current_size, week, initial_size):
-    """Size -> Genotype prediction using cure data"""
+    """Size -> Genotype prediction using your cure data and sigma from growth data"""
     unnorm = {}
     
     for name in names:
-        # Get expected size from cure data for this initial size and week
+        # Get expected size from cure data
         week_data = cure_data[week]
         
-        # Interpolate to get expected size for this initial_size
+        # Interpolate expected size for this initial_size
         if initial_size <= 10:
             expected = week_data[0]
         elif initial_size >= 60:
@@ -259,14 +259,19 @@ def predict_inverse(current_size, week, initial_size):
                     expected = low_v + frac * (high_v - low_v)
                     break
         
-        # Apply genotype scaling (relative to MLH1)
+        # Apply genotype scaling from your HR factors
         hr_factor = HR[name] / HR['MLH1']
         expected = expected * hr_factor
         expected = max(1.1, expected)
         
-        # Likelihood (current_size vs expected)
-        sigma = max(0.5, expected * 0.15)
-        like = normal_pdf(current_size, expected, sigma)
+        # Sigma from your growth data (standard deviation at this week)
+        if week in growth_data:
+            sigma = growth_data[week][1]  # SD_S_sum from your data
+        else:
+            sigma = 0.5  # fallback, though your data covers weeks 0-90
+        
+        # Likelihood (normal PDF using your sigma)
+        like = np.exp(-0.5 * ((current_size - expected) / sigma)**2) / (sigma * np.sqrt(2*np.pi))
         
         unnorm[name] = like * genotype_prior[name]
     
