@@ -372,7 +372,7 @@ tab1, tab2 = st.tabs(["🔍 Size -> Genotype", "🔮 Genotype -> Size"])
 with tab1:
     col_left, col_mid, col_right = st.columns(3)
     with col_left:
-        week = st.selectbox("📅 Week", weeks_list[:25], index=8)
+        week = st.selectbox("📅 Week", weeks_list, index=8)
     with col_mid:
         initial_size = st.slider("📏 Initial size at week 0 (mm)", min_value=10.0, max_value=60.0, value=23.0, step=1.0, help="Baseline tumor size before treatment")
     with col_right:
