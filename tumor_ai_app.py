@@ -251,9 +251,14 @@ def predict_inverse(current_size, week, initial_size):
             sigma = growth_data[week][1]
         else:
             sigma = 0.5
-    else:
-        # Cure phase: use fixed sigma (calibrated to 0.75 mm)
-        sigma = 0.75
+        else:
+        # Cure phase: use normalized SD model
+        norm_size = current_size / initial_size
+        x = max(0.01, min(norm_size, 0.99))
+        p = 0.45
+        peak_sd = 3.75
+        sigma = peak_sd * (x / p) * np.exp(1 - x / p) * (1 - x) / (1 - p)
+        sigma = max(0.0, sigma)
     
     for name in names:
         # Get expected size from cure_data
