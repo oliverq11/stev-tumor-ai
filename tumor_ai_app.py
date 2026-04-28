@@ -251,7 +251,7 @@ def predict_inverse(current_size, week, initial_size):
             sigma = growth_data[week][1]
         else:
             sigma = 0.5
-        else:
+    else:
         # Cure phase: use normalized SD model
         norm_size = current_size / initial_size
         x = max(0.01, min(norm_size, 0.99))
@@ -306,7 +306,6 @@ def predict_inverse(current_size, week, initial_size):
     posterior = {name: unnorm[name]/total for name in names}
     
     return posterior
-
 # ============================================================
 # CUSTOM CSS (same as before)
 # ============================================================
