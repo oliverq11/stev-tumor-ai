@@ -883,10 +883,10 @@ with tab2:
     tmb_mean = tmb_distribution[genotype]['mean']
     st.caption(f"🧬 {genotype} typical TMB = {tmb_mean}")
     
-        if st.button("Predict Size", use_container_width=True):
+    if st.button("Predict Size", use_container_width=True):
         week_data = cure_data[week]
         
-        # STEP 1: Calculate predicted
+     # STEP 1: Calculate predicted
         if initial_size <= 10:
             predicted = week_data[0]
         elif initial_size >= 60:
