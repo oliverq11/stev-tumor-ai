@@ -835,10 +835,11 @@ with tab1:
     # ============================================================
     
     # Show estimated growth time
+    # Show estimated growth time
     weeks_to_grow, lower_grow, upper_grow = get_growth_time(initial_size, 'MLH1')
     st.caption(f"📈 Estimated time to reach {initial_size:.1f} mm: **{weeks_to_grow:.0f} weeks** [90% CI: {lower_grow:.0f}-{upper_grow:.0f}]")
     
-       if st.button("Predict Genotype", use_container_width=True):
+    if st.button("Predict Genotype", use_container_width=True):
         probs = predict_inverse(current_size, week, initial_size)
         most_likely = max(probs, key=probs.get)
         
