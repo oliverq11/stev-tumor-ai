@@ -912,4 +912,13 @@ with tab2:
                           xaxis_title='Tumor size (mm)',
                           yaxis_title='Probability density')
         st.plotly_chart(fig, use_container_width=True)
+                threshold = st.slider(
+            "Clustering threshold (probability difference)",
+            min_value=0.01,
+            max_value=0.15,
+            value=0.05,
+            step=0.01,
+            key="cluster_threshold",
+            help="Lower = more clusters (detailed), Higher = fewer clusters (conservative)"
+        )
         st.caption("⚠️ Research & education only - not medical advice")
