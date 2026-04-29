@@ -792,19 +792,7 @@ with st.sidebar:
     qr.make(fit=True)
     img = qr.make_image(fill_color="black", back_color="white")
     buf = BytesIO()
-    img.save(buf, format="PNG")
-    st.image(buf.getvalue(), width=150, caption="Scan with phone camera")
-    st.markdown("**Or copy link:**")
-    st.code(app_url, language="text")
-    st.markdown("### ℹ️ How to use")
-    st.markdown("- **Size -> Genotype:** Enter Week and Size, get Genotype")
-    st.markdown("- **Genotype -> Size:** Enter Week, Genotype, and Initial Size, get Expected Size and Range")
-    st.markdown("- **Expanders:** Click to view curves, dynamics, math, and cases")
-    st.markdown("---")
-    st.markdown("**STEV model** - Lynch Syndrome")
-    st.markdown("*Horatio Quinones / Sherry Johnson et al*")
-
-# ============================================================
+  # ============================================================
 # MAIN APP WITH TWO TABS
 # ============================================================
 tab1, tab2 = st.tabs(["🔍 Size -> Genotype", "🔮 Genotype -> Size"])
@@ -819,9 +807,7 @@ with tab1:
     with col_right:
         current_size = st.slider("📏 Current tumor size (mm)", 0.0, 60.0, 1.4, 0.1)
     
-    # ============================================================
     # ALERT: Tumor not responding to immunotherapy
-    # ============================================================
     if current_size > initial_size:
         st.error(
             "🚨 **ALERT: TUMOR NOT RESPONDING TO IMMUNOTHERAPY** 🚨\n\n"
@@ -832,13 +818,12 @@ with tab1:
         st.warning(
             f"⚠️ **Minimal Response:** Current size ({current_size:.1f} mm) is >90% of Initial size ({initial_size:.1f} mm). Monitor closely."
         )
-    # ============================================================
     
     # Show estimated growth time
     weeks_to_grow, lower_grow, upper_grow = get_growth_time(initial_size, 'MLH1')
     st.caption(f"📈 Estimated time to reach {initial_size:.1f} mm: **{weeks_to_grow:.0f} weeks** [90% CI: {lower_grow:.0f}-{upper_grow:.0f}]")
     
-    if st.button("Predict Genotype", use_container_width=True):
+    if st.button("Predict Genotype", use_container_width=True, key="predict_genotype_button"):
         probs = predict_inverse(current_size, week, initial_size)
         most_likely = max(probs, key=probs.get)
         
@@ -853,17 +838,9 @@ with tab1:
         fig.update_layout(yaxis_title='Posterior probability', xaxis_title='Genotype')
         st.plotly_chart(fig, use_container_width=True)
         
-        # ============================================================
-        # GENOTYPE CLUSTERING (adds below the histogram)
-        # ============================================================
-        
-        # Sort probabilities
+        # GENOTYPE CLUSTERING
         sorted_probs = sorted(probs.items(), key=lambda x: x[1], reverse=True)
-        
-        # Clustering threshold (5% - genotypes within 5% probability are grouped)
         threshold = 0.05
-        
-        # Build clusters
         clusters = []
         i = 0
         while i < len(sorted_probs):
@@ -877,7 +854,6 @@ with tab1:
             clusters.append((" + ".join(cluster_names), cluster_total))
             i = j
         
-        # Display clusters as bullet points
         st.markdown("---")
         st.markdown("### 🧬 Genotype Clusters")
         st.markdown("*Genotypes within 5% probability are grouped as indistinguishable*")
@@ -893,29 +869,8 @@ with tab1:
                 st.markdown(f"**Cluster {idx} ({total:.1%})**: {names}")
         
         st.caption("⚠️ Research & education only - not medical advice")
-    # ============================================================
-    
-    # Show estimated growth time
-    # Show estimated growth time
-    weeks_to_grow, lower_grow, upper_grow = get_growth_time(initial_size, 'MLH1')
-    st.caption(f"📈 Estimated time to reach {initial_size:.1f} mm: **{weeks_to_grow:.0f} weeks** [90% CI: {lower_grow:.0f}-{upper_grow:.0f}]")
-    
-    if st.button("Predict Genotype", use_container_width=True):
-        probs = predict_inverse(current_size, week, initial_size)
-        most_likely = max(probs, key=probs.get)
-        
-        col_a, col_b = st.columns(2)
-        col_a.metric("🧬 Most likely Genotype", most_likely)
-        col_b.metric("📊 Probability", f"{probs[most_likely]:.1%}")
-        
-        df = pd.DataFrame(list(probs.items()), columns=['Genotype', 'Probability'])
-        fig = px.bar(df, x='Genotype', y='Probability', color='Genotype',
-                     color_discrete_sequence=px.colors.qualitative.Set2,
-                     title=f'Initial size = {initial_size:.1f} mm, Week {week}, Current size = {current_size:.1f} mm')
-        fig.update_layout(yaxis_title='Posterior probability', xaxis_title='Genotype')
-        st.plotly_chart(fig, use_container_width=True)
 
-        # ========== TAB 2: GENOTYPE -> SIZE ==========
+# ========== TAB 2: GENOTYPE -> SIZE ==========
 with tab2:
     col_left, col_right = st.columns(2)
     with col_left:
@@ -925,20 +880,15 @@ with tab2:
     
     initial_size = st.slider("📏 Initial tumor size at week 0 (mm)", min_value=1.1, max_value=60.0, value=30.0, step=1.0, key="init_size")
     
-    # Show estimated growth time
     weeks_to_grow, lower_grow, upper_grow = get_growth_time(initial_size, genotype)
     st.caption(f"📈 Estimated time to reach {initial_size:.1f} mm for {genotype}: **{weeks_to_grow:.0f} weeks** [90% CI: {lower_grow:.0f}-{upper_grow:.0f}]")
     
     tmb_mean = tmb_distribution[genotype]['mean']
     st.caption(f"🧬 {genotype} typical TMB = {tmb_mean}")
     
-    if st.button("Predict Size", use_container_width=True):
-        # For simplicity, use a basic prediction model
-        # You can expand this with your full cure-phase logic
-        # Use YOUR cure data
+    if st.button("Predict Size", use_container_width=True, key="predict_size_button"):
         week_data = cure_data[week]
         
-        # Interpolate between starting sizes
         if initial_size <= 10:
             predicted = week_data[0]
         elif initial_size >= 60:
@@ -954,18 +904,27 @@ with tab2:
                     predicted = low_v + frac * (high_v - low_v)
                     break
         
-        # Apply genotype scaling
         hr_factor = HR[genotype] / HR['MLH1']
         predicted = predicted * hr_factor
         predicted = max(1.1, predicted)
         
+        # Calculate sigma using normalized SD model
+        norm_size = predicted / initial_size
+        x_val = max(0.01, min(norm_size, 0.99))
+        p = 0.44
+        peak_sd = 3.83
+        sigma = peak_sd * (x_val / p) * np.exp(1 - x_val / p) * (1 - x_val) / (1 - p)
+        sigma = max(0.1, sigma)
+        
+        lower_ci = max(0.4, predicted - 1.96 * sigma)
+        upper_ci = predicted + 1.96 * sigma
+        
         col_a, col_b = st.columns(2)
         col_a.metric("📏 Expected size", f"{predicted:.2f} mm")
-        col_b.metric("📊 95% interval", f"[{max(1.1, predicted*0.7):.2f}, {predicted*1.3:.2f}] mm")
+        col_b.metric("📊 95% interval", f"[{lower_ci:.2f}, {upper_ci:.2f}] mm")
         
-        # Density plot
-        x_vals = np.linspace(max(0.5, predicted*0.6), predicted*1.4, 100)
-        y_vals = norm.pdf(x_vals, predicted, predicted*0.15)
+        x_vals = np.linspace(max(0.5, lower_ci), upper_ci, 100)
+        y_vals = norm.pdf(x_vals, predicted, sigma)
         fig = go.Figure()
         fig.add_trace(go.Scatter(x=x_vals, y=y_vals, fill='tozeroy', line_color='#1e466e', name='Density'))
         fig.add_vline(x=predicted, line_dash="dash", line_color="red", annotation_text=f"Predicted = {predicted:.2f} mm")
@@ -973,47 +932,16 @@ with tab2:
                           xaxis_title='Tumor size (mm)',
                           yaxis_title='Probability density')
         st.plotly_chart(fig, use_container_width=True)
+        
+        st.caption("⚠️ Research & education only - not medical advice")  img.save(buf, format="PNG")
+    st.image(buf.getvalue(), width=150, caption="Scan with phone camera")
+    st.markdown("**Or copy link:**")
+    st.code(app_url, language="text")
+    st.markdown("### ℹ️ How to use")
+    st.markdown("- **Size -> Genotype:** Enter Week and Size, get Genotype")
+    st.markdown("- **Genotype -> Size:** Enter Week, Genotype, and Initial Size, get Expected Size and Range")
+    st.markdown("- **Expanders:** Click to view curves, dynamics, math, and cases")
+    st.markdown("---")
+    st.markdown("**STEV model** - Lynch Syndrome")
+    st.markdown("*Horatio Quinones / Sherry Johnson et al*")
 
-
-
-        
-        # ============================================================
-        # GENOTYPE CLUSTERING (adds below the histogram)
-        # ============================================================
-        
-        # Sort probabilities
-        sorted_probs = sorted(probs.items(), key=lambda x: x[1], reverse=True)
-        
-        # Clustering threshold (5% - genotypes within 5% probability are grouped)
-        threshold = 0.05
-        
-        # Build clusters
-        clusters = []
-        i = 0
-        while i < len(sorted_probs):
-            cluster_names = [sorted_probs[i][0]]
-            cluster_total = sorted_probs[i][1]
-            j = i + 1
-            while j < len(sorted_probs) and sorted_probs[j][1] >= sorted_probs[i][1] - threshold:
-                cluster_names.append(sorted_probs[j][0])
-                cluster_total += sorted_probs[j][1]
-                j += 1
-            clusters.append((" + ".join(cluster_names), cluster_total))
-            i = j
-        
-        # Display clusters as bullet points
-        st.markdown("---")
-        st.markdown("### 🧬 Genotype Clusters")
-        st.markdown("*Genotypes within 5% probability are grouped as indistinguishable*")
-        
-        for idx, (names, total) in enumerate(clusters, 1):
-            if idx == 1:
-                st.markdown(f"**Most likely cluster ({total:.1%})**: {names}")
-            elif idx == 2:
-                st.markdown(f"**Second cluster ({total:.1%})**: {names}")
-            elif idx == 3:
-                st.markdown(f"**Third cluster ({total:.1%})**: {names}")
-            else:
-                st.markdown(f"**Cluster {idx} ({total:.1%})**: {names}")
-        
-        st.caption("⚠️ Research & education only - not medical advice")
