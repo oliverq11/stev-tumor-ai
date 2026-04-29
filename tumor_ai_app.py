@@ -7,7 +7,7 @@ from scipy.stats import norm
 import qrcode
 from io import BytesIO
 import os
-# HQS
+# HQ
 # ============================================================
 # PAGE CONFIGURATION
 # ============================================================
@@ -109,6 +109,163 @@ growth_data = {
     88: (4.745395155, 1.217349468),
     89: (4.897662487, 1.269524563),
     90: (5.055665808, 1.323647138),
+    91: (5.219583776, 1.379763699),
+    92: (5.389597532, 1.437919469),
+    93: (5.565890463, 1.498158115),
+    94: (5.748647928, 1.560521454),
+    95: (5.938056964, 1.625049141),
+    96: (6.134305952, 1.691778339),
+    97: (6.33758426, 1.760743364),
+    98: (6.548081841, 1.831975315),
+    99: (6.765988811, 1.90550168),
+    100: (6.991494978, 1.981345929),
+    101: (7.224789342, 2.059527084),
+    102: (7.466059555, 2.140059276),
+    103: (7.715491344, 2.222951285),
+    104: (7.973267898, 2.308206065),
+    105: (8.239569208, 2.395820265),
+    106: (8.514571383, 2.485783728),
+    107: (8.798445913, 2.578079003),
+    108: (9.091358909, 2.672680832),
+    109: (9.393470296, 2.769555659),
+    110: (9.704932979, 2.868661132),
+    111: (10.02589198, 2.969945615),
+    112: (10.35648352, 3.073347726),
+    113: (10.69683413, 3.178795877),
+    114: (11.04705968, 3.286207859),
+    115: (11.4072644, 3.395490445),
+    116: (11.77753994, 3.506539037),
+    117: (12.15796434, 3.619237361),
+    118: (12.54860105, 3.733457205),
+    119: (12.94949797, 3.849058227),
+    120: (13.36068639, 3.965887819),
+    121: (13.78218012, 4.08378105),
+    122: (14.21397446, 4.202560686),
+    123: (14.65604536, 4.322037296),
+    124: (15.10834851, 4.442009453),
+    125: (15.5708185, 4.562264026),
+    126: (16.04336813, 4.682576581),
+    127: (16.52588764, 4.802711883),
+    128: (17.01824413, 4.922424514),
+    129: (17.520281, 5.041459595),
+    130: (18.03181754, 5.159553622),
+    131: (18.55264857, 5.276435418),
+    132: (19.08254422, 5.391827187),
+    133: (19.62124981, 5.505445677),
+    134: (20.16848587, 5.617003448),
+    135: (20.72394832, 5.726210222),
+    136: (21.28730869, 5.832774332),
+    137: (21.85821458, 5.936404234),
+    138: (22.43629024, 6.03681009),
+    139: (23.02113722, 6.1337054),
+    140: (23.61233528, 6.226808668),
+    141: (24.20944335, 6.31584509),
+    142: (24.81200067, 6.400548248),
+    143: (25.41952808, 6.480661786),
+    144: (26.03152936, 6.555941063),
+    145: (26.64749281, 6.62615475),
+    146: (27.26689284, 6.691086366),
+    147: (27.8891917, 6.750535723),
+    148: (28.51384135, 6.804320283),
+    149: (29.14028528, 6.852276385),
+    150: (29.76796055, 6.89426035),
+    151: (30.39629973, 6.93014944),
+    152: (31.02473302, 6.959842658),
+    153: (31.65269027, 6.983261393),
+    154: (32.27960303, 7.000349878),
+    155: (32.90490667, 7.011075493),
+    156: (33.52804234, 7.015428865),
+    157: (34.14845897, 7.01342381),
+    158: (34.76561523, 7.005097083),
+    159: (35.37898131, 6.990507964),
+    160: (35.98804074, 6.969737673),
+    161: (36.59229203, 6.942888633),
+    162: (37.19125022, 6.91008358),
+    163: (37.78444833, 6.871464544),
+    164: (38.37143867, 6.827191708),
+    165: (38.951794, 6.777442156),
+    166: (39.52510858, 6.722408536),
+    167: (40.09099909, 6.66229765),
+    168: (40.64910534, 6.597328978),
+    169: (41.19909093, 6.527733169),
+    170: (41.74064369, 6.453750499),
+    171: (42.27347598, 6.375629331),
+    172: (42.79732496, 6.293624566),
+    173: (43.31195258, 6.207996127),
+    174: (43.81714551, 6.119007469),
+    175: (44.31271501, 6.026924139),
+    176: (44.79849656, 5.932012384),
+    177: (45.27434951, 5.834537838),
+    178: (45.74015652, 5.734764268),
+    179: (46.19582301, 5.632952411),
+    180: (46.64127646, 5.529358895),
+    181: (47.07646571, 5.424235242),
+    182: (47.50136009, 5.317826974),
+    183: (47.91594862, 5.210372806),
+    184: (48.32023911, 5.102103936),
+    185: (48.71425719, 4.993243423),
+    186: (49.09804539, 4.884005666),
+    187: (49.47166211, 4.774595964),
+    188: (49.83518072, 4.665210164),
+    189: (50.18868847, 4.55603439),
+    190: (50.53228555, 4.447244856),
+    191: (50.8660841, 4.339007739),
+    192: (51.19020724, 4.231479135),
+    193: (51.50478808, 4.124805065),
+    194: (51.80996886, 4.019121541),
+    195: (52.10589997, 3.914554692),
+    196: (52.39273912, 3.811220924),
+    197: (52.67065046, 3.70922713),
+    198: (52.9398038, 3.608670929),
+    199: (53.2003738, 3.509640942),
+    200: (53.45253925, 3.412217092),
+    201: (53.69648237, 3.316470921),
+    202: (53.9323881, 3.22246593),
+    203: (54.16044353, 3.130257934),
+    204: (54.38083728, 3.039895415),
+    205: (54.59375895, 2.951419897),
+    206: (54.7993986, 2.864866311),
+    207: (54.99794629, 2.780263369),
+    208: (55.18959163, 2.697633929),
+    209: (55.37452336, 2.616995365),
+    210: (55.55292901, 2.538359919),
+    211: (55.72499452, 2.461735053),
+    212: (55.89090396, 2.387123792),
+    213: (56.05083923, 2.314525051),
+    214: (56.20497985, 2.24393395),
+    215: (56.35350269, 2.175342128),
+    216: (56.49658177, 2.108738025),
+    217: (56.63438816, 2.044107166),
+    218: (56.76708972, 1.981432423),
+    219: (56.89485107, 1.920694263),
+    220: (57.01783342, 1.861870986),
+    221: (57.13619449, 1.804938941),
+    222: (57.25008847, 1.749872732),
+    223: (57.35966591, 1.69664541),
+    224: (57.46507373, 1.64522865),
+    225: (57.56645514, 1.595592911),
+    226: (57.66394966, 1.547707589),
+    227: (57.75769312, 1.501541148),
+    228: (57.84781762, 1.457061248),
+    229: (57.9344516, 1.414234854),
+    230: (58.01771981, 1.373028336),
+    231: (58.0977434, 1.33340756),
+    232: (58.1746399, 1.295337966),
+    233: (58.2485233, 1.258784636),
+    234: (58.31950409, 1.22371236),
+    235: (58.38768931, 1.190085686),
+    236: (58.4531826, 1.157868969),
+    237: (58.5160843, 1.127026413),
+    238: (58.57649147, 1.097522104),
+    239: (58.63449796, 1.069320048),
+    240: (58.69019453, 1.042384197),
+    241: (58.74366884, 1.016678479),
+    242: (58.7950056, 0.992166821),
+    243: (58.8442866, 0.968813179),
+    244: (58.8915908, 0.946581564),
+    245: (58.93699438, 0.925436069),
+    246: (58.98057085, 0.905340899),
+    247: (59.02239111, 0.886260402),
 }
 # Add more weeks as needed
 
@@ -252,8 +409,13 @@ def predict_inverse(current_size, week, initial_size):
         else:
             sigma = 0.5
     else:
-        # Cure phase: use fixed sigma (calibrated to 0.75 mm)
-        sigma = 0.75
+        # Cure phase: use normalized SD model
+        norm_size = current_size / initial_size
+        x = max(0.01, min(norm_size, 0.99))
+        p = 0.45
+        peak_sd = 3.75
+        sigma = peak_sd * (x / p) * np.exp(1 - x / p) * (1 - x) / (1 - p)
+        sigma = max(0.0, sigma)
     
     for name in names:
         # Get expected size from cure_data
@@ -301,7 +463,6 @@ def predict_inverse(current_size, week, initial_size):
     posterior = {name: unnorm[name]/total for name in names}
     
     return posterior
-
 # ============================================================
 # CUSTOM CSS (same as before)
 # ============================================================
@@ -674,6 +835,7 @@ with tab1:
     # ============================================================
     
     # Show estimated growth time
+    # Show estimated growth time
     weeks_to_grow, lower_grow, upper_grow = get_growth_time(initial_size, 'MLH1')
     st.caption(f"📈 Estimated time to reach {initial_size:.1f} mm: **{weeks_to_grow:.0f} weeks** [90% CI: {lower_grow:.0f}-{upper_grow:.0f}]")
     
@@ -691,64 +853,44 @@ with tab1:
                      title=f'Initial size = {initial_size:.1f} mm, Week {week}, Current size = {current_size:.1f} mm')
         fig.update_layout(yaxis_title='Posterior probability', xaxis_title='Genotype')
         st.plotly_chart(fig, use_container_width=True)
-        st.caption("⚠️ Research & education only - not medical advice")
-
-# ========== TAB 2: GENOTYPE -> SIZE ==========
-with tab2:
-    col_left, col_right = st.columns(2)
-    with col_left:
-        week = st.selectbox("📅 Week", list(range(25)), index=8, key="forward_week")
-    with col_right:
-        genotype = st.selectbox("🧬 Genotype", names, index=1)
-    
-    initial_size = st.slider("📏 Initial tumor size at week 0 (mm)", min_value=1.1, max_value=60.0, value=30.0, step=1.0, key="init_size")
-    
-    # Show estimated growth time
-    weeks_to_grow, lower_grow, upper_grow = get_growth_time(initial_size, genotype)
-    st.caption(f"📈 Estimated time to reach {initial_size:.1f} mm for {genotype}: **{weeks_to_grow:.0f} weeks** [90% CI: {lower_grow:.0f}-{upper_grow:.0f}]")
-    
-    tmb_mean = tmb_distribution[genotype]['mean']
-    st.caption(f"🧬 {genotype} typical TMB = {tmb_mean}")
-    
-    if st.button("Predict Size", use_container_width=True):
-        # For simplicity, use a basic prediction model
-        # You can expand this with your full cure-phase logic
-        # Use YOUR cure data
-        week_data = cure_data[week]
         
-        # Interpolate between starting sizes
-        if initial_size <= 10:
-            predicted = week_data[0]
-        elif initial_size >= 60:
-            predicted = week_data[-1]
-        else:
-            for i in range(len(starting_sizes)-1):
-                if starting_sizes[i] <= initial_size <= starting_sizes[i+1]:
-                    low_s = starting_sizes[i]
-                    high_s = starting_sizes[i+1]
-                    low_v = week_data[i]
-                    high_v = week_data[i+1]
-                    frac = (initial_size - low_s) / (high_s - low_s)
-                    predicted = low_v + frac * (high_v - low_v)
-                    break
+        # ============================================================
+        # GENOTYPE CLUSTERING (adds below the histogram)
+        # ============================================================
         
-        # Apply genotype scaling
-        hr_factor = HR[genotype] / HR['MLH1']
-        predicted = predicted * hr_factor
-        predicted = max(1.1, predicted)
+        # Sort probabilities
+        sorted_probs = sorted(probs.items(), key=lambda x: x[1], reverse=True)
         
-        col_a, col_b = st.columns(2)
-        col_a.metric("📏 Expected size", f"{predicted:.2f} mm")
-        col_b.metric("📊 95% interval", f"[{max(1.1, predicted*0.7):.2f}, {predicted*1.3:.2f}] mm")
+        # Clustering threshold (5% - genotypes within 5% probability are grouped)
+        threshold = 0.05
         
-        # Density plot
-        x_vals = np.linspace(max(0.5, predicted*0.6), predicted*1.4, 100)
-        y_vals = norm.pdf(x_vals, predicted, predicted*0.15)
-        fig = go.Figure()
-        fig.add_trace(go.Scatter(x=x_vals, y=y_vals, fill='tozeroy', line_color='#1e466e', name='Density'))
-        fig.add_vline(x=predicted, line_dash="dash", line_color="red", annotation_text=f"Predicted = {predicted:.2f} mm")
-        fig.update_layout(title=f'{genotype} at week {week} (initial size = {initial_size:.1f} mm)',
-                          xaxis_title='Tumor size (mm)',
-                          yaxis_title='Probability density')
-        st.plotly_chart(fig, use_container_width=True)
+        # Build clusters
+        clusters = []
+        i = 0
+        while i < len(sorted_probs):
+            cluster_names = [sorted_probs[i][0]]
+            cluster_total = sorted_probs[i][1]
+            j = i + 1
+            while j < len(sorted_probs) and sorted_probs[j][1] >= sorted_probs[i][1] - threshold:
+                cluster_names.append(sorted_probs[j][0])
+                cluster_total += sorted_probs[j][1]
+                j += 1
+            clusters.append((" + ".join(cluster_names), cluster_total))
+            i = j
+        
+        # Display clusters as bullet points
+        st.markdown("---")
+        st.markdown("### 🧬 Genotype Clusters")
+        st.markdown("*Genotypes within 5% probability are grouped as indistinguishable*")
+        
+        for idx, (names, total) in enumerate(clusters, 1):
+            if idx == 1:
+                st.markdown(f"**Most likely cluster ({total:.1%})**: {names}")
+            elif idx == 2:
+                st.markdown(f"**Second cluster ({total:.1%})**: {names}")
+            elif idx == 3:
+                st.markdown(f"**Third cluster ({total:.1%})**: {names}")
+            else:
+                st.markdown(f"**Cluster {idx} ({total:.1%})**: {names}")
+        
         st.caption("⚠️ Research & education only - not medical advice")
