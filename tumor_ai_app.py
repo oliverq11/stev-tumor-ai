@@ -893,7 +893,7 @@ with tab1:
 
         #    QQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQ
         
-        st.caption("⚠️ Research & education only - not medical advice")
+       # st.caption("⚠️ Research & education only - not medical advice")
 
 # ========== TAB 2: GENOTYPE -> SIZE ==========
 with tab2:
