@@ -883,9 +883,10 @@ with tab2:
     tmb_mean = tmb_distribution[genotype]['mean']
     st.caption(f"🧬 {genotype} typical TMB = {tmb_mean}")
     
-    if st.button("Predict Size", use_container_width=True):
+        if st.button("Predict Size", use_container_width=True):
         week_data = cure_data[week]
         
+        # STEP 1: Calculate predicted
         if initial_size <= 10:
             predicted = week_data[0]
         elif initial_size >= 60:
@@ -901,11 +902,12 @@ with tab2:
                     predicted = low_v + frac * (high_v - low_v)
                     break
         
+        # STEP 2: Apply genotype scaling
         hr_factor = HR[genotype] / HR['MLH1']
         predicted = predicted * hr_factor
         predicted = max(1.1, predicted)
         
-        # Calculate sigma using normalized SD model
+        # STEP 3: NOW calculate sigma (after predicted exists)
         norm_size = predicted / initial_size
         x_val = max(0.01, min(norm_size, 0.99))
         p = 0.44
@@ -915,6 +917,7 @@ with tab2:
         lower_ci = max(0.4, predicted - 1.96 * sigma)
         upper_ci = predicted + 1.96 * sigma
         
+        # STEP 4: Display
         col_a, col_b = st.columns(2)
         col_a.metric("📏 Expected size", f"{predicted:.2f} mm")
         col_b.metric("📊 95% interval", f"[{lower_ci:.2f}, {upper_ci:.2f}] mm")
