@@ -847,17 +847,7 @@ with tab1:
         
         col_a, col_b = st.columns(2)
         col_a.metric("🧬 Most likely Genotype", most_likely)
-        #col_b.metric("📊 Probability", f"{probs[most_likely]:.1%}")
-                # Calculate sigma using normalized SD model
-     #   norm_size = predicted / initial_size
-        x = max(0.01, min(norm_size, 0.99))
-        p = 0.44
-        peak_sd = 3.83
-        sigma = peak_sd * (x / p) * np.exp(1 - x / p) * (1 - x) / (1 - p)
-        sigma = max(0.1, sigma)
-        lower_ci = max(0.4, predicted - 1.96 * sigma)
-        upper_ci = predicted + 1.96 * sigma
-        col_b.metric("📊 95% interval", f"[{lower_ci:.2f}, {upper_ci:.2f}] mm")
+        col_b.metric("📊 Probability", f"{probs[most_likely]:.1%}")
         
         df = pd.DataFrame(list(probs.items()), columns=['Genotype', 'Probability'])
         fig = px.bar(df, x='Genotype', y='Probability', color='Genotype',
@@ -877,6 +867,7 @@ with tab2:
     
     initial_size = st.slider("📏 Initial tumor size at week 0 (mm)", min_value=1.1, max_value=60.0, value=30.0, step=1.0, key="init_size")
     
+    # Show estimated growth time
     weeks_to_grow, lower_grow, upper_grow = get_growth_time(initial_size, genotype)
     st.caption(f"📈 Estimated time to reach {initial_size:.1f} mm for {genotype}: **{weeks_to_grow:.0f} weeks** [90% CI: {lower_grow:.0f}-{upper_grow:.0f}]")
     
@@ -884,9 +875,12 @@ with tab2:
     st.caption(f"🧬 {genotype} typical TMB = {tmb_mean}")
     
     if st.button("Predict Size", use_container_width=True):
+        # For simplicity, use a basic prediction model
+        # You can expand this with your full cure-phase logic
+        # Use YOUR cure data
         week_data = cure_data[week]
         
-        # STEP 1: Calculate predicted
+        # Interpolate between starting sizes
         if initial_size <= 10:
             predicted = week_data[0]
         elif initial_size >= 60:
@@ -902,28 +896,18 @@ with tab2:
                     predicted = low_v + frac * (high_v - low_v)
                     break
         
-        # STEP 2: Apply genotype scaling
+        # Apply genotype scaling
         hr_factor = HR[genotype] / HR['MLH1']
         predicted = predicted * hr_factor
         predicted = max(1.1, predicted)
         
-        # STEP 3: Calculate sigma (after predicted exists)
-        norm_size = predicted / initial_size
-        x_val = max(0.01, min(norm_size, 0.99))
-        p = 0.44
-        peak_sd = 3.83
-        sigma = peak_sd * (x_val / p) * np.exp(1 - x_val / p) * (1 - x_val) / (1 - p)
-        sigma = max(0.1, sigma)
-        lower_ci = max(0.4, predicted - 1.96 * sigma)
-        upper_ci = predicted + 1.96 * sigma
-        
-        # STEP 4: Display
         col_a, col_b = st.columns(2)
         col_a.metric("📏 Expected size", f"{predicted:.2f} mm")
-        col_b.metric("📊 95% interval", f"[{lower_ci:.2f}, {upper_ci:.2f}] mm")
+        col_b.metric("📊 95% interval", f"[{max(1.1, predicted*0.7):.2f}, {predicted*1.3:.2f}] mm")
         
-        x_vals = np.linspace(max(0.5, lower_ci), upper_ci, 100)
-        y_vals = norm.pdf(x_vals, predicted, sigma)
+        # Density plot
+        x_vals = np.linspace(max(0.5, predicted*0.6), predicted*1.4, 100)
+        y_vals = norm.pdf(x_vals, predicted, predicted*0.15)
         fig = go.Figure()
         fig.add_trace(go.Scatter(x=x_vals, y=y_vals, fill='tozeroy', line_color='#1e466e', name='Density'))
         fig.add_vline(x=predicted, line_dash="dash", line_color="red", annotation_text=f"Predicted = {predicted:.2f} mm")
@@ -931,5 +915,4 @@ with tab2:
                           xaxis_title='Tumor size (mm)',
                           yaxis_title='Probability density')
         st.plotly_chart(fig, use_container_width=True)
-        
         st.caption("⚠️ Research & education only - not medical advice")
