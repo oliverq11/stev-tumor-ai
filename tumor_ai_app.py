@@ -847,7 +847,17 @@ with tab1:
         
         col_a, col_b = st.columns(2)
         col_a.metric("🧬 Most likely Genotype", most_likely)
-        col_b.metric("📊 Probability", f"{probs[most_likely]:.1%}")
+        #col_b.metric("📊 Probability", f"{probs[most_likely]:.1%}")
+                # Calculate sigma using normalized SD model
+        norm_size = predicted / initial_size
+        x = max(0.01, min(norm_size, 0.99))
+        p = 0.44
+        peak_sd = 3.83
+        sigma = peak_sd * (x / p) * np.exp(1 - x / p) * (1 - x) / (1 - p)
+        sigma = max(0.1, sigma)
+        lower_ci = max(0.4, predicted - 1.96 * sigma)
+        upper_ci = predicted + 1.96 * sigma
+        col_b.metric("📊 95% interval", f"[{lower_ci:.2f}, {upper_ci:.2f}] mm")
         
         df = pd.DataFrame(list(probs.items()), columns=['Genotype', 'Probability'])
         fig = px.bar(df, x='Genotype', y='Probability', color='Genotype',
