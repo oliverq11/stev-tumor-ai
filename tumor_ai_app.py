@@ -7,7 +7,7 @@ from scipy.stats import norm
 import qrcode
 from io import BytesIO
 import os
-# HQS
+# HQ
 # ============================================================
 # PAGE CONFIGURATION
 # ============================================================
