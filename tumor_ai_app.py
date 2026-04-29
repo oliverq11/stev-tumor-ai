@@ -888,12 +888,12 @@ with tab1:
             else:
                 st.markdown(f"**Cluster {idx} ({total:.1%})**: {names}")
         
-        st.caption("⚠️ Research & education only - not medical advice")
+        #st.caption("⚠️ Research & education only - not medical advice")
 
 
         #    QQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQ
         
-       # st.caption("⚠️ Research & education only - not medical advice")
+        st.caption("⚠️ Research & education only - not medical advice")
 
 # ========== TAB 2: GENOTYPE -> SIZE ==========
 with tab2:
