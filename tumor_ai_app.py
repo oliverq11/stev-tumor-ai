@@ -912,9 +912,9 @@ with tab2:
         peak_sd = 3.83
         sigma = peak_sd * (x / p) * np.exp(1 - x / p) * (1 - x) / (1 - p)
         sigma = max(0.1, sigma)
-          lower_ci = max(0.4, predicted - 1.96 * sigma)
-         upper_ci = predicted + 1.96 * sigma
-         col_b.metric("📊 95% interval", f"[{lower_ci:.2f}, {upper_ci:.2f}] mm")
+        lower_ci = max(0.4, predicted - 1.96 * sigma)
+        upper_ci = predicted + 1.96 * sigma
+        col_b.metric("📊 95% interval", f"[{lower_ci:.2f}, {upper_ci:.2f}] mm")
 
         # HHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHH
         # Density plot
