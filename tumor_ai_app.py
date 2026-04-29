@@ -877,17 +877,15 @@ with tab2:
     
     initial_size = st.slider("📏 Initial tumor size at week 0 (mm)", min_value=1.1, max_value=60.0, value=30.0, step=1.0, key="init_size")
     
-    # Show estimated growth time
     weeks_to_grow, lower_grow, upper_grow = get_growth_time(initial_size, genotype)
     st.caption(f"📈 Estimated time to reach {initial_size:.1f} mm for {genotype}: **{weeks_to_grow:.0f} weeks** [90% CI: {lower_grow:.0f}-{upper_grow:.0f}]")
     
     tmb_mean = tmb_distribution[genotype]['mean']
     st.caption(f"🧬 {genotype} typical TMB = {tmb_mean}")
-    # HHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHH
-        if st.button("Predict Size", use_container_width=True):
+    
+    if st.button("Predict Size", use_container_width=True):
         week_data = cure_data[week]
         
-        # FIRST: Calculate predicted
         if initial_size <= 10:
             predicted = week_data[0]
         elif initial_size >= 60:
@@ -903,12 +901,11 @@ with tab2:
                     predicted = low_v + frac * (high_v - low_v)
                     break
         
-        # Apply genotype scaling
         hr_factor = HR[genotype] / HR['MLH1']
         predicted = predicted * hr_factor
         predicted = max(1.1, predicted)
         
-        # THEN: Calculate sigma using predicted
+        # Calculate sigma using normalized SD model
         norm_size = predicted / initial_size
         x = max(0.01, min(norm_size, 0.99))
         p = 0.44
@@ -918,12 +915,10 @@ with tab2:
         lower_ci = max(0.4, predicted - 1.96 * sigma)
         upper_ci = predicted + 1.96 * sigma
         
-        # Display metrics
         col_a, col_b = st.columns(2)
         col_a.metric("📏 Expected size", f"{predicted:.2f} mm")
         col_b.metric("📊 95% interval", f"[{lower_ci:.2f}, {upper_ci:.2f}] mm")
         
-        # Density plot (optional, uses sigma)
         x_vals = np.linspace(max(0.5, lower_ci), upper_ci, 100)
         y_vals = norm.pdf(x_vals, predicted, sigma)
         fig = go.Figure()
