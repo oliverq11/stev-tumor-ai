@@ -928,40 +928,7 @@ with tab2:
                           yaxis_title='Probability density')
         st.plotly_chart(fig, use_container_width=True)
         # SSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSS
-              # ============================================================
-        # GENOTYPE CLUSTERING (with debug)
-        # ============================================================
-        sorted_probs = sorted(probs.items(), key=lambda x: x[1], reverse=True)
-        threshold = 0.05
-        clusters = []
-        i = 0
-        while i < len(sorted_probs):
-            cluster_names = [sorted_probs[i][0]]
-            cluster_total = sorted_probs[i][1]
-            j = i + 1
-            while j < len(sorted_probs) and sorted_probs[j][1] >= sorted_probs[i][1] - threshold:
-                cluster_names.append(sorted_probs[j][0])
-                cluster_total += sorted_probs[j][1]
-                j += 1
-            clusters.append((" + ".join(cluster_names), cluster_total))
-            i = j
-        
-        # DEBUG: Show what we found
-        st.write(f"DEBUG: Number of clusters = {len(clusters)}")
-        for idx, (cluster_genotypes, total) in enumerate(clusters, 1):
-            st.write(f"DEBUG: Cluster {idx}: {cluster_genotypes} -> {total:.1%}")
-        
-        st.markdown("---")
-        st.markdown("### 🧬 Genotype Clusters")
-        st.markdown("*Genotypes within 5% probability are grouped as indistinguishable*")
-        
-        for idx, (cluster_genotypes, total) in enumerate(clusters, 1):
-            if idx == 1:
-                st.markdown(f"**Most likely cluster ({total:.1%})**: {cluster_genotypes}")
-            elif idx == 2:
-                st.markdown(f"**Second cluster ({total:.1%})**: {cluster_genotypes}")
-            else:
-                st.markdown(f"**Cluster {idx} ({total:.1%})**: {cluster_genotypes}")
+  
 
         # SSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSS
 
