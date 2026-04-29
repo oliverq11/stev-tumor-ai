@@ -835,6 +835,67 @@ with tab1:
     # ============================================================
     
     # Show estimated growth time
+    weeks_to_grow, lower_grow, upper_grow = get_growth_time(initial_size, 'MLH1')
+    st.caption(f"📈 Estimated time to reach {initial_size:.1f} mm: **{weeks_to_grow:.0f} weeks** [90% CI: {lower_grow:.0f}-{upper_grow:.0f}]")
+    
+    if st.button("Predict Genotype", use_container_width=True):
+        probs = predict_inverse(current_size, week, initial_size)
+        most_likely = max(probs, key=probs.get)
+        
+        col_a, col_b = st.columns(2)
+        col_a.metric("🧬 Most likely Genotype", most_likely)
+        col_b.metric("📊 Probability", f"{probs[most_likely]:.1%}")
+        
+        df = pd.DataFrame(list(probs.items()), columns=['Genotype', 'Probability'])
+        fig = px.bar(df, x='Genotype', y='Probability', color='Genotype',
+                     color_discrete_sequence=px.colors.qualitative.Set2,
+                     title=f'Initial size = {initial_size:.1f} mm, Week {week}, Current size = {current_size:.1f} mm')
+        fig.update_layout(yaxis_title='Posterior probability', xaxis_title='Genotype')
+        st.plotly_chart(fig, use_container_width=True)
+        
+        # ============================================================
+        # GENOTYPE CLUSTERING (adds below the histogram)
+        # ============================================================
+        
+        # Sort probabilities
+        sorted_probs = sorted(probs.items(), key=lambda x: x[1], reverse=True)
+        
+        # Clustering threshold (5% - genotypes within 5% probability are grouped)
+        threshold = 0.05
+        
+        # Build clusters
+        clusters = []
+        i = 0
+        while i < len(sorted_probs):
+            cluster_names = [sorted_probs[i][0]]
+            cluster_total = sorted_probs[i][1]
+            j = i + 1
+            while j < len(sorted_probs) and sorted_probs[j][1] >= sorted_probs[i][1] - threshold:
+                cluster_names.append(sorted_probs[j][0])
+                cluster_total += sorted_probs[j][1]
+                j += 1
+            clusters.append((" + ".join(cluster_names), cluster_total))
+            i = j
+        
+        # Display clusters as bullet points
+        st.markdown("---")
+        st.markdown("### 🧬 Genotype Clusters")
+        st.markdown("*Genotypes within 5% probability are grouped as indistinguishable*")
+        
+        for idx, (names, total) in enumerate(clusters, 1):
+            if idx == 1:
+                st.markdown(f"**Most likely cluster ({total:.1%})**: {names}")
+            elif idx == 2:
+                st.markdown(f"**Second cluster ({total:.1%})**: {names}")
+            elif idx == 3:
+                st.markdown(f"**Third cluster ({total:.1%})**: {names}")
+            else:
+                st.markdown(f"**Cluster {idx} ({total:.1%})**: {names}")
+        
+        st.caption("⚠️ Research & education only - not medical advice")
+    # ============================================================
+    
+    # Show estimated growth time
     # Show estimated growth time
     weeks_to_grow, lower_grow, upper_grow = get_growth_time(initial_size, 'MLH1')
     st.caption(f"📈 Estimated time to reach {initial_size:.1f} mm: **{weeks_to_grow:.0f} weeks** [90% CI: {lower_grow:.0f}-{upper_grow:.0f}]")
