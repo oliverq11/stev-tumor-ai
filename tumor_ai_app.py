@@ -907,10 +907,10 @@ with tab2:
         
         # Calculate sigma using normalized SD model
         norm_size = predicted / initial_size
-        x = max(0.01, min(norm_size, 0.99))
+        x_val = max(0.01, min(norm_size, 0.99))
         p = 0.44
         peak_sd = 3.83
-        sigma = peak_sd * (x / p) * np.exp(1 - x / p) * (1 - x) / (1 - p)
+        sigma = peak_sd * (x_val / p) * np.exp(1 - x_val / p) * (1 - x_val) / (1 - p)
         sigma = max(0.1, sigma)
         lower_ci = max(0.4, predicted - 1.96 * sigma)
         upper_ci = predicted + 1.96 * sigma
