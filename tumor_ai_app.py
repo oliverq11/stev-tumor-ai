@@ -792,7 +792,7 @@ with st.sidebar:
     qr.make(fit=True)
     img = qr.make_image(fill_color="black", back_color="white")
     buf = BytesIO()
-  # ============================================================
+# ============================================================
 # MAIN APP WITH TWO TABS
 # ============================================================
 tab1, tab2 = st.tabs(["🔍 Size -> Genotype", "🔮 Genotype -> Size"])
@@ -823,7 +823,7 @@ with tab1:
     weeks_to_grow, lower_grow, upper_grow = get_growth_time(initial_size, 'MLH1')
     st.caption(f"📈 Estimated time to reach {initial_size:.1f} mm: **{weeks_to_grow:.0f} weeks** [90% CI: {lower_grow:.0f}-{upper_grow:.0f}]")
     
-    if st.button("Predict Genotype", use_container_width=True, key="predict_genotype_button"):
+    if st.button("Predict Genotype", use_container_width=True, key="predict_genotype_btn"):
         probs = predict_inverse(current_size, week, initial_size)
         most_likely = max(probs, key=probs.get)
         
@@ -886,7 +886,7 @@ with tab2:
     tmb_mean = tmb_distribution[genotype]['mean']
     st.caption(f"🧬 {genotype} typical TMB = {tmb_mean}")
     
-    if st.button("Predict Size", use_container_width=True, key="predict_size_button"):
+    if st.button("Predict Size", use_container_width=True, key="predict_size_btn"):
         week_data = cure_data[week]
         
         if initial_size <= 10:
@@ -933,15 +933,5 @@ with tab2:
                           yaxis_title='Probability density')
         st.plotly_chart(fig, use_container_width=True)
         
-        st.caption("⚠️ Research & education only - not medical advice")  img.save(buf, format="PNG")
-    st.image(buf.getvalue(), width=150, caption="Scan with phone camera")
-    st.markdown("**Or copy link:**")
-    st.code(app_url, language="text")
-    st.markdown("### ℹ️ How to use")
-    st.markdown("- **Size -> Genotype:** Enter Week and Size, get Genotype")
-    st.markdown("- **Genotype -> Size:** Enter Week, Genotype, and Initial Size, get Expected Size and Range")
-    st.markdown("- **Expanders:** Click to view curves, dynamics, math, and cases")
-    st.markdown("---")
-    st.markdown("**STEV model** - Lynch Syndrome")
-    st.markdown("*Horatio Quinones / Sherry Johnson et al*")
+        st.caption("⚠️ Research & education only - not medical advice")
 
