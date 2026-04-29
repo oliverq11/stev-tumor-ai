@@ -928,10 +928,8 @@ with tab2:
                           yaxis_title='Probability density')
         st.plotly_chart(fig, use_container_width=True)
         # SSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSS
-                st.plotly_chart(fig, use_container_width=True)
-        
-        # ============================================================
-        # GENOTYPE CLUSTERING
+              # ============================================================
+        # GENOTYPE CLUSTERING (with debug)
         # ============================================================
         sorted_probs = sorted(probs.items(), key=lambda x: x[1], reverse=True)
         threshold = 0.05
@@ -948,6 +946,11 @@ with tab2:
             clusters.append((" + ".join(cluster_names), cluster_total))
             i = j
         
+        # DEBUG: Show what we found
+        st.write(f"DEBUG: Number of clusters = {len(clusters)}")
+        for idx, (cluster_genotypes, total) in enumerate(clusters, 1):
+            st.write(f"DEBUG: Cluster {idx}: {cluster_genotypes} -> {total:.1%}")
+        
         st.markdown("---")
         st.markdown("### 🧬 Genotype Clusters")
         st.markdown("*Genotypes within 5% probability are grouped as indistinguishable*")
@@ -959,9 +962,6 @@ with tab2:
                 st.markdown(f"**Second cluster ({total:.1%})**: {cluster_genotypes}")
             else:
                 st.markdown(f"**Cluster {idx} ({total:.1%})**: {cluster_genotypes}")
-        
-        #st.caption("⚠️ Research & education only - not medical advice")
-
 
         # SSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSS
 
