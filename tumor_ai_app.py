@@ -838,7 +838,7 @@ with tab1:
     weeks_to_grow, lower_grow, upper_grow = get_growth_time(initial_size, 'MLH1')
     st.caption(f"📈 Estimated time to reach {initial_size:.1f} mm: **{weeks_to_grow:.0f} weeks** [90% CI: {lower_grow:.0f}-{upper_grow:.0f}]")
     
-    if st.button("Predict Genotype", use_container_width=True):
+       if st.button("Predict Genotype", use_container_width=True):
         probs = predict_inverse(current_size, week, initial_size)
         most_likely = max(probs, key=probs.get)
         
@@ -850,7 +850,7 @@ with tab1:
         fig = px.bar(df, x='Genotype', y='Probability', color='Genotype',
                      color_discrete_sequence=px.colors.qualitative.Set2,
                      title=f'Initial size = {initial_size:.1f} mm, Week {week}, Current size = {current_size:.1f} mm')
-           fig.update_layout(yaxis_title='Posterior probability', xaxis_title='Genotype')
+        fig.update_layout(yaxis_title='Posterior probability', xaxis_title='Genotype')
         st.plotly_chart(fig, use_container_width=True)
         
         # ============================================================
