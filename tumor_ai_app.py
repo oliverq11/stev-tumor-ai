@@ -849,7 +849,7 @@ with tab1:
         col_a.metric("🧬 Most likely Genotype", most_likely)
         #col_b.metric("📊 Probability", f"{probs[most_likely]:.1%}")
                 # Calculate sigma using normalized SD model
-        norm_size = predicted / initial_size
+     #   norm_size = predicted / initial_size
         x = max(0.01, min(norm_size, 0.99))
         p = 0.44
         peak_sd = 3.83
