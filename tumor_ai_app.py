@@ -886,7 +886,7 @@ with tab2:
     if st.button("Predict Size", use_container_width=True):
         week_data = cure_data[week]
         
-     # STEP 1: Calculate predicted
+        # STEP 1: Calculate predicted
         if initial_size <= 10:
             predicted = week_data[0]
         elif initial_size >= 60:
@@ -907,7 +907,7 @@ with tab2:
         predicted = predicted * hr_factor
         predicted = max(1.1, predicted)
         
-        # STEP 3: NOW calculate sigma (after predicted exists)
+        # STEP 3: Calculate sigma (after predicted exists)
         norm_size = predicted / initial_size
         x_val = max(0.01, min(norm_size, 0.99))
         p = 0.44
