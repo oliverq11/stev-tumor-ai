@@ -995,7 +995,8 @@ with tab1:
             else:
                 st.markdown(f"**Cluster {idx} ({total:.1%})**: {names}")
         
-        st.caption("⚠️ Research & education only - not medical advice")        df = pd.DataFrame(list(probs.items()), columns=['Genotype', 'Probability'])
+        st.caption("⚠️ Research & education only - not medical advice")     
+        df = pd.DataFrame(list(probs.items()), columns=['Genotype', 'Probability'])
         fig = px.bar(df, x='Genotype', y='Probability', color='Genotype',
                      color_discrete_sequence=px.colors.qualitative.Set2,
                      title=f'Initial size = {initial_size:.1f} mm, Week {week}, Current size = {current_size:.1f} mm')
