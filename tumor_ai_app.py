@@ -855,6 +855,51 @@ with tab1:
                      title=f'Initial size = {initial_size:.1f} mm, Week {week}, Current size = {current_size:.1f} mm')
         fig.update_layout(yaxis_title='Posterior probability', xaxis_title='Genotype')
         st.plotly_chart(fig, use_container_width=True)
+
+        # GGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGG
+                # ============================================================
+        # GENOTYPE CLUSTERING
+        # ============================================================
+        with st.container():
+            # Sort probabilities
+            sorted_probs = sorted(probs.items(), key=lambda x: x[1], reverse=True)
+            
+            # Clustering threshold
+            threshold = 0.05
+            
+            # Build clusters
+            clusters = []
+            i = 0
+            while i < len(sorted_probs):
+                cluster_names = [sorted_probs[i][0]]
+                cluster_total = sorted_probs[i][1]
+                j = i + 1
+                while j < len(sorted_probs) and sorted_probs[j][1] >= sorted_probs[i][1] - threshold:
+                    cluster_names.append(sorted_probs[j][0])
+                    cluster_total += sorted_probs[j][1]
+                    j += 1
+                clusters.append((" + ".join(cluster_names), cluster_total))
+                i = j
+            
+            # Display clusters
+            st.markdown("---")
+            st.markdown("### 🧬 Genotype Clusters")
+            st.markdown("*Genotypes within 5% probability are grouped as indistinguishable*")
+            
+            for idx, (names, total) in enumerate(clusters, 1):
+                if idx == 1:
+                    st.markdown(f"**Most likely cluster ({total:.1%})**: {names}")
+                elif idx == 2:
+                    st.markdown(f"**Second cluster ({total:.1%})**: {names}")
+                elif idx == 3:
+                    st.markdown(f"**Third cluster ({total:.1%})**: {names}")
+                else:
+                    st.markdown(f"**Cluster {idx} ({total:.1%})**: {names}")
+
+
+
+
+        # GGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGG
                
         st.caption("⚠️ Research & education only - not medical advice")
 
