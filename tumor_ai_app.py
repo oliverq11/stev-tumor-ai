@@ -863,9 +863,9 @@ with tab1:
 with tab2:
     col_left, col_right = st.columns(2)
     with col_left:
-        week = st.selectbox("📅 Week", list(range(25)), index=8, key="forward_week")
+        week = st.selectbox("📅 Week", list(range(25)), index=8, key="forward_week_tab2")
     with col_right:
-        genotype = st.selectbox("🧬 Genotype", names, index=1)
+        genotype = st.selectbox("🧬 Genotype", names, index=1, key="genotype_tab2")
     
     initial_size = st.slider("📏 Initial tumor size at week 0 (mm)", min_value=1.1, max_value=60.0, value=30.0, step=1.0, key="init_size")
     
