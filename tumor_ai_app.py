@@ -808,9 +808,9 @@ with st.sidebar:
     st.markdown("*Horatio Quinones / Sherry Johnson et al*")
 
 # ============================================================
-# MAIN APP WITH TWO TABS
+# MAIN APP WITH THREE TABS (ADDED CLUSTERING TAB)
 # ============================================================
-tab1, tab2 = st.tabs(["🔍 Size -> Genotype", "🔮 Genotype -> Size"])
+tab1, tab2, tab3 = st.tabs(["🔍 Size -> Genotype", "🔮 Genotype -> Size", "🧬 Genotype Clustering"])
 
 # ========== TAB 1: SIZE -> GENOTYPE ==========
 with tab1:
@@ -855,8 +855,6 @@ with tab1:
                      title=f'Initial size = {initial_size:.1f} mm, Week {week}, Current size = {current_size:.1f} mm')
         fig.update_layout(yaxis_title='Posterior probability', xaxis_title='Genotype')
         st.plotly_chart(fig, use_container_width=True)
-        
-                
         st.caption("⚠️ Research & education only - not medical advice")
 
 # ========== TAB 2: GENOTYPE -> SIZE ==========
@@ -867,7 +865,7 @@ with tab2:
     with col_right:
         genotype = st.selectbox("🧬 Genotype", names, index=1, key="genotype_tab2")
     
-    initial_size = st.slider("📏 Initial tumor size at week 0 (mm)", min_value=1.1, max_value=60.0, value=30.0, step=1.0, key="init_size")
+    initial_size = st.slider("📏 Initial tumor size at week 0 (mm)", min_value=1.1, max_value=60.0, value=30.0, step=1.0, key="init_size_tab2")
     
     # Show estimated growth time
     weeks_to_grow, lower_grow, upper_grow = get_growth_time(initial_size, genotype)
@@ -929,11 +927,81 @@ with tab2:
                           xaxis_title='Tumor size (mm)',
                           yaxis_title='Probability density')
         st.plotly_chart(fig, use_container_width=True)
-        # SSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSS
+        # SSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSS
   
 
         # SSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSS
+        st.caption("⚠️ Research & education only - not medical advice")
 
-
+# ========== TAB 3: GENOTYPE CLUSTERING (STANDALONE) ==========
+with tab3:
+    st.markdown("### 🧬 Genotype Probability Clustering")
+    st.markdown("*Genotypes within 5% probability are grouped as indistinguishable*")
+    st.markdown("---")
+    
+    # Create input columns
+    col1, col2, col3 = st.columns(3)
+    with col1:
+        cluster_week = st.selectbox("📅 Week", list(range(25)), index=8, key="cluster_week")
+    with col2:
+        cluster_initial = st.slider("📏 Initial size at week 0 (mm)", min_value=1.1, max_value=60.0, value=30.0, step=1.0, key="cluster_initial")
+    with col3:
+        cluster_current = st.slider("📏 Current tumor size (mm)", 0.0, 60.0, 1.4, 0.1, key="cluster_current")
+    
+    # Alert for non-response
+    if cluster_current > cluster_initial:
+        st.error(
+            "🚨 **ALERT: TUMOR NOT RESPONDING TO IMMUNOTHERAPY** 🚨\n\n"
+            f"Current size ({cluster_current:.1f} mm) is LARGER than Initial size ({cluster_initial:.1f} mm)."
+        )
+    elif cluster_current > cluster_initial * 0.9:
+        st.warning(
+            f"⚠️ **Minimal Response:** Current size ({cluster_current:.1f} mm) is >90% of Initial size ({cluster_initial:.1f} mm)."
+        )
+    
+    if st.button("Predict and Cluster Genotypes", use_container_width=True, key="cluster_btn"):
+        probs = predict_inverse(cluster_current, cluster_week, cluster_initial)
+        
+        # Sort probabilities
+        sorted_probs = sorted(probs.items(), key=lambda x: x[1], reverse=True)
+        
+        # Clustering threshold (5%)
+        threshold = 0.05
+        
+        # Build clusters
+        clusters = []
+        i = 0
+        while i < len(sorted_probs):
+            cluster_names = [sorted_probs[i][0]]
+            cluster_total = sorted_probs[i][1]
+            j = i + 1
+            while j < len(sorted_probs) and sorted_probs[j][1] >= sorted_probs[i][1] - threshold:
+                cluster_names.append(sorted_probs[j][0])
+                cluster_total += sorted_probs[j][1]
+                j += 1
+            clusters.append((" + ".join(cluster_names), cluster_total))
+            i = j
+        
+        # Show bar chart first
+        df = pd.DataFrame(list(probs.items()), columns=['Genotype', 'Probability'])
+        fig = px.bar(df, x='Genotype', y='Probability', color='Genotype',
+                     color_discrete_sequence=px.colors.qualitative.Set2,
+                     title=f'Initial size = {cluster_initial:.1f} mm, Week {cluster_week}, Current size = {cluster_current:.1f} mm')
+        fig.update_layout(yaxis_title='Posterior probability', xaxis_title='Genotype')
+        st.plotly_chart(fig, use_container_width=True)
+        
+        # Show clusters
+        st.markdown("---")
+        st.markdown("### 📊 Genotype Clusters")
+        
+        for idx, (names, total) in enumerate(clusters, 1):
+            if idx == 1:
+                st.markdown(f"**Most likely cluster ({total:.1%})**: {names}")
+            elif idx == 2:
+                st.markdown(f"**Second cluster ({total:.1%})**: {names}")
+            elif idx == 3:
+                st.markdown(f"**Third cluster ({total:.1%})**: {names}")
+            else:
+                st.markdown(f"**Cluster {idx} ({total:.1%})**: {names}")
         
         st.caption("⚠️ Research & education only - not medical advice")
