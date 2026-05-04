@@ -808,9 +808,9 @@ with st.sidebar:
     st.markdown("*Horatio Quinones / Sherry Johnson et al*")
 
 # ============================================================
-# MAIN APP WITH THREE TABS (ADDED CLUSTERING TAB)
+# MAIN APP WITH TWO TABS
 # ============================================================
-tab1, tab2, tab3 = st.tabs(["🔍 Size -> Genotype", "🔮 Genotype -> Size", "🧬 Genotype Clustering"])
+tab1, tab2 = st.tabs(["🔍 Size -> Genotype", "🔮 Genotype -> Size"])
 
 # ========== TAB 1: SIZE -> GENOTYPE ==========
 with tab1:
@@ -855,6 +855,8 @@ with tab1:
                      title=f'Initial size = {initial_size:.1f} mm, Week {week}, Current size = {current_size:.1f} mm')
         fig.update_layout(yaxis_title='Posterior probability', xaxis_title='Genotype')
         st.plotly_chart(fig, use_container_width=True)
+        
+                
         st.caption("⚠️ Research & education only - not medical advice")
 
 # ========== TAB 2: GENOTYPE -> SIZE ==========
@@ -865,7 +867,7 @@ with tab2:
     with col_right:
         genotype = st.selectbox("🧬 Genotype", names, index=1, key="genotype_tab2")
     
-    initial_size = st.slider("📏 Initial tumor size at week 0 (mm)", min_value=1.1, max_value=60.0, value=30.0, step=1.0, key="init_size_tab2")
+    initial_size = st.slider("📏 Initial tumor size at week 0 (mm)", min_value=1.1, max_value=60.0, value=30.0, step=1.0, key="init_size")
     
     # Show estimated growth time
     weeks_to_grow, lower_grow, upper_grow = get_growth_time(initial_size, genotype)
@@ -927,39 +929,11 @@ with tab2:
                           xaxis_title='Tumor size (mm)',
                           yaxis_title='Probability density')
         st.plotly_chart(fig, use_container_width=True)
-        # SSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSS
-                
-        # ============================================================
-        # GENOTYPE CLUSTERING (simple probability grouping)
-        # ============================================================
-        
-        # Sort and cluster genotypes within 5%
-        sorted_probs = sorted(probs.items(), key=lambda x: x[1], reverse=True)
-        threshold = 0.05
-        
-        clusters = []
-        i = 0
-        while i < len(sorted_probs):
-            cluster_names = [sorted_probs[i][0]]
-            cluster_total = sorted_probs[i][1]
-            j = i + 1
-            while j < len(sorted_probs) and sorted_probs[j][1] >= sorted_probs[i][1] - threshold:
-                cluster_names.append(sorted_probs[j][0])
-                cluster_total += sorted_probs[j][1]
-                j += 1
-            clusters.append((" + ".join(cluster_names), cluster_total))
-            i = j
-        
-        # Display compact clustering info
-        st.markdown("---")
-        st.markdown("**🧬 Probability Clusters** (within 5%):")
-        for idx, (names, total) in enumerate(clusters, 1):
-            if idx == 1:
-                st.markdown(f"- **Most likely**: {names} ({total:.1%})")
-            else:
-                st.markdown(f"- {names} ({total:.1%})")
+        # SSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSS
   
 
         # SSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSS
-        st.caption("⚠️ Research & education only - not medical advice")
 
+
+        
+        st.caption("⚠️ Research & education only - not medical advice")
