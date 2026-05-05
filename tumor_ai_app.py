@@ -856,37 +856,7 @@ with tab1:
         fig.update_layout(yaxis_title='Posterior probability', xaxis_title='Genotype')
         st.plotly_chart(fig, use_container_width=True)
         # 555555555555555555555555555555555555555555555555555555555555555555
-                
-        # ============================================================
-        # GENOTYPE CLUSTERING (simple probability grouping)
-        # ============================================================
         
-        # Sort and cluster genotypes within 5%
-        sorted_probs = sorted(probs.items(), key=lambda x: x[1], reverse=True)
-        threshold = 0.05
-        
-        clusters = []
-        i = 0
-        while i < len(sorted_probs):
-            cluster_names = [sorted_probs[i][0]]
-            cluster_total = sorted_probs[i][1]
-            j = i + 1
-            while j < len(sorted_probs) and sorted_probs[j][1] >= sorted_probs[i][1] - threshold:
-                cluster_names.append(sorted_probs[j][0])
-                cluster_total += sorted_probs[j][1]
-                j += 1
-            clusters.append((" + ".join(cluster_names), cluster_total))
-            i = j
-        
-        # Display compact clustering info
-        st.markdown("---")
-        st.markdown("**🧬 Probability Clusters** (within 5%):")
-        for idx, (names, total) in enumerate(clusters, 1):
-            if idx == 1:
-                st.markdown(f"- **Most likely**: {names} ({total:.1%})")
-            else:
-                st.markdown(f"- {names} ({total:.1%})")
-
 
 
         # 555555555555555555555555555555555555555555555555555555555555555555
